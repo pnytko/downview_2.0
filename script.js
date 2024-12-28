@@ -76,7 +76,10 @@ const LAYER_ZINDEX = {
   HISTORICAL: 4,
   PARCELS: 5,
   STREETS: 6,
-  VECTOR: 100
+  TRAILS: 7,
+  VECTOR: 8,
+  MARKERS: 9,
+  MEASURE: 10
 };
 
 // Base Layers
@@ -338,6 +341,47 @@ const bikeLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.VECTOR
 });
 
+// Warstwa dla pomiarów
+const measureSource = new ol.source.Vector();
+const measureVector = new ol.layer.Vector({
+    source: measureSource,
+    style: new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: 'rgba(255, 0, 0, 0.2)'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#ff0000',
+            width: 2
+        }),
+        image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({
+                color: '#ff0000'
+            })
+        })
+    }),
+    zIndex: LAYER_ZINDEX.MEASURE
+});
+
+// Warstwa dla znaczników
+const markerSource = new ol.source.Vector();
+const markerLayer = new ol.layer.Vector({
+    source: markerSource,
+    style: new ol.style.Style({
+        image: new ol.style.Icon({
+            anchor: [0.5, 1],
+            src: 'img/marker.png'
+        })
+    }),
+    zIndex: LAYER_ZINDEX.MARKERS
+});
+
+// Funkcja usuwania wszystkich znaczników
+window.ClearMarkers = function() {
+    markerSource.clear();
+    console.log('Usunięto wszystkie znaczniki');
+}
+
 // Funkcja do przełączania warstwy OSM
 function ToogleLayersWMS_Osm() {
     const osmLayer = map.getLayers().item(0);
@@ -473,11 +517,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Funkcja dodawania znaczników
+function AddMarker() {
+    // Zmień kursor
+    const mapElement = document.getElementById('map');
+    mapElement.classList.add('cursor-crosshair');
+    
+    // Dodaj komunikat
+    const message = document.createElement('div');
+    message.className = 'marker-mode-message';
+    message.textContent = 'Kliknij na mapie, aby dodać znacznik';
+    document.body.appendChild(message);
+    
+    // Funkcja aktualizująca pozycję komunikatu
+    const updateTooltipPosition = (e) => {
+        const offset = 15; // Odstęp od kursora w pikselach
+        message.style.left = (e.clientX + offset) + 'px';
+        message.style.top = (e.clientY + offset) + 'px';
+    };
+    
+    // Nasłuchuj ruchu myszy
+    document.addEventListener('mousemove', updateTooltipPosition);
+    
+    // Pobierz współrzędne kliknięcia z mapy
+    const clickHandler = function(event) {
+        // Usuń klasę kursora i komunikat
+        mapElement.classList.remove('cursor-crosshair');
+        message.remove();
+        document.removeEventListener('mousemove', updateTooltipPosition);
+        
+        const coordinates = event.coordinate;
+        const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+        
+        // Stwórz nowy znacznik
+        const marker = new ol.Feature({
+            geometry: new ol.geom.Point(coordinates),
+            name: 'Znacznik'
+        });
+        
+        // Dodaj znacznik do źródła
+        markerSource.addFeature(marker);
+        
+        // Wyświetl współrzędne w konsoli (opcjonalnie)
+        console.log('Dodano znacznik na współrzędnych:', lonLat);
+    };
+    
+    map.once('click', clickHandler);
+    
+    // Dodaj obsługę klawisza Escape
+    const escapeHandler = function(e) {
+        if (e.key === 'Escape') {
+            mapElement.classList.remove('cursor-crosshair');
+            message.remove();
+            document.removeEventListener('mousemove', updateTooltipPosition);
+            map.un('click', clickHandler);
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+}
+
+// Upewnij się, że funkcja jest dostępna globalnie
+window.AddMarker = AddMarker;
+
 // Map Initialization
 let map;
 
 document.addEventListener('DOMContentLoaded', async function() {
   try {
+    // Dodanie logo
+    const logoOverlay = document.createElement('div');
+    logoOverlay.className = 'logo-overlay';
+    const logoImg = document.createElement('img');
+    logoImg.src = 'img/logo.png';
+    logoImg.alt = 'Logo';
+    logoOverlay.appendChild(logoImg);
+    document.querySelector('.grid-container').appendChild(logoOverlay);
+
     // Inicjalizacja mapy
     map = new ol.Map({
         target: 'map',
@@ -486,6 +602,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             ortoLayer,
             demLayer,
             parcelLayer,
+            measureVector,
+            markerLayer,
             caveLayer,
             bdlLayer,
             campLayer,
@@ -498,198 +616,175 @@ document.addEventListener('DOMContentLoaded', async function() {
             minZoom: CONFIG.minZoom,
             maxZoom: CONFIG.maxZoom,
         }),
+        interactions: ol.interaction.defaults({
+            doubleClickZoom: false
+        }).extend([
+            new ol.interaction.DragRotateAndZoom()
+        ])
     });
 
     // Dodanie warstw szlaków do mapy
-    Object.values(trailLayers).forEach(layer => map.addLayer(layer));
-
-    // Funkcja do przełączania widoczności szlaków
-    window.toggleTrail = function(color) {
-        const checkbox = document.getElementById(`trail-${color}`);
-        const layer = trailLayers[color];
-        if (layer) {
-            layer.setVisible(checkbox.checked);
-            console.log(`Przełączono szlak ${color}, widoczność:`, checkbox.checked);
-        }
+    for (const color in trailLayers) {
+        map.addLayer(trailLayers[color]);
     }
 
     // Mouse Position Control
     const mousePositionControl = new ol.control.MousePosition({
-      coordinateFormat: ol.coordinate.createStringXY(4),
-      projection: "EPSG:4326",
-      className: "custom-mouse-position",
-      target: document.querySelector('.ol-viewport'),
+        coordinateFormat: ol.coordinate.createStringXY(4),
+        projection: "EPSG:4326",
+        className: "custom-mouse-position",
+        target: document.querySelector('.ol-viewport')
     });
+
     map.addControl(mousePositionControl);
 
-    // Interaction
-    const interaction = new ol.interaction.DragRotateAndZoom(); //ROTACJA SHIFT+LPM
-    map.addInteraction(interaction);
+    // Usuwamy niepotrzebną interakcję, która była dodawana osobno
+    // const interaction = new ol.interaction.DragRotateAndZoom();
+    // map.addInteraction(interaction);
 
-    // Markers
-    var markers = new ol.layer.Vector({
-      source: new ol.source.Vector(),
-      zIndex: 15,
-      style: new ol.style.Style({
-        image: new ol.style.Icon({
-          anchor: [0.5, 1],
-          src: "img/marker.png",
-        }),
-      }),
-    });
-    map.addLayer(markers);
-
-    var marker1 = new ol.Feature(
-      new ol.geom.Point(ol.proj.fromLonLat([20.9884, 50.0125]))
-    );
-    var marker2 = new ol.Feature(
-      new ol.geom.Point(ol.proj.fromLonLat([20.9972, 49.9891]))
-    );
-    markers.getSource().addFeature(marker1);
-    markers.getSource().addFeature(marker2);
-
-    // ========== POMIARY ==========
-    let draw;
-    let sketch;
+    // ========== ZMIENNE GLOBALNE ==========
+    let draw; // current draw interaction
+    let sketch; // currently drawn feature
     let measureTooltipElement;
     let measureTooltip;
-    const measureSource = new ol.source.Vector();
-    const measureSource_layer = new ol.layer.Vector({
-      source: measureSource,
-      style: new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.2)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: '#ffcc33',
-          width: 2
-        }),
-        image: new ol.style.Circle({
-          radius: 7,
-          fill: new ol.style.Fill({
-            color: '#ffcc33'
-          })
-        })
-      })
-    });
 
+    // ========== FUNKCJE POMIAROWE ==========
     function MeasureLength() {
-      map.removeInteraction(draw);
-      addInteraction('LineString');
+        if (draw) {
+            map.removeInteraction(draw);
+        }
+        addInteraction('LineString');
     }
 
     function MeasureArea() {
-      map.removeInteraction(draw);
-      addInteraction('Polygon');
+        if (draw) {
+            map.removeInteraction(draw);
+        }
+        addInteraction('Polygon');
     }
 
     function ClearMeasure() {
-      measureSource.clear();
-      map.removeInteraction(draw);
-      if (measureTooltipElement) {
+        if (draw) {
+            map.removeInteraction(draw);
+        }
+        // Usuń wszystkie tooltips
         let elements = document.getElementsByClassName('ol-tooltip');
         while (elements[0]) {
-          elements[0].parentNode.removeChild(elements[0]);
+            elements[0].parentNode.removeChild(elements[0]);
         }
-      }
+        // Resetuj zmienne tooltipów
+        measureTooltipElement = null;
+        measureTooltip = null;
+        // Wyczyść źródło wektora
+        measureSource.clear();
     }
 
     function createMeasureTooltip() {
-      if (measureTooltipElement) {
-        measureTooltipElement.parentNode.removeChild(measureTooltipElement);
-      }
-      measureTooltipElement = document.createElement('div');
-      measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
-      measureTooltip = new ol.Overlay({
-        element: measureTooltipElement,
-        offset: [0, -15],
-        positioning: 'bottom-center',
-        stopEvent: false
-      });
-      map.addOverlay(measureTooltip);
+        if (measureTooltipElement) {
+            measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+        }
+        measureTooltipElement = document.createElement('div');
+        measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+        measureTooltip = new ol.Overlay({
+            element: measureTooltipElement,
+            offset: [0, -15],
+            positioning: 'bottom-center',
+            stopEvent: false,
+            insertFirst: false
+        });
+        map.addOverlay(measureTooltip);
     }
 
     function addInteraction(type) {
-      draw = new ol.interaction.Draw({
-        source: measureSource,
-        type: type,
-        style: new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'rgba(255, 255, 255, 0.2)'
-          }),
-          stroke: new ol.style.Stroke({
-            color: 'rgba(0, 0, 0, 0.5)',
-            lineDash: [10, 10],
-            width: 2
-          }),
-          image: new ol.style.Circle({
-            radius: 5,
-            stroke: new ol.style.Stroke({
-              color: 'rgba(0, 0, 0, 0.7)'
-            }),
-            fill: new ol.style.Fill({
-              color: 'rgba(255, 255, 255, 0.2)'
-            })
-          })
-        })
-      });
-
-      createMeasureTooltip();
-
-      let listener;
-      draw.on('drawstart', function(evt) {
-        sketch = evt.feature;
-
-        let tooltipCoord = evt.coordinate;
-
-        listener = sketch.getGeometry().on('change', function(evt) {
-          const geom = evt.target;
-          let output;
-          if (geom instanceof ol.geom.Polygon) {
-            output = formatArea(geom);
-            tooltipCoord = geom.getInteriorPoint().getCoordinates();
-          } else if (geom instanceof ol.geom.LineString) {
-            output = formatLength(geom);
-            tooltipCoord = geom.getLastCoordinate();
-          }
-          measureTooltipElement.innerHTML = output;
-          measureTooltip.setPosition(tooltipCoord);
-        });
-      });
-
-      draw.on('drawend', function() {
-        measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
-        measureTooltip.setOffset([0, -7]);
-        sketch = null;
-        measureTooltipElement = null;
+        // Zawsze twórz nowy tooltip przed rozpoczęciem rysowania
         createMeasureTooltip();
-        ol.Observable.unByKey(listener);
-      });
+        
+        draw = new ol.interaction.Draw({
+            source: measureSource,
+            type: type,
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 0, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    lineDash: [10, 10],
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 5,
+                    stroke: new ol.style.Stroke({
+                        color: '#ff0000'
+                    }),
+                    fill: new ol.style.Fill({
+                        color: '#ff0000'
+                    })
+                })
+            })
+        });
 
-      map.addInteraction(draw);
+        map.addInteraction(draw);
+
+        let listener;
+        draw.on('drawstart', function(evt) {
+            sketch = evt.feature;
+            let tooltipCoord = evt.coordinate;
+
+            listener = sketch.getGeometry().on('change', function(evt) {
+                const geom = evt.target;
+                let output;
+                if (geom instanceof ol.geom.Polygon) {
+                    output = formatArea(geom);
+                    tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                } else if (geom instanceof ol.geom.LineString) {
+                    output = formatLength(geom);
+                    tooltipCoord = geom.getLastCoordinate();
+                }
+                measureTooltipElement.innerHTML = output;
+                measureTooltip.setPosition(tooltipCoord);
+            });
+        });
+
+        draw.on('drawend', function() {
+            measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
+            measureTooltip.setOffset([0, -7]);
+            sketch = null;
+            // Przygotuj nowy tooltip dla następnego pomiaru
+            measureTooltipElement = null;
+            createMeasureTooltip();
+            ol.Observable.unByKey(listener);
+            map.removeInteraction(draw);
+        });
     }
 
     function formatLength(line) {
-      const length = ol.sphere.getLength(line);
-      let output;
-      if (length > 100) {
-        output = (Math.round(length / 1000 * 100) / 100) + ' km';
-      } else {
-        output = (Math.round(length * 100) / 100) + ' m';
-      }
-      return output;
+        const length = ol.sphere.getLength(line);
+        let output;
+        if (length > 100) {
+            output = (Math.round(length / 1000 * 100) / 100) + ' km';
+        } else {
+            output = (Math.round(length * 100) / 100) + ' m';
+        }
+        return output;
     }
 
     function formatArea(polygon) {
-      const area = ol.sphere.getArea(polygon);
-      let output;
-      if (area > 10000) {
-        output = (Math.round(area / 1000000 * 100) / 100) + ' km²';
-      } else {
-        output = (Math.round(area * 100) / 100) + ' m²';
-      }
-      return output;
+        const area = ol.sphere.getArea(polygon);
+        let output;
+        if (area >= 1000000) {  // 1 km² = 1,000,000 m²
+            output = (Math.round(area / 1000000 * 100) / 100) + ' km²';
+        } else if (area >= 10000) {  // 1 ha = 10,000 m²
+            output = (Math.round(area / 10000 * 100) / 100) + ' ha';
+        } else {
+            output = (Math.round(area * 100) / 100) + ' m²';
+        }
+        return output;
     }
+
+    // Dodajemy funkcje do globalnego obiektu window
+    window.MeasureLength = MeasureLength;
+    window.MeasureArea = MeasureArea;
+    window.ClearMeasure = ClearMeasure;
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     window.ToggleLayersWMS_Dzialki = function() {
@@ -705,7 +800,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     window.ToogleLayersWMS_Wektory = function() {
-        vectorLayer.setVisible(document.getElementById('vector-wms').checked);
+        const checkbox = document.getElementById('vector-wms');
+        const isVisible = checkbox.checked;
+        
+        // Przełącz widoczność warstw wektorowych
+        markerLayer.setVisible(isVisible);
+        measureVector.setVisible(isVisible);
+        
+        // Obsługa tooltipów
+        const tooltips = document.getElementsByClassName('ol-tooltip');
+        for (let tooltip of tooltips) {
+            tooltip.style.display = isVisible ? 'block' : 'none';
+        }
     }
 
     window.ToogleLayersWMS_Szlaki = function() {
@@ -729,6 +835,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Aktualizacja widoczności warstw
         Object.values(trailLayers).forEach(layer => layer.setVisible(isChecked));
+    }
+
+    window.toggleTrail = function(color) {
+        const checkbox = document.getElementById(`trail-${color}`);
+        const layer = trailLayers[color];
+        if (layer) {
+            layer.setVisible(checkbox.checked);
+            console.log(`Przełączono szlak ${color}, widoczność:`, checkbox.checked);
+        }
     }
 
     window.ToogleLayersWMS_Szlaki_Yellow = function() {
@@ -796,25 +911,36 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // ========== PEŁNY EKRAN ==========
     function FullScreen() {
-      const elem = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (elem.requestFullscreen) {
-          elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) {
-          elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-          elem.msRequestFullscreen();
+        const element = document.documentElement;
+
+        if (!document.fullscreenElement && !document.mozFullScreenElement &&
+            !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            // Wejście w tryb pełnoekranowy
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            } else if (element.mozRequestFullScreen) {
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            // Wyjście z trybu pełnoekranowego
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen();
-        }
-      }
     }
+
+    // Upewniamy się, że funkcja jest dostępna globalnie
+    window.FullScreen = FullScreen;
 
     console.log('Mapa została zainicjalizowana pomyślnie');
   } catch (error) {

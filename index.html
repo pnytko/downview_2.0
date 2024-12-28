@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css">
     <link rel="stylesheet" href="style.css">
     <link rel="shortcut icon" href="img/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="grid-container">
@@ -107,6 +110,9 @@
                 </button>
                 <button class="tool-button" onclick="AddMarker()" title="Dodaj znacznik">
                     <i class="fas fa-map-marker-alt"></i>
+                </button>
+                <button class="tool-button" onclick="ClearMarkers()" title="Usuń znaczniki">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
                 <button class="tool-button" onclick="ExportToPDF()" title="Eksportuj do PDF">
                     <i class="fas fa-file-pdf"></i>
