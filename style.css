@@ -211,18 +211,27 @@ button i {
   position: relative;
 }
 
-.custom-mouse-position {
-  position: absolute;
-  bottom: var(--spacing-md);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--secondary-bg);
-  color: var(--text-primary);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-small);
-  z-index: 2;
-  box-shadow: var(--shadow-sm);
+.ol-viewport .custom-mouse-position {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 1000;
+    background: rgba(45, 45, 45, 0.75);
+    padding: 5px 10px;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+}
+
+.ol-viewport .custom-mouse-position:empty {
+    display: none;
+}
+
+/* Ensure the map canvas container is relative for absolute positioning */
+.ol-viewport {
+    position: relative;
 }
 
 /* Tool Controls */
@@ -740,4 +749,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .wrapper-visible {
   display: block !important;
+}
+
+#custom-mouse-position {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 14px;
+    z-index: 1000;
+}
+
+#custom-mouse-position:not(:empty) {
+    background: rgba(45, 45, 45, 0.75);
 }

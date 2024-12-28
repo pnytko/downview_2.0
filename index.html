@@ -26,15 +26,15 @@
             <div class="checkbox-group">
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToogleLayersWMS_Osm()" id="osm-wms" checked>
-                    <label for="osm-wms">OSM</label>
+                    <label for="osm-wms">Open Street Map</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToogleLayersWMS_Wektory()" id="vector-wms" checked>
-                    <label for="vector-wms">Wektory</label>
+                    <label for="vector-wms">Warstwa wektorowa</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToggleLayersWMS_Dzialki()" id="dzialki-wms">
-                    <label for="dzialki-wms">Działki</label>
+                    <label for="dzialki-wms">Ewidencja działek</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToggleLayersWMS_OrtoHD()" id="ortoHD-wms">
@@ -42,15 +42,27 @@
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToogleLayersWMS_DEM()" id="dem">
-                    <label for="dem">DEM</label>
+                    <label for="dem">Numeryczny Model Terenu</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" onclick="ToogleLayersWMS_Szlaki()" id="szlaki">
-                    <label for="szlaki">Szlaki</label>
+                    <label for="szlaki">Szlaki turystyczne</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToogleLayersWMS_Jaskinie()" id="jaskinie">
-                    <label for="jaskinie">Jaskinie</label>
+                    <input type="checkbox" id="cave-checkbox" onchange="ToogleLayersWMS_Jaskinie()">
+                    <label for="cave-checkbox">Jaskinie i groty</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="camp-checkbox" onchange="ToggleLayersWMS_Camp()">
+                    <label for="camp-checkbox">Miejsca biwakowe</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="kayak-checkbox" onchange="ToggleLayersWMS_Kayak()">
+                    <label for="kayak-checkbox">Trasy kajakowe</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="bike-checkbox" onchange="ToggleLayersWMS_Bike()">
+                    <label for="bike-checkbox">Trasy rowerowe</label>
                 </div>
             </div>
 
@@ -133,7 +145,7 @@
 
     <div id="wrapper-trails" class="modal">
         <div class="modal-header">
-            <h2>Szlaki</h2>
+            <h2>Szlaki turystyczne</h2>
             <button class="btn-close" onclick="HideWrapperTrails()">
                 <i class="fas fa-power-off"></i>
             </button>
@@ -142,23 +154,23 @@
             <div class="checkbox-group">
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-red" onchange="toggleTrail('red')" />
-                    <label for="trail-red">Szlak czerwony</label>
+                    <label for="trail-red">Szlak turystyczny czerwony</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-blue" onchange="toggleTrail('blue')" />
-                    <label for="trail-blue">Szlak niebieski</label>
+                    <label for="trail-blue">Szlak turystyczny niebieski</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-green" onchange="toggleTrail('green')" />
-                    <label for="trail-green">Szlak zielony</label>
+                    <label for="trail-green">Szlak turystyczny zielony</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-yellow" onchange="toggleTrail('yellow')" />
-                    <label for="trail-yellow">Szlak żółty</label>
+                    <label for="trail-yellow">Szlak turystyczny żółty</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-black" onchange="toggleTrail('black')" />
-                    <label for="trail-black">Szlak czarny</label>
+                    <label for="trail-black">Szlak turystyczny czarny</label>
                 </div>
             </div>
         </div>

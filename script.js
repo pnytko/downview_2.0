@@ -91,43 +91,53 @@ const osmLayer = new ol.layer.Tile({
 const createTrailLayer = (layerId) => {
   return new ol.layer.Tile({
     source: new ol.source.TileWMS({
-      url: "https://mapy.geoportal.gov.pl/wss/service/pub/guest/G2_MOBILE_500/MapServer/WMSServer",
+      url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
       params: {
         FORMAT: "image/png",
-        TILED: true,
+        TRANSPARENT: true,
         VERSION: "1.1.1",
         LAYERS: layerId,
       },
-      transition: 0,
-      projection: "EPSG:4326",
+      transition: 0
     }),
     visible: false,
+    opacity: 0.8,
     zIndex: LAYER_ZINDEX.STREETS,
   });
 };
 
 // Warstwy WMS dla szlaków
 const trailLayers = {
-    yellow: createTrailLayer("10"),
-    green: createTrailLayer("11"),
-    blue: createTrailLayer("12"),
-    red: createTrailLayer("13"),
-    black: createTrailLayer("14"),
+    yellow: createTrailLayer("11"),   // szlak pieszy żółty
+    green: createTrailLayer("12"),    // szlak pieszy zielony
+    blue: createTrailLayer("13"),     // szlak pieszy niebieski
+    red: createTrailLayer("14"),      // szlak pieszy czerwony
+    black: createTrailLayer("15"),    // szlak pieszy czarny
 };
 
 // Warstwy WMS dla działek
 const parcelLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
-        url: "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow",
+        url: "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow/WMS",
         params: {
             FORMAT: "image/png",
             TILED: true,
             VERSION: "1.3.0",
+            SERVICE: "WMS",
             REQUEST: "GetMap",
             LAYERS: "dzialki,numery_dzialek",
+            TRANSPARENT: true,
+            BUFFER: 0,
+            WIDTH: 256,
+            HEIGHT: 256
         },
-        transition: 0,
-        projection: "EPSG:2180",
+        tileGrid: new ol.tilegrid.TileGrid({
+            extent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10],
+            resolutions: [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395],
+            tileSize: [256, 256]
+        }),
+        cacheSize: 256,
+        transition: 0
     }),
     visible: false,
     title: "Działki",
@@ -143,9 +153,18 @@ const ortoLayer = new ol.layer.Tile({
             VERSION: "1.3.0",
             REQUEST: "GetMap",
             LAYERS: "Raster",
+            FORMAT: "image/jpeg",
+            BUFFER: 0,
+            WIDTH: 256,
+            HEIGHT: 256
         },
-        transition: 0,
-        projection: "EPSG:4326",
+        tileGrid: new ol.tilegrid.TileGrid({
+            extent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10],
+            resolutions: [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395],
+            tileSize: [256, 256]
+        }),
+        cacheSize: 256,
+        transition: 0
     }),
     visible: false,
     title: "Ortofotomapa",
@@ -161,9 +180,17 @@ const demLayer = new ol.layer.Tile({
       VERSION: "1.1.1",
       REQUEST: "GetMap",
       LAYERS: "Raster",
+      BUFFER: 0,
+      WIDTH: 256,
+      HEIGHT: 256
     },
-    transition: 0,
-    projection: "EPSG:2180",
+    tileGrid: new ol.tilegrid.TileGrid({
+      extent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10],
+      resolutions: [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395],
+      tileSize: [256, 256]
+    }),
+    cacheSize: 256,
+    transition: 0
   }),
   visible: false,
   title: "DEM",
@@ -205,6 +232,25 @@ const streetLayer = new ol.layer.Tile({
   zIndex: LAYER_ZINDEX.STREETS,
 });
 
+// Warstwa tras kajakowych
+const kayakLayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+        url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
+        params: {
+            'LAYERS': '4',  // Trasy kajakowe
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+            'VERSION': '1.1.1',
+            'SRS': 'EPSG:3857'
+        },
+        transition: 0
+    }),
+    opacity: 0.8,
+    visible: false,
+    title: 'Trasy kajakowe',
+    zIndex: LAYER_ZINDEX.VECTOR
+});
+
 // Warstwa jaskiń
 const caveStyle = (feature) => {
     return new ol.style.Style({
@@ -237,10 +283,77 @@ const caveLayer = new ol.layer.Vector({
 
 caveLayer.setZIndex(10);
 
+// Warstwa BDL (Bank Danych o Lasach)
+const bdlLayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+        url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/MapServer/WMSServer',
+        params: {
+            'LAYERS': '0',  // Numer warstwy - możesz zmienić w zależności od potrzeb
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+            'VERSION': '1.3.0'
+        },
+        transition: 0
+    }),
+    visible: false,
+    title: 'Lasy BDL',
+    zIndex: LAYER_ZINDEX.VECTOR
+});
+
+// Warstwa miejsc biwakowych
+const campLayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+        url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
+        params: {
+            'LAYERS': '0',  // Miejsca biwakowe
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+            'VERSION': '1.1.1',
+            'SRS': 'EPSG:3857'
+        },
+        transition: 0
+    }),
+    opacity: 0.5,
+    visible: false,
+    title: 'Miejsca biwakowe',
+    zIndex: LAYER_ZINDEX.VECTOR
+});
+
+// Warstwa tras rowerowych
+const bikeLayer = new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+        url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
+        params: {
+            'LAYERS': '8',  // Trasy rowerowe
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+            'VERSION': '1.1.1',
+            'SRS': 'EPSG:3857'
+        },
+        transition: 0
+    }),
+    opacity: 0.8,
+    visible: false,
+    title: 'Trasy rowerowe',
+    zIndex: LAYER_ZINDEX.VECTOR
+});
+
 // Funkcja do przełączania warstwy OSM
 function ToogleLayersWMS_Osm() {
     const osmLayer = map.getLayers().item(0);
     osmLayer.setVisible(!osmLayer.getVisible());
+}
+
+// Funkcja do przełączania warstwy tras kajakowych
+function ToggleLayersWMS_Kayak() {
+    const checkbox = document.getElementById('kayak-checkbox');
+    kayakLayer.setVisible(checkbox.checked);
+}
+
+// Funkcja do przełączania warstwy tras rowerowych
+function ToggleLayersWMS_Bike() {
+    const checkbox = document.getElementById('bike-checkbox');
+    bikeLayer.setVisible(checkbox.checked);
 }
 
 // Mobile Menu Toggle
@@ -374,6 +487,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             demLayer,
             parcelLayer,
             caveLayer,
+            bdlLayer,
+            campLayer,
+            kayakLayer,
+            bikeLayer,
         ],
         view: new ol.View({
             center: ol.proj.fromLonLat(CONFIG.startCoords),
@@ -394,10 +511,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             layer.setVisible(checkbox.checked);
             console.log(`Przełączono szlak ${color}, widoczność:`, checkbox.checked);
         }
-
-        // Włącz wszystkie szlaki, jeśli jakikolwiek checkbox jest zaznaczony
-        const anyChecked = Array.from(document.querySelectorAll('.checkbox-wrapper input[type="checkbox"]')).some(cb => cb.checked);
-        Object.values(trailLayers).forEach(layer => layer.setVisible(anyChecked));
     }
 
     // Mouse Position Control
@@ -405,7 +518,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       coordinateFormat: ol.coordinate.createStringXY(4),
       projection: "EPSG:4326",
       className: "custom-mouse-position",
-      target: document.getElementById("mouse-position"),
+      target: document.querySelector('.ol-viewport'),
     });
     map.addControl(mousePositionControl);
 
@@ -619,28 +732,47 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     window.ToogleLayersWMS_Szlaki_Yellow = function() {
-      trailLayers.yellow.setVisible(document.getElementById('tr_y').checked);
+      trailLayers.yellow.setVisible(document.getElementById('trail-yellow').checked);
     }
 
     window.ToogleLayersWMS_Szlaki_Green = function() {
-      trailLayers.green.setVisible(document.getElementById('tr_g').checked);
+      trailLayers.green.setVisible(document.getElementById('trail-green').checked);
     }
 
     window.ToogleLayersWMS_Szlaki_Blue = function() {
-      trailLayers.blue.setVisible(document.getElementById('tr_b').checked);
+      trailLayers.blue.setVisible(document.getElementById('trail-blue').checked);
     }
 
     window.ToogleLayersWMS_Szlaki_Red = function() {
-      trailLayers.red.setVisible(document.getElementById('tr_r').checked);
+      trailLayers.red.setVisible(document.getElementById('trail-red').checked);
     }
 
     window.ToogleLayersWMS_Szlaki_Black = function() {
-      trailLayers.black.setVisible(document.getElementById('tr_bl').checked);
+      trailLayers.black.setVisible(document.getElementById('trail-black').checked);
     }
 
     window.ToogleLayersWMS_Jaskinie = function() {
-        const checkbox = document.getElementById('jaskinie');
+        const checkbox = document.getElementById('cave-checkbox');
         caveLayer.setVisible(checkbox.checked);
+    }
+
+    window.ToggleLayersWMS_Camp = function() {
+        console.log('Przełączanie warstwy miejsc biwakowych');
+        const checkbox = document.getElementById('camp-checkbox');
+        if (checkbox) {
+            console.log('Stan checkboxa:', checkbox.checked);
+            campLayer.setVisible(checkbox.checked);
+        }
+    }
+
+    window.ToggleLayersWMS_Kayak = function() {
+        const checkbox = document.getElementById('kayak-checkbox');
+        kayakLayer.setVisible(checkbox.checked);
+    }
+
+    window.ToggleLayersWMS_Bike = function() {
+        const checkbox = document.getElementById('bike-checkbox');
+        bikeLayer.setVisible(checkbox.checked);
     }
 
     // Kontrolki kierunkowe
