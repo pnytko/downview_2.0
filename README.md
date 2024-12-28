@@ -1,101 +1,107 @@
-# 🗺️ DownView - Interaktywna Mapa Regionu Tarnowskiego
+# 🗺️ DownView - Interactive Tourist Map Application
 
-## 📋 Spis treści
-- [O projekcie](#o-projekcie)
-- [Funkcjonalności](#funkcjonalności)
-- [Technologie](#technologie)
-- [Instalacja](#instalacja)
-- [Użytkowanie](#użytkowanie)
-- [Warstwy mapy](#warstwy-mapy)
-- [Narzędzia](#narzędzia)
+## 📋 Table of Contents
+- [About](#about)
+- [Features](#features)
+- [Technologies](#technologies)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Map Layers](#map-layers)
+- [Tools](#tools)
 
-## 🎯 O projekcie
-DownView to interaktywna aplikacja mapowa stworzona w celach edukacyjnych, skupiająca się na regionie tarnowskim i jego okolicach. Projekt oferuje szereg funkcjonalności przydatnych dla archeologów, historyków, odkrywców i wszystkich zainteresowanych eksploracją regionu.
+## 🎯 About
+DownView is an interactive map application designed for tourists and outdoor enthusiasts. It combines various map layers and tools to enhance the hiking and exploration experience. The application provides detailed trail information, terrain analysis, and measurement tools to help users plan and navigate their outdoor adventures.
 
-## ✨ Funkcjonalności
+## ✨ Features
 
-### 🗺️ Warstwy mapowe
-- **OpenStreetMap (OSM)** - podstawowa warstwa mapowa
-- **Ortofotomapa HD** - szczegółowe zdjęcia lotnicze
-- **Działki** - warstwa katastralna
-- **DEM** - numeryczny model terenu
-- **Szlaki turystyczne** - z podziałem na kolory:
-  - Czerwony
-  - Niebieski
-  - Zielony
-  - Żółty
-  - Czarny
-- **Jaskinie** - lokalizacje jaskiń w regionie
+### 🗺️ Map Layers
+- **OpenStreetMap (OSM)** - base map layer
+- **High-Resolution Orthophoto** - detailed aerial imagery
+- **Land Parcels** - cadastral information
+- **DEM (Digital Elevation Model)** - terrain elevation data
+- **Tourist Trails** - color-coded hiking paths:
+  - Red trails
+  - Blue trails
+  - Green trails
+  - Yellow trails
+  - Black trails
+- **Cave Locations** - marked cave entrances and information
 
-### 🛠️ Narzędzia pomiarowe
-- **Pomiar długości** - możliwość mierzenia odległości
-- **Pomiar powierzchni** - obliczanie powierzchni obszarów
-- **Znaczniki** - dodawanie punktów na mapie
-- **Eksport do PDF** - możliwość zapisania widoku mapy
+### 🛠️ Measurement Tools
+- **Length Measurement** - calculate distances along paths
+- **Area Measurement** - measure terrain areas
+- **Custom Markers** - add points of interest
+- **PDF Export** - save map views for offline use
 
-### 🎨 Personalizacja
-- **Dostosowywanie warstw** - włączanie/wyłączanie poszczególnych warstw
-- **Kontrola przezroczystości** - regulacja widoczności warstw
-- **Wybór projekcji** - obsługa różnych układów współrzędnych:
+### 🎨 Customization
+- **Layer Management** - toggle individual layers
+- **Opacity Control** - adjust layer visibility
+- **Projection Selection** - support for different coordinate systems:
   - EPSG:4326
   - EPSG:3857
-- **Precyzja współrzędnych** - regulacja dokładności wyświetlanych współrzędnych
+- **Coordinate Precision** - adjust coordinate display accuracy
 
-### 🧭 Nawigacja
-- **Kontrola kierunków** - obracanie mapy w 8 kierunkach (N, NE, E, SE, S, SW, W, NW)
-- **Tryb pełnoekranowy** - maksymalizacja obszaru mapy
-- **Informacje o położeniu** - wyświetlanie aktualnych współrzędnych kursora
+### 🧭 Navigation
+- **Direction Control** - rotate map in 8 directions (N, NE, E, SE, S, SW, W, NW)
+- **Fullscreen Mode** - maximize map viewing area
+- **Position Information** - display current cursor coordinates
 
-## 🔧 Technologie
-- **OpenLayers 6** - główna biblioteka mapowa
-- **JavaScript (ES6+)** - logika aplikacji
-- **HTML5 & CSS3** - struktura i stylizacja
-- **Font Awesome** - ikony interfejsu
-- **jQuery** - obsługa interakcji
+## 🔧 Technologies
+- **OpenLayers 6** - main mapping library
+- **JavaScript (ES6+)** - application logic
+- **HTML5 & CSS3** - structure and styling
+- **Font Awesome** - interface icons
+- **jQuery** - interaction handling
 
-## 💻 Instalacja
-1. Sklonuj repozytorium:
+## 💻 Installation
+1. Clone the repository:
 \`\`\`bash
-git clone https://github.com/twoja-nazwa/downview.git
+git clone https://github.com/your-username/downview.git
 \`\`\`
 
-2. Otwórz projekt w lokalnym serwerze (np. Python):
+2. Start a local server (e.g., using Python):
 \`\`\`bash
 python -m http.server
 \`\`\`
 
-3. Otwórz przeglądarkę i przejdź pod adres:
+3. Open your browser and navigate to:
 \`\`\`
 http://localhost:8000
 \`\`\`
 
-## 🎮 Użytkowanie
+## 🎮 Usage
 
-### Podstawowa nawigacja
-- **Przybliżanie/Oddalanie** - użyj kółka myszy
-- **Przesuwanie** - przeciągnij mapę lewym przyciskiem myszy
-- **Obrót** - użyj przycisków kierunkowych w górnej części mapy
+### Basic Navigation
+- **Zoom** - use mouse wheel
+- **Pan** - drag the map with left mouse button
+- **Rotate** - use direction buttons at the top of the map
 
-### Pomiary
-1. Wybierz narzędzie pomiarowe z paska narzędzi
-2. Klikaj na mapie, aby wyznaczyć punkty pomiaru
-3. Zakończ pomiar podwójnym kliknięciem
+### Measurements
+1. Select a measurement tool from the toolbar
+2. Click on the map to set measurement points
+3. Double-click to finish measurement
 
-### Eksport do PDF
-1. Ustaw pożądany widok mapy
-2. Kliknij przycisk eksportu do PDF
-3. Wybierz lokalizację zapisu pliku
+### PDF Export
+1. Set desired map view
+2. Click the PDF export button
+3. Choose save location
 
-## 📝 Licencja
-Projekt jest dostępny na licencji MIT. Szczegóły w pliku [LICENSE](LICENSE).
+## 📝 License
+This project is available under the MIT License. See [LICENSE](LICENSE) for details.
 
-## 🤝 Współpraca
-Jesteśmy otwarci na współpracę! Jeśli masz pomysł na ulepszenie aplikacji:
-1. Utwórz fork repozytorium
-2. Stwórz nową gałąź z Twoimi zmianami
-3. Wyślij pull request
+## 🤝 Contributing
+We welcome contributions! If you have ideas for improvements:
+1. Fork the repository
+2. Create a branch for your changes
+3. Submit a pull request
 
-## 📧 Kontakt
-Jeśli masz pytania lub sugestie, skontaktuj się z nami:
-- Email: [twój-email]
-- GitHub: [twój-profil]
+## 📧 Contact
+For questions or suggestions:
+- Email: [your-email]
+- GitHub: [your-profile]
+
+## 🌟 Acknowledgments
+Special thanks to:
+- OpenLayers community
+- OpenStreetMap contributors
+- All contributors and users of DownView
