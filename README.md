@@ -1,5 +1,7 @@
 # 🗺️ DownView - Interactive Tourist Map Application
 
+![DownView Interface](img/ss1.png)
+
 ## 📋 Table of Contents
 - [About](#about)
 - [Features](#features)
