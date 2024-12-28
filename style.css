@@ -1,0 +1,743 @@
+:root {
+  /* Colors */
+  --primary-bg: #1a1a1a;
+  --secondary-bg: #2d2d2d;
+  --accent-color: #4a90e2;
+  --accent-hover: #357abd;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --danger-color: #ff4a4a;
+  --success-color: #4aff4a;
+  --background-color: var(--secondary-bg);
+  --text-color: var(--text-primary);
+  --hover-color: var(--accent-color);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.20);
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+  
+  /* Typography */
+  --font-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-primary: var(--font-fallback);
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-primary);
+}
+
+/* Base Styles */
+body {
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
+  overflow: hidden;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.5;
+}
+
+/* Layout */
+.grid-container {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  background: rgba(45, 45, 45, 0.75);
+  padding: var(--spacing-md);
+  width: 250px;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h3 {
+  color: var(--accent-color);
+  margin: var(--spacing-lg) 0 var(--spacing-sm);
+  font-size: 1.2rem;
+}
+
+.button-group {
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
+}
+
+#aboutButton {
+  width: calc(100% - 2 * var(--spacing-md));
+  margin: var(--spacing-md);
+  margin-top: auto;
+  justify-content: center;
+}
+
+#aboutButton:hover {
+  background: var(--accent-hover);
+}
+
+#aboutButton i {
+  font-size: 1.2em;
+}
+
+/* Checkbox Groups */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-wrapper + .checkbox-wrapper {
+  margin-top: 0;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  margin-right: var(--spacing-sm);
+}
+
+.checkbox-wrapper label {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-color);
+}
+
+/* Controls */
+.measurement-controls,
+.position-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+select,
+input[type="number"] {
+  background: var(--primary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-small);
+}
+
+/* Buttons */
+button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--accent-color);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  transition: background var(--transition-fast);
+}
+
+button:hover {
+  background: var(--accent-hover);
+}
+
+button i {
+  font-size: 1.2em;
+}
+
+/* Map Container */
+.map-container {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.custom-mouse-position {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--secondary-bg);
+  color: var(--text-primary);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-small);
+  z-index: 2;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Tool Controls */
+.tool-controls {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  z-index: 2;
+}
+
+.tool-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(45, 45, 45, 0.75);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+}
+
+.tool-button:hover {
+  background: var(--accent-color);
+  transform: scale(1.1);
+}
+
+.tool-button.active {
+  background: var(--accent-color);
+}
+
+.tool-button i {
+  font-size: 1.2rem;
+}
+
+/* Logo */
+#logo {
+  position: fixed;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  z-index: 10;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+  width: 50px;
+  height: auto;
+}
+
+#logo:hover {
+  opacity: 1;
+}
+
+/* Navigation Controls */
+.navigation-controls {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  background: rgba(45, 45, 45, 0.75);
+  padding: 5px;
+  border-radius: var(--radius-md);
+  z-index: 1000;
+}
+
+.navigation-controls .tool-button {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navigation-controls .tool-button:hover {
+  background: var(--accent-hover);
+  transform: scale(1.1);
+}
+
+/* Direction Controls */
+.direction-controls {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 1000;
+}
+
+.direction-button {
+  width: 30px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.direction-button:hover {
+  background: var(--accent-color);
+  transform: scale(1.1);
+}
+
+/* Modal Windows */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(45, 45, 45, 0.75);
+  border-radius: var(--radius-lg);
+  width: 600px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1001;
+  user-select: none;
+}
+
+.modal.visible {
+  display: block;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(45, 45, 45, 0.9);
+  color: var(--text-primary);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  cursor: move;
+}
+
+.modal-header h2 {
+  margin: 0;
+  line-height: 32px;
+  font-size: 18px;
+}
+
+.modal-content {
+  padding: var(--spacing-lg);
+  color: var(--text-primary);
+}
+
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger-color);
+  border: none;
+  color: var(--text-primary);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  opacity: 0.75;
+  transition: all var(--transition-fast);
+}
+
+.btn-close i {
+  font-size: 14px;
+}
+
+.btn-close:hover {
+  opacity: 1;
+  background: var(--danger-hover);
+  transform: rotate(180deg);
+}
+
+/* Trails Window Specific Styles */
+.modal .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+}
+
+.modal .checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: 0;
+}
+
+.modal .checkbox-wrapper label {
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+/* Customize Window Specific Styles */
+.row {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.column {
+  flex: 1;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: 12px;
+  cursor: default;
+  user-select: none;
+}
+
+.tooltip-measure {
+  opacity: 1;
+  font-weight: bold;
+}
+
+.tooltip-static {
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.tooltip-measure:before,
+.tooltip-static:before {
+  border-top: 6px solid rgba(0, 0, 0, 0.8);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  margin-left: -7px;
+  left: 50%;
+}
+
+/* Fonts CSS */
+/* System Font Stack */
+:root {
+    --font-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --font-primary: var(--font-fallback);
+}
+
+/* Typography Scale */
+:root {
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+}
+
+/* Base Typography */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+}
+
+h1 { font-size: var(--font-size-2xl); }
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+h4 { font-size: var(--font-size-base); }
+h5 { font-size: var(--font-size-sm); }
+h6 { font-size: var(--font-size-xs); }
+
+/* Text Elements */
+p, ul, ol {
+    margin-bottom: 1rem;
+}
+
+/* Small Text */
+small {
+    font-size: var(--font-size-sm);
+}
+
+/* Links */
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* Measures CSS */
+.ol-tooltip {
+	position: relative;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: white;
+    padding: 4px 8px;
+    opacity: 0.7;
+    white-space: nowrap;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+}
+
+.ol-tooltip-measure {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.ol-tooltip-static {
+    background-color: #ffcc33;
+    color: black;
+    border: 1px solid white;
+}
+
+.ol-tooltip-measure:before,
+.ol-tooltip-static:before{
+    border-top: 6px solid rgba(0, 0, 0, 0.5);
+    border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    margin-left: -7px;
+    left: 50%;
+}
+
+.ol-tooltip-static:before{
+	border-top-color: #ffcc33;
+}
+
+/* Popup */
+
+.row {
+  margin: var(--spacing-lg);
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  display: flex;
+}
+
+.column {
+  flex: 50%;
+}
+
+input[type="range"] {
+  width: 170px;
+  margin: 0;
+  accent-color: #ff0000;
+}
+
+#pet-select{
+ width: 170px;
+ border: none;
+ padding-left: 5%;
+}
+
+/* Remove conflicting button styles */
+#download_pdf,
+#customize_data,
+#create_marker {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  opacity: 1 !important;
+}
+
+#download_pdf:hover,
+#customize_data:hover,
+#create_marker:hover {
+  opacity: 1 !important;
+}
+
+/* Hide OpenLayers Controls */
+.ol-rotate {
+  visibility: hidden;
+}
+
+.ol-zoom.ol-unselectable.ol-control {
+  visibility: hidden;
+}
+
+.ol-attribution.ol-unselectable.ol-control.ol-uncollapsible {
+  visibility: hidden;
+}
+
+/* Mobile Menu */
+.menu-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    width: 80%;
+    max-width: 300px;
+    z-index: 1000;
+    transition: left var(--transition-normal);
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    z-index: 1001;
+    background: var(--background-color);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .menu-toggle svg {
+    color: var(--text-color);
+    transition: color var(--transition-fast);
+  }
+
+  .menu-toggle:hover {
+    background: var(--hover-color);
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+}
+
+/* About Button */
+.about-button-container {
+    position: absolute;
+    bottom: var(--spacing-lg);
+    left: 0;
+    right: 0;
+    padding: 0 var(--spacing-md);
+}
+
+.about-button-container .control-button {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Modal Windows */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.wrapper-unvisible {
+  display: none !important;
+}
+
+.wrapper-visible {
+  display: block !important;
+}

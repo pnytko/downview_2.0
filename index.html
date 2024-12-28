@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DownView</title>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.18.3/minified.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/css/ol.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="img/favicon.ico" />
+</head>
+<body>
+    <div class="grid-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <h3>WARSTWY</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToogleLayersWMS_Osm()" id="osm-wms" checked>
+                    <label for="osm-wms">OSM</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToogleLayersWMS_Wektory()" id="vector-wms" checked>
+                    <label for="vector-wms">Wektory</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToggleLayersWMS_Dzialki()" id="dzialki-wms">
+                    <label for="dzialki-wms">Działki</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToggleLayersWMS_OrtoHD()" id="ortoHD-wms">
+                    <label for="ortoHD-wms">Ortofotomapa</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToogleLayersWMS_DEM()" id="dem">
+                    <label for="dem">DEM</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToogleLayersWMS_Szlaki()" id="szlaki">
+                    <label for="szlaki">Szlaki</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" onclick="ToogleLayersWMS_Jaskinie()" id="jaskinie">
+                    <label for="jaskinie">Jaskinie</label>
+                </div>
+            </div>
+
+            <h3>POŁOŻENIE</h3>
+            <div class="position-controls">
+                <label for="projection">Projekcja:</label>
+                <select id="projection">
+                    <option value="EPSG:4326">EPSG:4326</option>
+                    <option value="EPSG:3857">EPSG:3857</option>
+                </select>
+                
+                <label for="precision">Precyzja (0-12)</label>
+                <input id="precision" type="number" min="0" max="12" value="4"/>
+            </div>
+
+            <!-- Mouse Position -->
+            <div id="mouse-position"></div>
+
+            <!-- About Button -->
+            <button id="aboutButton" class="control-button" onclick="DisplayWrapperAbout()">
+                O aplikacji
+            </button>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Tool Controls -->
+            <div class="tool-controls">
+                <button class="tool-button" onclick="MeasureLength()" title="Pomiar długości">
+                    <i class="fas fa-ruler"></i>
+                </button>
+                <button class="tool-button" onclick="MeasureArea()" title="Pomiar powierzchni">
+                    <i class="fas fa-draw-polygon"></i>
+                </button>
+                <button class="tool-button" onclick="ClearMeasure()" title="Wyczyść pomiary">
+                    <i class="fas fa-eraser"></i>
+                </button>
+                <button class="tool-button" onclick="AddMarker()" title="Dodaj znacznik">
+                    <i class="fas fa-map-marker-alt"></i>
+                </button>
+                <button class="tool-button" onclick="ExportToPDF()" title="Eksportuj do PDF">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                <button class="tool-button" onclick="CustomizeData()" title="Dostosuj dane">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="tool-button" onclick="FullScreen()" title="Tryb pełnoekranowy">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <!-- Mouse Position -->
+            <div id="mouse-position"></div>
+        </div>
+    </div>
+
+    <!-- Modal Windows -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+    
+    <div id="wrapper-about" class="modal">
+        <div class="modal-header">
+            <h2>O aplikacji</h2>
+            <button class="btn-close" onclick="CloseWrapperAbout()">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <h3>Czym jest i dla kogo jest aplikacja?</h3>
+            <p>Downview jest projektem niekomercyjnym wykonanym w celach edukacyjnych. Zakres map zawiera się dla powiatu tarnowskiego i
+            okolic, jednakże niektóre usługi (np. OrtoHD, OSM czy działki) dostępne są dla całej Polski. Projekt skupiony jest głównie na rozwiązaniach
+            dla map historycznych. Dostarczane usługi mogą być przydatne dla archeologów, historyków, odkrywców czy detektorystów.</p>
+            
+            <h3>Podstawowe aspekty techniczne aplikacji</h3>
+            <p>Aplikacja korzysta z biblioteki OpenLayers6 i integruje
+            różne typy danych w postaci <b>warstw</b>. Część map funkcjonuje jako serwisy WMS, a część jako dane magazynowane na hostingu.</p>
+        </div>
+    </div>
+
+    <div id="wrapper-trails" class="modal">
+        <div class="modal-header">
+            <h2>Szlaki</h2>
+            <button class="btn-close" onclick="HideWrapperTrails()">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="checkbox-group">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-red" onchange="toggleTrail('red')" />
+                    <label for="trail-red">Szlak czerwony</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-blue" onchange="toggleTrail('blue')" />
+                    <label for="trail-blue">Szlak niebieski</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-green" onchange="toggleTrail('green')" />
+                    <label for="trail-green">Szlak zielony</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-yellow" onchange="toggleTrail('yellow')" />
+                    <label for="trail-yellow">Szlak żółty</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-black" onchange="toggleTrail('black')" />
+                    <label for="trail-black">Szlak czarny</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wrapper-customize" class="modal">
+        <div class="modal-header">
+            Dostosuj dane
+            <button class="btn-close" onclick="HideWrapperCustomize()">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="row">
+                <div class="column">
+                    <p>
+                        <ul>
+                            <li><b>KOLOR</b></li><br>
+                            <li><b>GRUBOŚĆ</b></li><br>
+                            <li><b>WZÓR</b></li><br>
+                            <li><b>PRZEZROCZYSTOŚĆ</b></li>
+                        </ul>
+                    </p>
+                </div>
+                <div class="column">
+                    <p>
+                        <img src="img/pallete/white_pallete.png" alt="alt">
+                        <img src="img/pallete/red_pallete.png" alt="alt">
+                        <img src="img/pallete/green_pallete.png" alt="alt">
+                        <img src="img/pallete/blue_pallete.png" alt="alt">
+                        <img src="img/pallete/pink_pallete.png" alt="alt">
+                        <img src="img/pallete/cyan_pallete.png" alt="alt">
+                        <img src="img/pallete/purple_pallete.png" alt="alt">
+                        <img src="img/pallete/yellow_pallete.png" alt="alt">
+                    </p>
+                    <p><input type="range" id="vector_height" name="volume" min="0" max="100"></p>
+                    <p><select name="pets" id="pet-select">
+                        <option value="">Wybierz styl linii</option>
+                        <option value="dog">Ciągła</option>
+                        <option value="cat">Przerywana</option>
+                        <option value="hamster">Kropki</option>
+                        <option value="parrot">Przerywana-Kropki</option>
+                    </select>
+                    </p>
+                    <p><input type="range" id="vector_opacity" name="volume" min="0" max="100"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
