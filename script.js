@@ -363,17 +363,57 @@ const measureVector = new ol.layer.Vector({
 });
 
 // Warstwa dla znaczników
+let markerCounter = 0;
 const markerSource = new ol.source.Vector();
+const markerStyle = new ol.style.Style({
+    image: new ol.style.Icon({
+        anchor: [0.5, 1],
+        src: 'img/marker.png'
+    }),
+    text: new ol.style.Text({
+        font: 'bold 12px Inter',
+        text: '',  // Tekst będzie ustawiony dla każdego znacznika osobno
+        offsetY: 25,  // Przesunięcie w dół
+        offsetX: 0,   // Wycentrowanie w osi X
+        textAlign: 'center',
+        fill: new ol.style.Fill({
+            color: '#000000'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#ffffff',
+            width: 3
+        })
+    })
+});
 const markerLayer = new ol.layer.Vector({
     source: markerSource,
-    style: new ol.style.Style({
+    style: markerStyle,
+    zIndex: LAYER_ZINDEX.MARKERS
+});
+
+// Funkcja do tworzenia stylu znacznika z numerem
+function createMarkerStyle(number) {
+    return new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 1],
             src: 'img/marker.png'
+        }),
+        text: new ol.style.Text({
+            font: 'bold 12px Inter',
+            text: `PUNKT ${number}`,
+            offsetY: 25,  // Przesunięcie w dół
+            offsetX: 0,   // Wycentrowanie w osi X
+            textAlign: 'center',
+            fill: new ol.style.Fill({
+                color: '#000000'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ffffff',
+                width: 3
+            })
         })
-    }),
-    zIndex: LAYER_ZINDEX.MARKERS
-});
+    });
+}
 
 // Funkcja do przełączania warstwy OSM
 function ToogleLayersWMS_Osm() {
@@ -998,13 +1038,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             const marker = new ol.Feature({
                 geometry: new ol.geom.Point(evt.coordinate)
             });
-
-            marker.setStyle(new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0.5, 1],
-                    src: 'img/marker.png'
-                })
-            }));
+            
+            // Ustaw styl z numerem dla nowego znacznika
+            marker.setStyle(createMarkerStyle(markerCounter));
+            markerCounter++;
 
             markerSource.addFeature(marker);
             map.getTargetElement().style.cursor = 'default';
