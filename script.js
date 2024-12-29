@@ -873,13 +873,49 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Mapa została zainicjalizowana pomyślnie');
 
     // Funkcje obsługi znaczników
-    function DisplayWrapperMarker(marker) {
+    async function DisplayWrapperMarker(marker) {
         selectedMarker = marker;
         const coordinates = ol.proj.transform(marker.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+        
+        // Display initial coordinates
         document.getElementById('marker-coordinates').innerHTML = 
             `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
-             <div>Długość: ${coordinates[0].toFixed(6)}°</div>`;
+             <div>Długość: ${coordinates[0].toFixed(6)}°</div>
+             <div>Wysokość: Ładowanie...</div>`;
         document.getElementById('wrapper-marker').style.display = 'block';
+
+        // Fetch elevation data
+        try {
+            const response = await fetch('https://api.open-elevation.com/api/v1/lookup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    locations: [
+                        {
+                            latitude: coordinates[1],
+                            longitude: coordinates[0]
+                        }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            const elevation = data.results[0].elevation;
+
+            // Update the display with elevation data
+            document.getElementById('marker-coordinates').innerHTML = 
+                `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
+                 <div>Długość: ${coordinates[0].toFixed(6)}°</div>
+                 <div>Wysokość: ${elevation.toFixed(2)} m n.p.m.</div>`;
+        } catch (error) {
+            console.error('Błąd podczas pobierania wysokości:', error);
+            document.getElementById('marker-coordinates').innerHTML = 
+                `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
+                 <div>Długość: ${coordinates[0].toFixed(6)}°</div>
+                 <div>Wysokość: Błąd pobierania danych</div>`;
+        }
     }
 
     function CloseWrapperMarker() {
