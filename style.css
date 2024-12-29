@@ -572,168 +572,43 @@ button i {
   left: 50%;
 }
 
-/* Fonts CSS */
-/* System Font Stack */
-:root {
-    --font-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    --font-primary: 'Inter', var(--font-fallback);
-}
-
-/* Typography Scale */
-:root {
-    --font-size-xs: 0.75rem;    /* 12px */
-    --font-size-sm: 0.875rem;   /* 14px */
-    --font-size-base: 1rem;     /* 16px */
-    --font-size-lg: 1.125rem;   /* 18px */
-    --font-size-xl: 1.25rem;    /* 20px */
-    --font-size-2xl: 1.5rem;    /* 24px */
-    
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    
-    --line-height-tight: 1.25;
-    --line-height-normal: 1.5;
-    --line-height-relaxed: 1.75;
-}
-
-/* Base Typography */
-body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Headings */
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-primary);
-    font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-tight);
-}
-
-h1 { font-size: var(--font-size-2xl); }
-h2 { font-size: var(--font-size-xl); }
-h3 { font-size: var(--font-size-lg); }
-h4 { font-size: var(--font-size-base); }
-h5 { font-size: var(--font-size-sm); }
-h6 { font-size: var(--font-size-xs); }
-
-/* Text Elements */
-p, ul, ol {
-    margin-bottom: 1rem;
-}
-
-/* Small Text */
-small {
-    font-size: var(--font-size-sm);
-}
-
-/* Links */
-a {
-    color: var(--accent-color);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-a:hover {
-    color: var(--accent-hover);
-    text-decoration: underline;
-}
-
-/* Measures CSS */
+/* Measurement Tooltips */
 .ol-tooltip {
-	position: relative;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
-    color: white;
-    padding: 4px 8px;
-    opacity: 0.7;
-    white-space: nowrap;
-    font-size: 12px;
-    cursor: default;
-    user-select: none;
+  position: relative;
+  background: var(--accent-color);
+  border-radius: var(--radius-sm);
+  color: white;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .ol-tooltip-measure {
-    opacity: 1;
-    font-weight: bold;
+  opacity: 1;
+  font-weight: var(--font-weight-medium);
 }
 
 .ol-tooltip-static {
-    background-color: #ffcc33;
-    color: black;
-    border: 1px solid white;
+  background-color: var(--accent-color);
+  color: white;
+  border: 1px solid white;
 }
 
 .ol-tooltip-measure:before,
-.ol-tooltip-static:before{
-    border-top: 6px solid rgba(0, 0, 0, 0.5);
-    border-right: 6px solid transparent;
-    border-left: 6px solid transparent;
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    margin-left: -7px;
-    left: 50%;
+.ol-tooltip-static:before {
+  border-top: 6px solid var(--accent-color);
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  margin-left: -7px;
+  left: 50%;
 }
 
-.ol-tooltip-static:before{
-	border-top-color: #ffcc33;
-}
-
-/* Popup */
-
-.row {
-  margin: var(--spacing-lg);
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  display: flex;
-}
-
-.column {
-  flex: 50%;
-}
-
-input[type="range"] {
-  width: 170px;
-  margin: 0;
-  accent-color: #ff0000;
-}
-
-#pet-select{
- width: 170px;
- border: none;
- padding-left: 5%;
-}
-
-/* Remove conflicting button styles */
-#download_pdf,
-#customize_data,
-#create_marker {
-  position: static !important;
-  top: auto !important;
-  right: auto !important;
-  opacity: 1 !important;
-}
-
-#download_pdf:hover,
-#customize_data:hover,
-#create_marker:hover {
-  opacity: 1 !important;
-}
-
-/* Hide OpenLayers Controls */
-.ol-rotate {
-  visibility: hidden;
-}
-
-.ol-zoom.ol-unselectable.ol-control {
-  visibility: hidden;
-}
-
-.ol-attribution.ol-unselectable.ol-control.ol-uncollapsible {
-  visibility: hidden;
+.ol-tooltip-static:before {
+  border-top-color: var(--accent-color);
 }
 
 /* Menu Toggle Button */
@@ -900,4 +775,32 @@ input[type="range"] {
         opacity: 1;
         transform: translate(-50%, 0);
     }
+}
+
+/* Hide OpenLayers Controls */
+.ol-zoom,
+.ol-attribution,
+.ol-rotate,
+#custom-mouse-position {
+    display: none !important;
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+    display: none;
+    position: absolute;
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    z-index: 1000;
+    background: var(--primary-bg);
+    border: none;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+.menu-toggle i {
+    font-size: 1.5rem;
+    color: var(--text-primary);
 }

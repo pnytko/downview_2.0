@@ -609,6 +609,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             minZoom: CONFIG.minZoom,
             maxZoom: CONFIG.maxZoom,
         }),
+        controls: [],  // Remove all default controls
         interactions: ol.interaction.defaults({
             doubleClickZoom: false
         }).extend([
@@ -620,20 +621,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     for (const color in trailLayers) {
         map.addLayer(trailLayers[color]);
     }
-
-    // Mouse Position Control
-    const mousePositionControl = new ol.control.MousePosition({
-        coordinateFormat: ol.coordinate.createStringXY(4),
-        projection: "EPSG:4326",
-        className: "custom-mouse-position",
-        target: document.querySelector('.ol-viewport')
-    });
-
-    map.addControl(mousePositionControl);
-
-    // Usuwamy niepotrzebną interakcję, która była dodawana osobno
-    // const interaction = new ol.interaction.DragRotateAndZoom();
-    // map.addInteraction(interaction);
 
     // ========== ZMIENNE GLOBALNE ==========
     let draw; // current draw interaction
