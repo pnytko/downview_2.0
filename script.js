@@ -501,24 +501,6 @@ window.CloseWrapperAbout = function() {
     modal.style.display = 'none';
 }
 
-window.DisplayWrapperTrails = function() {
-    document.getElementById('wrapper-trails').style.display = 'block';
-}
-
-window.HideWrapperTrails = function() {
-    document.getElementById('wrapper-trails').style.display = 'none';
-}
-
-window.DisplayWrapperCustomize = function() {
-    const modal = document.getElementById('wrapper-customize');
-    modal.style.display = 'block';
-}
-
-window.HideWrapperCustomize = function() {
-    const modal = document.getElementById('wrapper-customize');
-    modal.style.display = 'none';
-}
-
 // Funkcja do obsługi przeciągania okien modalnych
 function makeDraggable(modal) {
     const header = modal.querySelector('.modal-header');
@@ -581,18 +563,6 @@ function makeDraggable(modal) {
 document.addEventListener('DOMContentLoaded', () => {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => makeDraggable(modal));
-});
-
-// Dodanie obsługi checkboxa dla szlaków
-document.addEventListener('DOMContentLoaded', () => {
-    const trailsCheckbox = document.getElementById('toggleTrails');
-    if (trailsCheckbox) {
-        trailsCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                DisplayWrapperTrails();
-            }
-        });
-    }
 });
 
 // Map Initialization
@@ -831,9 +801,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         const isChecked = checkbox.checked;
         
         if (isChecked) {
-            DisplayWrapperTrails(); // Wyświetl okno modalne z wyborem szlaków
+            // Wyświetl okno modalne z wyborem szlaków
         } else {
-            HideWrapperTrails(); // Ukryj okno modalne
+            // Ukryj okno modalne
             // Wyłącz wszystkie szlaki
             Object.values(trailLayers).forEach(layer => layer.setVisible(false));
         }

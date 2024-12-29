@@ -99,9 +99,6 @@
                 <button class="tool-button" onclick="ExportToPDF()" title="Eksportuj do PDF" style="display: none;">
                     <i class="fas fa-file-pdf"></i>
                 </button>
-                <button class="tool-button" onclick="CustomizeData()" title="Dostosuj dane">
-                    <i class="fas fa-cog"></i>
-                </button>
                 <button class="tool-button" onclick="FullScreen()" title="Tryb pełnoekranowy">
                     <i class="fas fa-expand"></i>
                 </button>
@@ -177,51 +174,6 @@
                 <div class="checkbox-wrapper">
                     <input type="checkbox" id="trail-black" onchange="toggleTrail('black')" />
                     <label for="trail-black">Szlak turystyczny czarny</label>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="wrapper-customize" class="modal">
-        <div class="modal-header">
-            Dostosuj dane
-            <button class="btn-close" onclick="HideWrapperCustomize()">
-                <i class="fas fa-power-off"></i>
-            </button>
-        </div>
-        <div class="modal-content">
-            <div class="row">
-                <div class="column">
-                    <p>
-                        <ul>
-                            <li><b>KOLOR</b></li><br>
-                            <li><b>GRUBOŚĆ</b></li><br>
-                            <li><b>WZÓR</b></li><br>
-                            <li><b>PRZEZROCZYSTOŚĆ</b></li>
-                        </ul>
-                    </p>
-                </div>
-                <div class="column">
-                    <p>
-                        <img src="img/pallete/white_pallete.png" alt="alt">
-                        <img src="img/pallete/red_pallete.png" alt="alt">
-                        <img src="img/pallete/green_pallete.png" alt="alt">
-                        <img src="img/pallete/blue_pallete.png" alt="alt">
-                        <img src="img/pallete/pink_pallete.png" alt="alt">
-                        <img src="img/pallete/cyan_pallete.png" alt="alt">
-                        <img src="img/pallete/purple_pallete.png" alt="alt">
-                        <img src="img/pallete/yellow_pallete.png" alt="alt">
-                    </p>
-                    <p><input type="range" id="vector_height" name="volume" min="0" max="100"></p>
-                    <p><select name="pets" id="pet-select">
-                        <option value="">Wybierz styl linii</option>
-                        <option value="dog">Ciągła</option>
-                        <option value="cat">Przerywana</option>
-                        <option value="hamster">Kropki</option>
-                        <option value="parrot">Przerywana-Kropki</option>
-                    </select>
-                    </p>
-                    <p><input type="range" id="vector_opacity" name="volume" min="0" max="100"></p>
                 </div>
             </div>
         </div>
