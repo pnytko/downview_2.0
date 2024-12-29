@@ -53,7 +53,7 @@ window.rotateMap = rotateMap;
 // Constants
 const CONFIG = {
   minZoom: 3,
-  maxZoom: 21,
+  maxZoom: 25,
   startZoom: 18,
   startCoords: [20.9884, 50.01225],
   directions: {
@@ -256,31 +256,71 @@ const kayakLayer = new ol.layer.Tile({
 
 // Warstwa jaskiń
 const caveStyle = (feature) => {
-    return new ol.style.Style({
-        image: new ol.style.Icon({
-            scale: 0.15,
-            src: "./img/cave.png",
-        }),
-        text: new ol.style.Text({
-            font: "40px Roboto",
-            text: feature.get("NAZWA"),
-            placement: "line",
-            scale: 0.5,
-            offsetY: 30,
-            fill: new ol.style.Fill({
-                color: "#000",
+    // Sprawdź czy to klaster
+    const features = feature.get('features');
+    const size = features ? features.length : 1;
+    
+    if (size > 1) {
+        // Styl dla klastra
+        return new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 15,
+                fill: new ol.style.Fill({
+                    color: '#3399CC'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#fff',
+                    width: 2
+                })
             }),
-        }),
-    });
+            text: new ol.style.Text({
+                text: size.toString(),
+                fill: new ol.style.Fill({
+                    color: '#fff'
+                }),
+                font: '12px sans-serif'
+            })
+        });
+    } else {
+        // Styl dla pojedynczej jaskini
+        const actualFeature = features ? features[0] : feature;
+        return new ol.style.Style({
+            image: new ol.style.Icon({
+                scale: 0.15,
+                src: "./img/cave.png",
+            }),
+            text: new ol.style.Text({
+                font: "14px Inter",
+                text: actualFeature.get("NAZWA"),
+                offsetY: 20,
+                fill: new ol.style.Fill({
+                    color: "#000",
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#fff',
+                    width: 3
+                })
+            }),
+        });
+    }
 };
 
+const caveSource = new ol.source.Vector({
+    url: "json_data/caves.geojson",
+    format: new ol.format.GeoJSON(),
+});
+
+const clusterSource = new ol.source.Cluster({
+    distance: 15,  // Zmniejszona odległość klastrowania
+    source: caveSource,
+    minDistance: 10  // Minimalna odległość między klastrami
+});
+
 const caveLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
-        url: "json_data/caves.geojson",
-        format: new ol.format.GeoJSON(),
-    }),
+    source: clusterSource,
     style: caveStyle,
-    zIndex: LAYER_ZINDEX.MARKERS
+    zIndex: LAYER_ZINDEX.MARKERS,
+    visible: false
 });
 
 caveLayer.setZIndex(10);
