@@ -111,17 +111,31 @@ h6 { font-size: var(--font-size-xs); }
   height: 100vh;
   width: 100%;
   overflow: hidden;
+  position: relative;
+}
+
+/* Map Container */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
 }
 
 /* Sidebar */
 .sidebar {
-  background: rgba(45, 45, 45, 0.75);
+  background: rgba(45, 45, 45, 0.95);
   padding: var(--spacing-md);
   width: var(--sidebar-width);
   height: 100vh;
   overflow-y: auto;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 1;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
 }
@@ -230,40 +244,60 @@ button i {
   font-size: 1.2em;
 }
 
-/* Map Container */
-.map-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-}
-
-#map {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-.ol-viewport .custom-mouse-position {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 5px;
-    z-index: 1000;
-    background: rgba(45, 45, 45, 0.75);
-    padding: 5px 10px;
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-}
-
-.ol-viewport .custom-mouse-position:empty {
+/* Menu Toggle Button */
+.menu-toggle {
     display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 2000;
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    width: 45px;
+    height: 45px;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Ensure the map canvas container is relative for absolute positioning */
-.ol-viewport {
-    position: relative;
+.menu-toggle i {
+    font-size: 1.5rem;
+}
+
+.menu-toggle:hover {
+    background-color: var(--accent-color);
+}
+
+@media screen and (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        transition: left 0.3s ease;
+        z-index: 1999;
+        background-color: rgba(45, 45, 45, 0.95);
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .map-container {
+        width: 100%;
+        height: 100vh;
+    }
 }
 
 /* Tool Controls */
@@ -710,77 +744,6 @@ button i {
   border-top-color: var(--accent-color);
 }
 
-/* Menu Toggle Button */
-.menu-toggle {
-    display: none;
-    position: absolute;
-    top: var(--spacing-md);
-    left: var(--spacing-md);
-    z-index: 1000;
-    background: var(--primary-bg);
-    border: none;
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    box-shadow: var(--shadow-md);
-}
-
-.menu-toggle i {
-    font-size: 1.5rem;
-    color: var(--text-primary);
-}
-
-/* Media Queries for Mobile */
-@media screen and (max-width: 768px) {
-    .grid-container {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        position: fixed;
-        left: -250px;
-        transition: left var(--transition-normal);
-        background: rgba(45, 45, 45, 0.95);
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    .menu-toggle {
-        display: block;
-    }
-
-    .tool-controls {
-        right: var(--spacing-sm);
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-
-    .tool-button {
-        padding: var(--spacing-sm);
-    }
-
-    .modal {
-        width: 90%;
-        max-height: 80vh;
-    }
-
-    .checkbox-wrapper label {
-        font-size: var(--font-size-sm);
-    }
-}
-
-/* Ensure modals are properly positioned on mobile */
-@media screen and (max-width: 768px) {
-    .modal {
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) !important;
-        margin: 0;
-    }
-}
-
 /* About Button */
 .about-button-container {
     position: absolute;
@@ -882,24 +845,4 @@ button i {
 .ol-rotate,
 #custom-mouse-position {
     display: none !important;
-}
-
-/* Menu Toggle Button */
-.menu-toggle {
-    display: none;
-    position: absolute;
-    top: var(--spacing-md);
-    left: var(--spacing-md);
-    z-index: 1000;
-    background: var(--primary-bg);
-    border: none;
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    box-shadow: var(--shadow-md);
-}
-
-.menu-toggle i {
-    font-size: 1.5rem;
-    color: var(--text-primary);
 }
