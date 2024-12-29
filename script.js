@@ -1081,6 +1081,108 @@ document.addEventListener('DOMContentLoaded', async function() {
       });
     });
 
+    // Funkcja geolokalizacji
+    function GetUserLocation() {
+        if (!navigator.geolocation) {
+            alert('Geolokalizacja nie jest wspierana przez twoją przeglądarkę');
+            return;
+        }
+
+        // Pobranie przycisku i zmiana ikony na animację ładowania
+        const button = document.querySelector('button[onclick="GetUserLocation()"]');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        const resetIcon = () => {
+            button.innerHTML = '<i class="fas fa-location-arrow"></i>';
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Konwersja współrzędnych do formatu OpenLayers
+                const coords = ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]);
+                
+                // Animowane przejście do lokalizacji użytkownika
+                map.getView().animate({
+                    center: coords,
+                    zoom: 18,
+                    duration: 1000
+                });
+
+                // Dodanie znacznika lokalizacji użytkownika
+                const locationFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]))
+                });
+
+                // Styl dla znacznika lokalizacji
+                const locationStyle = new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 8,
+                        fill: new ol.style.Fill({
+                            color: '#4285F4'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#fff',
+                            width: 2
+                        })
+                    })
+                });
+
+                locationFeature.setStyle(locationStyle);
+
+                // Usunięcie poprzedniego znacznika lokalizacji, jeśli istnieje
+                const locationSource = map.getLayers().getArray().find(layer => 
+                    layer.get('name') === 'userLocation'
+                );
+                if (locationSource) {
+                    map.removeLayer(locationSource);
+                }
+
+                // Utworzenie nowej warstwy dla znacznika lokalizacji
+                const locationLayer = new ol.layer.Vector({
+                    source: new ol.source.Vector({
+                        features: [locationFeature]
+                    }),
+                    name: 'userLocation',
+                    zIndex: LAYER_ZINDEX.MARKERS + 1
+                });
+
+                map.addLayer(locationLayer);
+
+                // Przywrócenie ikony lokalizacji na przycisku po krótkim opóźnieniu
+                setTimeout(resetIcon, 100);
+            },
+            function(error) {
+                // Obsługa błędów
+                let message = 'Wystąpił błąd podczas pobierania lokalizacji: ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message += 'Brak uprawnień do geolokalizacji.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message += 'Informacja o lokalizacji jest niedostępna.';
+                        break;
+                    case error.TIMEOUT:
+                        message += 'Przekroczono czas oczekiwania na lokalizację.';
+                        break;
+                    default:
+                        message += 'Nieznany błąd.';
+                        break;
+                }
+                alert(message);
+                // Przywrócenie ikony lokalizacji na przycisku po krótkim opóźnieniu
+                setTimeout(resetIcon, 100);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    // Upewniamy się, że funkcja jest dostępna globalnie
+    window.GetUserLocation = GetUserLocation;
+
   } catch (error) {
     console.error('Błąd podczas inicjalizacji mapy:', error);
   }
