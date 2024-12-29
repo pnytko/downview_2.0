@@ -49,6 +49,9 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-full: 9999px;
+  
+  /* Dodanie zmiennej dla szerokości sidebara */
+  --sidebar-width: 250px;
 }
 
 /* Reset */
@@ -114,7 +117,7 @@ h6 { font-size: var(--font-size-xs); }
 .sidebar {
   background: rgba(45, 45, 45, 0.75);
   padding: var(--spacing-md);
-  width: 250px;
+  width: var(--sidebar-width);
   height: 100vh;
   overflow-y: auto;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
@@ -420,6 +423,55 @@ button i {
   max-height: 80vh;
   overflow: hidden;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Specjalne style dla okna szlaków */
+#wrapper-trails {
+  position: absolute;
+  top: 20px;
+  left: calc(var(--sidebar-width) + 20px);
+  transform: none;
+  width: 300px;
+}
+
+/* Specjalne style dla okna o aplikacji */
+#wrapper-about {
+  position: absolute;
+  bottom: 20px;
+  left: calc(var(--sidebar-width) + 20px);
+  transform: none;
+  width: 400px;
+}
+
+#wrapper-about .modal-content {
+  max-height: 300px;
+  overflow: auto;
+}
+
+/* Responsywność dla okna szlaków */
+@media (max-width: 768px) {
+  #wrapper-trails {
+    top: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    max-width: 300px;
+  }
+  
+  #wrapper-trails .checkbox-wrapper {
+    padding: 10px;
+  }
+  
+  #wrapper-trails .checkbox-wrapper label {
+    font-size: 14px;
+  }
+
+  /* Responsywność dla okna o aplikacji */
+  #wrapper-about {
+    bottom: 10px;
+    left: 10px;
+    width: calc(100% - 20px);
+    max-width: 400px;
+  }
 }
 
 .modal-header {
