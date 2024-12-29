@@ -279,9 +279,8 @@ const caveLayer = new ol.layer.Vector({
         url: "json_data/caves.geojson",
         format: new ol.format.GeoJSON(),
     }),
-    visible: false,
     style: caveStyle,
-    declutter: true,
+    zIndex: LAYER_ZINDEX.MARKERS
 });
 
 caveLayer.setZIndex(10);
@@ -375,12 +374,6 @@ const markerLayer = new ol.layer.Vector({
     }),
     zIndex: LAYER_ZINDEX.MARKERS
 });
-
-// Funkcja usuwania wszystkich znaczników
-window.ClearMarkers = function() {
-    markerSource.clear();
-    console.log('Usunięto wszystkie znaczniki');
-}
 
 // Funkcja do przełączania warstwy OSM
 function ToogleLayersWMS_Osm() {
