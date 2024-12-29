@@ -74,7 +74,7 @@ const LAYER_ZINDEX = {
   ORTO: 2,
   DEM: 3,
   PARCELS: 5,
-  TRAILS: 7,
+  TRAILS: 6,
   VECTOR: 8,
   MARKERS: 9,
   MEASURE: 10
@@ -103,7 +103,7 @@ const createTrailLayer = (layerId) => {
     }),
     visible: false,
     opacity: 0.8,
-    zIndex: LAYER_ZINDEX.STREETS,
+    zIndex: LAYER_ZINDEX.TRAILS,
   });
 };
 
