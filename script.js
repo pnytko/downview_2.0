@@ -510,68 +510,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Funkcja dodawania znaczników
-function AddMarker() {
-    // Zmień kursor
-    const mapElement = document.getElementById('map');
-    mapElement.classList.add('cursor-crosshair');
-    
-    // Dodaj komunikat
-    const message = document.createElement('div');
-    message.className = 'marker-mode-message';
-    message.textContent = 'Kliknij na mapie, aby dodać znacznik';
-    document.body.appendChild(message);
-    
-    // Funkcja aktualizująca pozycję komunikatu
-    const updateTooltipPosition = (e) => {
-        const offset = 15; // Odstęp od kursora w pikselach
-        message.style.left = (e.clientX + offset) + 'px';
-        message.style.top = (e.clientY + offset) + 'px';
-    };
-    
-    // Nasłuchuj ruchu myszy
-    document.addEventListener('mousemove', updateTooltipPosition);
-    
-    // Pobierz współrzędne kliknięcia z mapy
-    const clickHandler = function(event) {
-        // Usuń klasę kursora i komunikat
-        mapElement.classList.remove('cursor-crosshair');
-        message.remove();
-        document.removeEventListener('mousemove', updateTooltipPosition);
-        
-        const coordinates = event.coordinate;
-        const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-        
-        // Stwórz nowy znacznik
-        const marker = new ol.Feature({
-            geometry: new ol.geom.Point(coordinates),
-            name: 'Znacznik'
-        });
-        
-        // Dodaj znacznik do źródła
-        markerSource.addFeature(marker);
-        
-        // Wyświetl współrzędne w konsoli (opcjonalnie)
-        console.log('Dodano znacznik na współrzędnych:', lonLat);
-    };
-    
-    map.once('click', clickHandler);
-    
-    // Dodaj obsługę klawisza Escape
-    const escapeHandler = function(e) {
-        if (e.key === 'Escape') {
-            mapElement.classList.remove('cursor-crosshair');
-            message.remove();
-            document.removeEventListener('mousemove', updateTooltipPosition);
-            map.un('click', clickHandler);
-            document.removeEventListener('keydown', escapeHandler);
-        }
-    };
-    document.addEventListener('keydown', escapeHandler);
-}
-
-// Upewnij się, że funkcja jest dostępna globalnie
-window.AddMarker = AddMarker;
+// Zmienne globalne dla znaczników
+let selectedMarker = null;
+let clickListener = null;
 
 // Map Initialization
 let map;
@@ -923,6 +864,114 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.FullScreen = FullScreen;
 
     console.log('Mapa została zainicjalizowana pomyślnie');
+
+    // Funkcje obsługi znaczników
+    function DisplayWrapperMarker(marker) {
+        selectedMarker = marker;
+        const coordinates = ol.proj.transform(marker.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+        document.getElementById('marker-coordinates').innerHTML = 
+            `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
+             <div>Długość: ${coordinates[0].toFixed(6)}°</div>`;
+        document.getElementById('wrapper-marker').style.display = 'block';
+    }
+
+    function CloseWrapperMarker() {
+        document.getElementById('wrapper-marker').style.display = 'none';
+        selectedMarker = null;
+    }
+
+    function DeleteMarker() {
+        if (selectedMarker) {
+            markerSource.removeFeature(selectedMarker);
+            CloseWrapperMarker();
+        }
+    }
+
+    // Dodanie funkcji do globalnego obiektu window
+    window.CloseWrapperMarker = CloseWrapperMarker;
+    window.DeleteMarker = DeleteMarker;
+
+    // Inicjalizacja przeciągania dla okna znacznika
+    const markerModal = document.getElementById('wrapper-marker');
+    const markerHeader = markerModal.querySelector('.modal-header');
+    
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+
+    markerHeader.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    function dragStart(e) {
+        const rect = markerModal.getBoundingClientRect();
+        initialX = e.clientX - rect.left;
+        initialY = e.clientY - rect.top;
+
+        if (e.target === markerHeader) {
+            isDragging = true;
+        }
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            
+            const newX = e.clientX - initialX;
+            const newY = e.clientY - initialY;
+
+            markerModal.style.left = `${newX}px`;
+            markerModal.style.top = `${newY}px`;
+            markerModal.style.margin = '0';
+        }
+    }
+
+    function dragEnd(e) {
+        isDragging = false;
+    }
+
+    // Obsługa kliknięcia na znacznik
+    map.on('click', function(evt) {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+        });
+
+        if (feature && markerSource.getFeatures().includes(feature)) {
+            DisplayWrapperMarker(feature);
+        }
+    });
+
+    // Upewnij się, że funkcja jest dostępna globalnie
+    window.AddMarker = function() {
+        map.getTargetElement().style.cursor = 'crosshair';
+        
+        if (clickListener) {
+            map.un('click', clickListener);
+        }
+
+        clickListener = function(evt) {
+            const marker = new ol.Feature({
+                geometry: new ol.geom.Point(evt.coordinate)
+            });
+
+            marker.setStyle(new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0.5, 1],
+                    src: 'img/marker.png'
+                })
+            }));
+
+            markerSource.addFeature(marker);
+            map.getTargetElement().style.cursor = 'default';
+            map.un('click', clickListener);
+            clickListener = null;
+        };
+
+        map.on('click', clickListener);
+    }
+
   } catch (error) {
     console.error('Błąd podczas inicjalizacji mapy:', error);
   }

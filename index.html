@@ -143,6 +143,24 @@
         </div>
     </div>
 
+    <div id="wrapper-marker" class="modal">
+        <div class="modal-header">
+            <h2>Informacje o znaczniku</h2>
+            <button class="btn-close" onclick="CloseWrapperMarker()">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="marker-info">
+                <p><strong>Współrzędne geograficzne:</strong></p>
+                <p id="marker-coordinates"></p>
+            </div>
+            <button class="delete-marker-btn" onclick="DeleteMarker()">
+                <i class="fas fa-trash-alt"></i> Usuń znacznik
+            </button>
+        </div>
+    </div>
+
     <div id="wrapper-trails" class="modal">
         <div class="modal-header">
             <h2>Szlaki turystyczne</h2>
