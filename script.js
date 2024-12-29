@@ -595,10 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Zmienne globalne dla znaczników
-let selectedMarker = null;
-let clickListener = null;
-
 // Map Initialization
 let map;
 
@@ -643,6 +639,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         ])
     });
 
+    // Zmiana kursora przy najechaniu na punkt
+    map.on('pointermove', function(e) {
+        const pixel = map.getEventPixel(e.originalEvent);
+        const hit = map.hasFeatureAtPixel(pixel);
+        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+    });
+
     // Dodanie warstw szlaków do mapy
     for (const color in trailLayers) {
         map.addLayer(trailLayers[color]);
@@ -653,6 +656,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     let sketch; // currently drawn feature
     let measureTooltipElement;
     let measureTooltip;
+    let clickListener = null; // listener for marker placement
+    let selectedMarker = null; // selected marker reference
 
     // ========== FUNKCJE POMIAROWE ==========
     function MeasureLength() {
