@@ -612,6 +612,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Inicjalizacja mapy
     map = new ol.Map({
         target: 'map',
+        pixelRatio: 1,
         layers: [
             osmLayer,
             ortoLayer,
@@ -1094,6 +1095,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         map.on('click', clickListener);
     }
+
+    // Set willReadFrequently for the map's canvas
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => {
+        const mapCanvas = map.getTargetElement().querySelector('canvas');
+        if (mapCanvas) {
+          const newCanvas = document.createElement('canvas');
+          newCanvas.width = mapCanvas.width;
+          newCanvas.height = mapCanvas.height;
+          const ctx = newCanvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(mapCanvas, 0, 0);
+          mapCanvas.parentNode.replaceChild(newCanvas, mapCanvas);
+        }
+      });
+    });
 
   } catch (error) {
     console.error('Błąd podczas inicjalizacji mapy:', error);
