@@ -131,6 +131,39 @@
         </div>
     </div>
 
+    <div id="wrapper-trails" class="modal">
+        <div class="modal-header">
+            <h2>Szlaki turystyczne</h2>
+            <button class="btn-close" onclick="CloseWrapperTrails()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="checkbox-group">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-red" onchange="toggleTrail('red')">
+                    <label for="trail-red">Szlak czerwony</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-blue" onchange="toggleTrail('blue')">
+                    <label for="trail-blue">Szlak niebieski</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-green" onchange="toggleTrail('green')">
+                    <label for="trail-green">Szlak zielony</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-yellow" onchange="toggleTrail('yellow')">
+                    <label for="trail-yellow">Szlak żółty</label>
+                </div>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="trail-black" onchange="toggleTrail('black')">
+                    <label for="trail-black">Szlak czarny</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="wrapper-marker" class="modal">
         <div class="modal-header">
             <h2>Informacje o znaczniku</h2>
@@ -146,39 +179,6 @@
             <button class="delete-marker-btn" onclick="DeleteMarker()">
                 <i class="fas fa-trash-alt"></i> Usuń znacznik
             </button>
-        </div>
-    </div>
-
-    <div id="wrapper-trails" class="modal">
-        <div class="modal-header">
-            <h2>Szlaki turystyczne</h2>
-            <button class="btn-close" onclick="HideWrapperTrails()">
-                <i class="fas fa-power-off"></i>
-            </button>
-        </div>
-        <div class="modal-content">
-            <div class="checkbox-group">
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="trail-red" onchange="toggleTrail('red')" />
-                    <label for="trail-red">Szlak turystyczny czerwony</label>
-                </div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="trail-blue" onchange="toggleTrail('blue')" />
-                    <label for="trail-blue">Szlak turystyczny niebieski</label>
-                </div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="trail-green" onchange="toggleTrail('green')" />
-                    <label for="trail-green">Szlak turystyczny zielony</label>
-                </div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="trail-yellow" onchange="toggleTrail('yellow')" />
-                    <label for="trail-yellow">Szlak turystyczny żółty</label>
-                </div>
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="trail-black" onchange="toggleTrail('black')" />
-                    <label for="trail-black">Szlak turystyczny czarny</label>
-                </div>
-            </div>
         </div>
     </div>
 

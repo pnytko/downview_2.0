@@ -799,24 +799,46 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.ToogleLayersWMS_Szlaki = function() {
         const checkbox = document.getElementById('szlaki');
         const isChecked = checkbox.checked;
+        const modal = document.getElementById('wrapper-trails');
         
         if (isChecked) {
             // Wyświetl okno modalne z wyborem szlaków
+            modal.style.display = 'block';
+            // Domyślnie włącz wszystkie szlaki
+            Object.values(trailLayers).forEach(layer => layer.setVisible(true));
+            // Zaznacz wszystkie checkboxy
+            document.getElementById('trail-red').checked = true;
+            document.getElementById('trail-blue').checked = true;
+            document.getElementById('trail-green').checked = true;
+            document.getElementById('trail-yellow').checked = true;
+            document.getElementById('trail-black').checked = true;
         } else {
             // Ukryj okno modalne
+            modal.style.display = 'none';
             // Wyłącz wszystkie szlaki
             Object.values(trailLayers).forEach(layer => layer.setVisible(false));
+            // Odznacz wszystkie checkboxy
+            document.getElementById('trail-red').checked = false;
+            document.getElementById('trail-blue').checked = false;
+            document.getElementById('trail-green').checked = false;
+            document.getElementById('trail-yellow').checked = false;
+            document.getElementById('trail-black').checked = false;
         }
-        
-        // Zaznaczanie wszystkich checkboxów szlaków
-        document.getElementById('trail-red').checked = isChecked;
-        document.getElementById('trail-blue').checked = isChecked;
-        document.getElementById('trail-green').checked = isChecked;
-        document.getElementById('trail-yellow').checked = isChecked;
-        document.getElementById('trail-black').checked = isChecked;
-        
-        // Aktualizacja widoczności warstw
-        Object.values(trailLayers).forEach(layer => layer.setVisible(isChecked));
+    }
+
+    window.CloseWrapperTrails = function() {
+        const modal = document.getElementById('wrapper-trails');
+        modal.style.display = 'none';
+        // Odznacz główny checkbox szlaków
+        document.getElementById('szlaki').checked = false;
+        // Wyłącz wszystkie szlaki
+        Object.values(trailLayers).forEach(layer => layer.setVisible(false));
+        // Odznacz wszystkie checkboxy
+        document.getElementById('trail-red').checked = false;
+        document.getElementById('trail-blue').checked = false;
+        document.getElementById('trail-green').checked = false;
+        document.getElementById('trail-yellow').checked = false;
+        document.getElementById('trail-black').checked = false;
     }
 
     window.toggleTrail = function(color) {
@@ -824,7 +846,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         const layer = trailLayers[color];
         if (layer) {
             layer.setVisible(checkbox.checked);
-            console.log(`Przełączono szlak ${color}, widoczność:`, checkbox.checked);
         }
     }
 
