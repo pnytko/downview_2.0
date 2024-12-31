@@ -42,6 +42,7 @@ DownView is an interactive map application designed for tourists and outdoor ent
   - EPSG:4326
   - EPSG:3857
 - **Coordinate Precision** - adjust coordinate display accuracy
+- **Optimized CSS** - reduced file size and improved performance through PurgeCSS
 
 ### 🧭 Navigation
 - **Direction Control** - rotate map in 8 directions (N, NE, E, SE, S, SW, W, NW)
@@ -98,9 +99,8 @@ We welcome contributions! If you have ideas for improvements:
 3. Submit a pull request
 
 ## 📧 Contact
-For questions or suggestions:
-- Email: [your-email]
-- GitHub: [your-profile]
+For questions or suggestions, reach out at:
+`pnytko98 [at] gmail [dot] com`
 
 ## 🌟 Acknowledgments
 Special thanks to:
