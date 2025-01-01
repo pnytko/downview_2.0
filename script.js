@@ -507,13 +507,13 @@ const trailLayers = {
 
 // Funkcja do przełączania warstwy tras kajakowych
 function ToggleLayersWMS_Kayak() {
-    const checkbox = document.getElementById('kayak-checkbox');
+    const checkbox = document.getElementById('kayak');
     kayakLayer.setVisible(checkbox.checked);
 }
 
 // Funkcja do przełączania warstwy tras rowerowych
 function ToggleLayersWMS_Bike() {
-    const checkbox = document.getElementById('bike-checkbox');
+    const checkbox = document.getElementById('bike');
     bikeLayer.setVisible(checkbox.checked);
 }
 
@@ -916,13 +916,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     window.ToogleLayersWMS_Jaskinie = function() {
-        const checkbox = document.getElementById('cave-checkbox');
+        const checkbox = document.getElementById('cave');
         caveLayer.setVisible(checkbox.checked);
     }
 
     window.ToggleLayersWMS_Camp = function() {
         console.log('Przełączanie warstwy miejsc biwakowych');
-        const checkbox = document.getElementById('camp-checkbox');
+        const checkbox = document.getElementById('camp');
         if (checkbox) {
             console.log('Stan checkboxa:', checkbox.checked);
             campLayer.setVisible(checkbox.checked);
@@ -930,12 +930,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     window.ToggleLayersWMS_Kayak = function() {
-        const checkbox = document.getElementById('kayak-checkbox');
+        const checkbox = document.getElementById('kayak');
         kayakLayer.setVisible(checkbox.checked);
     }
 
     window.ToggleLayersWMS_Bike = function() {
-        const checkbox = document.getElementById('bike-checkbox');
+        const checkbox = document.getElementById('bike');
         bikeLayer.setVisible(checkbox.checked);
     }
 
