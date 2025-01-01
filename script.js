@@ -13,25 +13,25 @@ function rotateMap(direction) {
             rotation = 0;
             break;
         case 'NE':
-            rotation = Math.PI / 4;
+            rotation = -Math.PI / 4;
             break;
         case 'E':
-            rotation = Math.PI / 2;
+            rotation = -Math.PI / 2; 
             break;
         case 'SE':
-            rotation = 3 * Math.PI / 4;
+            rotation = -3 * Math.PI / 4;
             break;
         case 'S':
             rotation = Math.PI;
             break;
         case 'SW':
-            rotation = 5 * Math.PI / 4;
+            rotation = 3 * Math.PI / 4; 
             break;
         case 'W':
-            rotation = 3 * Math.PI / 2;
+            rotation = Math.PI / 2;
             break;
         case 'NW':
-            rotation = 7 * Math.PI / 4;
+            rotation = Math.PI / 4;
             break;
         default:
             console.error('Invalid direction:', direction);
