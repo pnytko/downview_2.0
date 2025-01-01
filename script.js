@@ -450,7 +450,7 @@ window.CloseWrapperAbout = function() {
 
 // Funkcja do obsługi przeciągania okien modalnych
 function makeDraggable(modal) {
-    const header = modal.querySelector('.modal-header');
+    const header = modal.querySelector('.modal-header, .wrapper-header');
     let isDragging = false;
     let currentX;
     let currentY;
@@ -460,7 +460,8 @@ function makeDraggable(modal) {
     let yOffset = 0;
 
     function dragStart(e) {
-        if (e.target.closest('.modal-header') && !e.target.closest('.btn-close')) {
+        if ((e.target.closest('.modal-header') || e.target.closest('.wrapper-header')) && 
+            !e.target.closest('.btn-close') && !e.target.closest('.close')) {
             isDragging = true;
             
             const transform = window.getComputedStyle(modal).transform;
