@@ -453,68 +453,18 @@ function createMarkerStyle(number) {
     });
 }
 
-// Funkcja do przełączania warstwy OSM
-function ToogleLayersWMS_Osm() {
-    const checkbox = document.getElementById('osm');
-    osmLayer.setVisible(checkbox.checked);
+// Funkcja do przełączania warstw
+function toggleLayer(layer, checkboxId) {
+    const checkbox = document.getElementById(checkboxId);
+    layer.setVisible(checkbox.checked);
 }
 
-// Funkcja do przełączania warstwy wektorowej
-function ToogleLayersWMS_Wektory() {
-    const checkbox = document.getElementById('vector');
-    vectorLayer.setVisible(checkbox.checked);
-}
-
-// Funkcja do przełączania warstwy działek
-function ToggleLayersWMS_Dzialki() {
-    const checkbox = document.getElementById('dzialki');
-    parcelLayer.setVisible(checkbox.checked);
-}
-
-// Funkcja do przełączania warstwy ortofotomapy
-function ToggleLayersWMS_OrtoHD() {
-    const checkbox = document.getElementById('ortoHD');
-    ortoLayer.setVisible(checkbox.checked);
-}
-
-// Funkcja do tworzenia warstwy szlaków
-const createTrailLayer = (layerId) => {
-  return new ol.layer.Tile({
-    source: new ol.source.TileWMS({
-      url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
-      params: {
-        FORMAT: "image/png",
-        TRANSPARENT: true,
-        VERSION: "1.1.1",
-        LAYERS: layerId,
-      },
-      transition: 0
-    }),
-    visible: false,
-    opacity: 0.8,
-    zIndex: LAYER_ZINDEX.TRAILS,
-  });
-};
-
-// Warstwy WMS dla szlaków
-const trailLayers = {
-    yellow: createTrailLayer("11"),   // szlak pieszy żółty
-    green: createTrailLayer("12"),    // szlak pieszy zielony
-    blue: createTrailLayer("13"),     // szlak pieszy niebieski
-    red: createTrailLayer("14"),      // szlak pieszy czerwony
-    black: createTrailLayer("15"),    // szlak pieszy czarny
-};
-
-// Funkcja do przełączania warstwy tras kajakowych
-function ToggleLayersWMS_Kayak() {
-    const checkbox = document.getElementById('kayak');
-    kayakLayer.setVisible(checkbox.checked);
-}
-
-// Funkcja do przełączania warstwy tras rowerowych
-function ToggleLayersWMS_Bike() {
-    const checkbox = document.getElementById('bike');
-    bikeLayer.setVisible(checkbox.checked);
+// Funkcja do przełączania pojedynczego szlaku
+function toggleTrail(color) {
+    const checkbox = document.getElementById(`trail-${color}`);
+    if (trailLayers[color]) {
+        trailLayers[color].setVisible(checkbox.checked);
+    }
 }
 
 // Mobile Menu Toggle
@@ -816,15 +766,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     window.ToggleLayersWMS_Dzialki = function() {
-        parcelLayer.setVisible(document.getElementById('dzialki').checked);
+        toggleLayer(parcelLayer, 'dzialki');
     }
 
     window.ToggleLayersWMS_OrtoHD = function() {
-        ortoLayer.setVisible(document.getElementById('ortoHD').checked);
+        toggleLayer(ortoLayer, 'ortoHD');
     }
 
     window.ToogleLayersWMS_DEM = function() {
-        demLayer.setVisible(document.getElementById('dem').checked);
+        toggleLayer(demLayer, 'dem');
     }
 
     window.ToogleLayersWMS_Wektory = function() {
@@ -887,56 +837,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         document.getElementById('trail-black').checked = false;
     }
 
-    window.toggleTrail = function(color) {
-        const checkbox = document.getElementById(`trail-${color}`);
-        const layer = trailLayers[color];
-        if (layer) {
-            layer.setVisible(checkbox.checked);
-        }
-    }
+    window.toggleTrail = toggleTrail;
 
     window.ToogleLayersWMS_Szlaki_Yellow = function() {
-      trailLayers.yellow.setVisible(document.getElementById('trail-yellow').checked);
+      toggleTrail('yellow');
     }
 
     window.ToogleLayersWMS_Szlaki_Green = function() {
-      trailLayers.green.setVisible(document.getElementById('trail-green').checked);
+      toggleTrail('green');
     }
 
     window.ToogleLayersWMS_Szlaki_Blue = function() {
-      trailLayers.blue.setVisible(document.getElementById('trail-blue').checked);
+      toggleTrail('blue');
     }
 
     window.ToogleLayersWMS_Szlaki_Red = function() {
-      trailLayers.red.setVisible(document.getElementById('trail-red').checked);
+      toggleTrail('red');
     }
 
     window.ToogleLayersWMS_Szlaki_Black = function() {
-      trailLayers.black.setVisible(document.getElementById('trail-black').checked);
+      toggleTrail('black');
     }
 
     window.ToogleLayersWMS_Jaskinie = function() {
-        const checkbox = document.getElementById('cave');
-        caveLayer.setVisible(checkbox.checked);
+        toggleLayer(caveLayer, 'cave');
     }
 
     window.ToggleLayersWMS_Camp = function() {
-        console.log('Przełączanie warstwy miejsc biwakowych');
-        const checkbox = document.getElementById('camp');
-        if (checkbox) {
-            console.log('Stan checkboxa:', checkbox.checked);
-            campLayer.setVisible(checkbox.checked);
-        }
+        toggleLayer(campLayer, 'camp');
     }
 
     window.ToggleLayersWMS_Kayak = function() {
-        const checkbox = document.getElementById('kayak');
-        kayakLayer.setVisible(checkbox.checked);
+        toggleLayer(kayakLayer, 'kayak');
     }
 
     window.ToggleLayersWMS_Bike = function() {
-        const checkbox = document.getElementById('bike');
-        bikeLayer.setVisible(checkbox.checked);
+        toggleLayer(bikeLayer, 'bike');
     }
 
     // Kontrolki kierunkowe
