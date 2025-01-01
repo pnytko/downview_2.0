@@ -1,11 +1,8 @@
 // Globalna funkcja rotacji
 function rotateMap(direction) {
     if (!map) {
-        console.error('Map not initialized');
         return;
     }
-
-    console.log('Rotating to direction:', direction); // Debug log
 
     let rotation = 0;
     switch (direction) {
@@ -16,7 +13,7 @@ function rotateMap(direction) {
             rotation = -Math.PI / 4;
             break;
         case 'E':
-            rotation = -Math.PI / 2; 
+            rotation = -Math.PI / 2;
             break;
         case 'SE':
             rotation = -3 * Math.PI / 4;
@@ -25,7 +22,7 @@ function rotateMap(direction) {
             rotation = Math.PI;
             break;
         case 'SW':
-            rotation = 3 * Math.PI / 4; 
+            rotation = 3 * Math.PI / 4;
             break;
         case 'W':
             rotation = Math.PI / 2;
@@ -34,11 +31,8 @@ function rotateMap(direction) {
             rotation = Math.PI / 4;
             break;
         default:
-            console.error('Invalid direction:', direction);
             return;
     }
-
-    console.log('Applying rotation:', rotation); // Debug log
     
     const view = map.getView();
     view.animate({
@@ -927,8 +921,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Upewniamy się, że funkcja jest dostępna globalnie
     window.FullScreen = FullScreen;
 
-    console.log('Mapa została zainicjalizowana pomyślnie');
-
     // Funkcje obsługi znaczników
     async function DisplayWrapperMarker(marker) {
         selectedMarker = marker;
@@ -967,7 +959,22 @@ document.addEventListener('DOMContentLoaded', async function() {
                  <div>Długość: ${coordinates[0].toFixed(6)}°</div>
                  <div>Wysokość: ${elevation.toFixed(2)} m n.p.m.</div>`;
         } catch (error) {
-            console.error('Błąd podczas pobierania wysokości:', error);
+            // Obsługa błędów
+            let message = 'Wystąpił błąd podczas pobierania wysokości: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message += 'Brak uprawnień do geolokalizacji.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message += 'Informacja o lokalizacji jest niedostępna.';
+                    break;
+                case error.TIMEOUT:
+                    message += 'Przekroczono czas oczekiwania na lokalizację.';
+                    break;
+                default:
+                    message += 'Nieznany błąd.';
+                    break;
+            }
             document.getElementById('marker-coordinates').innerHTML = 
                 `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
                  <div>Długość: ${coordinates[0].toFixed(6)}°</div>
@@ -1091,32 +1098,25 @@ document.addEventListener('DOMContentLoaded', async function() {
             return;
         }
 
-        // Pobranie przycisku i zmiana ikony na animację ładowania
-        const button = document.querySelector('button[onclick="GetUserLocation()"]');
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-        const resetIcon = () => {
-            button.innerHTML = '<i class="fas fa-location-arrow"></i>';
-        };
-
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 // Konwersja współrzędnych do formatu OpenLayers
-                const coords = ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]);
+                const coordinates = ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]);
                 
                 // Animowane przejście do lokalizacji użytkownika
-                map.getView().animate({
-                    center: coords,
+                const view = map.getView();
+                view.animate({
+                    center: coordinates,
                     zoom: 18,
                     duration: 1000
                 });
 
-                // Dodanie znacznika lokalizacji użytkownika
+                // Tworzenie punktu lokalizacji
                 const locationFeature = new ol.Feature({
-                    geometry: new ol.geom.Point(ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]))
+                    geometry: new ol.geom.Point(coordinates)
                 });
 
-                // Styl dla znacznika lokalizacji
+                // Styl dla punktu lokalizacji
                 const locationStyle = new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 8,
@@ -1132,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 locationFeature.setStyle(locationStyle);
 
-                // Usunięcie poprzedniego znacznika lokalizacji, jeśli istnieje
+                // Usunięcie poprzedniego punktu lokalizacji, jeśli istnieje
                 const locationSource = map.getLayers().getArray().find(layer => 
                     layer.get('name') === 'userLocation'
                 );
@@ -1140,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     map.removeLayer(locationSource);
                 }
 
-                // Utworzenie nowej warstwy dla znacznika lokalizacji
+                // Utworzenie nowej warstwy dla punktu lokalizacji
                 const locationLayer = new ol.layer.Vector({
                     source: new ol.source.Vector({
                         features: [locationFeature]
@@ -1150,34 +1150,31 @@ document.addEventListener('DOMContentLoaded', async function() {
                 });
 
                 map.addLayer(locationLayer);
-
-                // Przywrócenie ikony lokalizacji na przycisku po krótkim opóźnieniu
-                setTimeout(resetIcon, 100);
             },
             function(error) {
-                // Obsługa błędów
-                let message = 'Wystąpił błąd podczas pobierania lokalizacji: ';
+                let message = '';
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        message += 'Brak uprawnień do geolokalizacji.';
+                        message = 'Brak uprawnień do geolokalizacji.\n\n' +
+                                 'Aby zresetować uprawnienia:\n' +
+                                 '1. Kliknij ikonę kłódki obok adresu strony\n' +
+                                 '2. W ustawieniach lokalizacji wybierz "Resetuj uprawnienia"\n' +
+                                 '3. Odśwież stronę i spróbuj ponownie';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        message += 'Informacja o lokalizacji jest niedostępna.';
+                        message = 'Nie można określić twojej lokalizacji';
                         break;
                     case error.TIMEOUT:
-                        message += 'Przekroczono czas oczekiwania na lokalizację.';
+                        message = 'Upłynął limit czasu określania lokalizacji';
                         break;
                     default:
-                        message += 'Nieznany błąd.';
-                        break;
+                        message = 'Wystąpił nieznany błąd podczas określania lokalizacji';
                 }
                 alert(message);
-                // Przywrócenie ikony lokalizacji na przycisku po krótkim opóźnieniu
-                setTimeout(resetIcon, 100);
             },
             {
                 enableHighAccuracy: true,
-                timeout: 5000,
+                timeout: 10000,
                 maximumAge: 0
             }
         );
@@ -1187,6 +1184,22 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.GetUserLocation = GetUserLocation;
 
   } catch (error) {
-    console.error('Błąd podczas inicjalizacji mapy:', error);
+    // Obsługa błędów
+    let message = 'Wystąpił błąd podczas inicjalizacji mapy: ';
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            message += 'Brak uprawnień do geolokalizacji.';
+            break;
+        case error.POSITION_UNAVAILABLE:
+            message += 'Informacja o lokalizacji jest niedostępna.';
+            break;
+        case error.TIMEOUT:
+            message += 'Przekroczono czas oczekiwania na lokalizację.';
+            break;
+        default:
+            message += 'Nieznany błąd.';
+            break;
+    }
+    alert(message);
   }
 });
