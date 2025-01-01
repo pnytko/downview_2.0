@@ -182,23 +182,6 @@ const demLayer = new ol.layer.Tile({
   zIndex: LAYER_ZINDEX.DEM,
 });
 
-const streetLayer = new ol.layer.Tile({
-  source: new ol.source.TileWMS({
-    url: "https://wms.epodgik.pl/cgi-bin/KrajowaIntegracjaPunktowAdresowych",
-    params: {
-      FORMAT: "image/png",
-      TILED: true,
-      VERSION: "1.3.0",
-      LAYERS: "emuia-ulice",
-    },
-    transition: 0,
-    projection: "EPSG:4326",
-  }),
-  visible: false,
-  title: "Streets",
-  zIndex: LAYER_ZINDEX.STREETS,
-});
-
 // Warstwa tras kajakowych
 const kayakLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
@@ -288,23 +271,6 @@ const caveLayer = new ol.layer.Vector({
 });
 
 caveLayer.setZIndex(10);
-
-// Warstwa BDL (Bank Danych o Lasach)
-const bdlLayer = new ol.layer.Tile({
-    source: new ol.source.TileWMS({
-        url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL/MapServer/WMSServer',
-        params: {
-            'LAYERS': '0',  // Numer warstwy - możesz zmienić w zależności od potrzeb
-            'FORMAT': 'image/png',
-            'TRANSPARENT': true,
-            'VERSION': '1.3.0'
-        },
-        transition: 0
-    }),
-    visible: false,
-    title: 'Lasy BDL',
-    zIndex: LAYER_ZINDEX.VECTOR
-});
 
 // Warstwa miejsc biwakowych
 const campLayer = new ol.layer.Tile({
@@ -553,7 +519,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             measureVector,
             markerLayer,
             caveLayer,
-            bdlLayer,
             campLayer,
             kayakLayer,
             bikeLayer,
