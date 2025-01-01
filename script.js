@@ -202,75 +202,93 @@ const kayakLayer = new ol.layer.Tile({
 });
 
 // Warstwa jaskiń
-const caveStyle = (feature) => {
-    // Sprawdź czy to klaster
-    const features = feature.get('features');
-    const size = features ? features.length : 1;
-    
-    if (size > 1) {
-        // Styl dla klastra
+const createCaveLayer = () => {
+    const caveStyle = (feature) => {
+        const features = feature.get('features');
+        if (!features) {
+            return new ol.style.Style({
+                image: new ol.style.Icon({ scale: 0.15, src: "./img/cave.png" }),
+                text: new ol.style.Text({
+                    text: feature.get("NAZWA"),
+                    font: "14px Inter",
+                    offsetY: 20,
+                    fill: new ol.style.Fill({ color: "#000" }),
+                    stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                })
+            });
+        }
+        
+        // Przy dużym przybliżeniu pokazujemy pojedyncze jaskinie
+        if (map && map.getView().getResolution() < 10) {
+            const feature = features[0];
+            return new ol.style.Style({
+                image: new ol.style.Icon({ scale: 0.15, src: "./img/cave.png" }),
+                text: new ol.style.Text({
+                    text: feature.get("NAZWA"),
+                    font: "14px Inter",
+                    offsetY: 20,
+                    fill: new ol.style.Fill({ color: "#000" }),
+                    stroke: new ol.style.Stroke({ color: '#fff', width: 3 })
+                })
+            });
+        }
+        
+        // Styl dla klastra przy oddaleniu
         return new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 15,
-                fill: new ol.style.Fill({
-                    color: '#3399CC'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#fff',
-                    width: 2
-                })
+                radius: 12,
+                fill: new ol.style.Fill({ color: '#3399CC' }),
+                stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
             }),
             text: new ol.style.Text({
-                text: size.toString(),
-                fill: new ol.style.Fill({
-                    color: '#fff'
-                }),
+                text: features.length.toString(),
+                fill: new ol.style.Fill({ color: '#fff' }),
                 font: '12px sans-serif'
             })
         });
-    } else {
-        // Styl dla pojedynczej jaskini
-        const actualFeature = features ? features[0] : feature;
-        return new ol.style.Style({
-            image: new ol.style.Icon({
-                scale: 0.15,
-                src: "./img/cave.png",
-            }),
-            text: new ol.style.Text({
-                font: "14px Inter",
-                text: actualFeature.get("NAZWA"),
-                offsetY: 20,
-                fill: new ol.style.Fill({
-                    color: "#000",
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#fff',
-                    width: 3
-                })
-            }),
-        });
-    }
+    };
+
+    const caveSource = new ol.source.Vector({
+        url: "json_data/caves.geojson",
+        format: new ol.format.GeoJSON()
+    });
+
+    const clusterSource = new ol.source.Cluster({
+        source: caveSource,
+        distance: 40,
+        geometryFunction: function(feature) {
+            if (map && map.getView().getResolution() < 10) {
+                return feature.getGeometry();  // Zwracamy geometrię zamiast null
+            }
+            return feature.getGeometry();
+        }
+    });
+
+    const layer = new ol.layer.Vector({
+        source: clusterSource,
+        style: caveStyle,
+        zIndex: LAYER_ZINDEX.MARKERS,
+        visible: false
+    });
+
+    return layer;
 };
 
-const caveSource = new ol.source.Vector({
-    url: "json_data/caves.geojson",
-    format: new ol.format.GeoJSON(),
-});
+const caveLayer = createCaveLayer();
 
-const clusterSource = new ol.source.Cluster({
-    distance: 15,  // Zmniejszona odległość klastrowania
-    source: caveSource,
-    minDistance: 10  // Minimalna odległość między klastrami
-});
+// Dodajemy funkcję do window
+window.ToggleLayersWMS_Cave = function() {
+    toggleLayer(caveLayer, 'cave');
+};
 
-const caveLayer = new ol.layer.Vector({
-    source: clusterSource,
-    style: caveStyle,
-    zIndex: LAYER_ZINDEX.MARKERS,
-    visible: false
+// Po inicjalizacji mapy dodajemy listener
+document.addEventListener('DOMContentLoaded', () => {
+    if (map) {
+        map.getView().on('change:resolution', () => {
+            caveLayer.getSource().refresh();
+        });
+    }
 });
-
-caveLayer.setZIndex(10);
 
 // Warstwa miejsc biwakowych
 const campLayer = new ol.layer.Tile({
