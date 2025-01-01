@@ -82,24 +82,27 @@
             <div id="map"></div>
             
             <!-- Tool Controls -->
-            <div class="tool-controls">
-                <button class="tool-button" onclick="MeasureLength()" title="Pomiar długości">
+            <div class="tools-grid">
+                <button onclick="MeasureLength()" class="tool-button" title="Pomiar odległości">
                     <i class="fas fa-ruler"></i>
                 </button>
-                <button class="tool-button" onclick="MeasureArea()" title="Pomiar powierzchni">
+                <button onclick="MeasureArea()" class="tool-button" title="Pomiar powierzchni">
                     <i class="fas fa-draw-polygon"></i>
                 </button>
-                <button class="tool-button" onclick="ClearMeasure()" title="Wyczyść pomiary">
-                    <i class="fas fa-eraser"></i>
+                <button onclick="ClearMeasure()" class="tool-button" title="Wyczyść pomiary">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
-                <button class="tool-button" onclick="AddMarker()" title="Dodaj znacznik">
+                <button onclick="AddMarker()" class="tool-button" title="Dodaj znacznik">
                     <i class="fas fa-map-marker-alt"></i>
                 </button>
-                <button class="tool-button" onclick="GetUserLocation()" title="Pokaż moją lokalizację">
+                <button onclick="GetUserLocation()" class="tool-button" title="Lokalizacja">
                     <i class="fas fa-location-arrow"></i>
                 </button>
-                <button class="tool-button" onclick="FullScreen()" title="Tryb pełnoekranowy">
+                <button onclick="FullScreen()" class="tool-button" title="Pełny ekran">
                     <i class="fas fa-expand"></i>
+                </button>
+                <button onclick="ToggleLayersWMS_Weather()" class="tool-button" title="Pogoda">
+                    <i class="fas fa-cloud-sun"></i>
                 </button>
             </div>
         </div>

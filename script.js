@@ -61,7 +61,8 @@ const LAYER_ZINDEX = {
   TRAILS: 5,
   VECTOR: 6,
   MARKERS: 7,
-  MEASURE: 8
+  MEASURE: 8,
+  WEATHER: 15
 };
 
 // Base Layers
@@ -511,6 +512,120 @@ document.addEventListener('DOMContentLoaded', () => {
     modals.forEach(modal => makeDraggable(modal));
 });
 
+// Zmienne globalne dla pogody
+let weatherActive = false;
+
+// Funkcja do pobierania danych pogodowych
+async function getWeatherData(coordinates) {
+    const [lon, lat] = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,cloudcover,windspeed_10m`;
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.current;
+    } catch (error) {
+        console.error('Błąd podczas pobierania danych pogodowych:', error);
+        return null;
+    }
+}
+
+// Funkcja wyświetlająca okno pogodowe
+async function DisplayWrapperWeather(coordinates) {
+    console.log('Próba wyświetlenia okna pogodowego');
+    const weatherData = await getWeatherData(coordinates);
+    if (!weatherData) {
+        console.error('Nie udało się pobrać danych pogodowych');
+        return;
+    }
+
+    console.log('Pobrane dane pogodowe:', weatherData);
+
+    // Usuń poprzedni popup jeśli istnieje
+    CloseWrapperWeather();
+
+    // Stwórz wrapper
+    const wrapper = document.createElement('div');
+    wrapper.id = 'wrapperWeather';
+    wrapper.className = 'wrapper';
+    wrapper.style.display = 'block';
+
+    wrapper.innerHTML = `
+        <div class="wrapper-content">
+            <div class="wrapper-header">
+                <h2><i class="fas fa-cloud-sun"></i> Pogoda</h2>
+                <span class="close" onclick="CloseWrapperWeather()">&times;</span>
+            </div>
+            <div class="wrapper-body">
+                <p><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> ${weatherData.temperature_2m}°C</p>
+                <p><i class="fas fa-cloud-rain"></i> <strong>Opady:</strong> ${weatherData.precipitation} mm</p>
+                <p><i class="fas fa-cloud"></i> <strong>Zachmurzenie:</strong> ${weatherData.cloudcover}%</p>
+                <p><i class="fas fa-wind"></i> <strong>Prędkość wiatru:</strong> ${weatherData.windspeed_10m} km/h</p>
+            </div>
+        </div>
+    `;
+
+    // Dodaj do dokumentu
+    document.body.appendChild(wrapper);
+    console.log('Okno pogodowe zostało dodane do dokumentu');
+    makeDraggable(wrapper);
+}
+
+// Funkcja zamykająca okno pogodowe
+window.CloseWrapperWeather = function() {
+    const wrapper = document.getElementById('wrapperWeather');
+    if (wrapper) {
+        wrapper.remove();
+        console.log('Okno pogodowe zostało zamknięte');
+    }
+};
+
+// Funkcja obsługująca kliknięcie na mapę dla pogody
+async function handleWeatherClick(evt) {
+    console.log('Kliknięcie na mapę', weatherActive);
+    if (!weatherActive) return;
+    
+    evt.preventDefault();
+    evt.stopPropagation();
+    
+    await DisplayWrapperWeather(evt.coordinate);
+    
+    // Dezaktywuj narzędzie po użyciu
+    weatherActive = false;
+    const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+    if (button) {
+        button.classList.remove('active');
+    }
+    map.getViewport().style.cursor = 'default';
+}
+
+// Funkcja przełączająca narzędzie pogody
+window.ToggleLayersWMS_Weather = function() {
+    console.log('Przełączanie narzędzia pogody, obecny stan:', weatherActive);
+    
+    // Jeśli narzędzie jest już aktywne, wyłącz je
+    if (weatherActive) {
+        weatherActive = false;
+        map.getViewport().style.cursor = 'default';
+        const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+        if (button) {
+            button.classList.remove('active');
+        }
+        CloseWrapperWeather();
+        console.log('Narzędzie pogody zostało wyłączone');
+        return;
+    }
+
+    // Aktywuj narzędzie
+    weatherActive = true;
+    map.getViewport().style.cursor = 'crosshair';
+    const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+    if (button) {
+        button.classList.add('active');
+    }
+    console.log('Narzędzie pogody zostało aktywowane');
+};
+
 // Map Initialization
 let map;
 
@@ -532,8 +647,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         layers: [
             osmLayer,
             ortoLayer,
-            demLayer,
             parcelLayer,
+            demLayer,
             measureVector,
             markerLayer,
             caveLayer,
@@ -566,6 +681,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     for (const color in trailLayers) {
         map.addLayer(trailLayers[color]);
     }
+
+    // Dodaj listener kliknięcia do mapy dla pogody
+    map.on('click', handleWeatherClick);
 
     // ========== ZMIENNE GLOBALNE ==========
     let draw; // current draw interaction
@@ -898,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     message += 'Informacja o lokalizacji jest niedostępna.';
                     break;
                 case error.TIMEOUT:
-                    message += 'Przekroczono czas oczekiwania na lokalizację.';
+                    message += 'Upłynął limit czasu określania lokalizacji.';
                     break;
                 default:
                     message += 'Nieznany błąd.';
