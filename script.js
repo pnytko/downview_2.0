@@ -49,17 +49,7 @@ const CONFIG = {
   minZoom: 3,
   maxZoom: 25,
   startZoom: 18,
-  startCoords: [20.9884, 50.01225],
-  directions: {
-    N: 0,         // 0 stopni
-    NE: 0.785,    // 45 stopni
-    E: 1.57,      // 90 stopni
-    SE: 2.355,    // 135 stopni
-    S: 3.14,      // 180 stopni
-    SW: 3.925,    // 225 stopni
-    W: 4.71,      // 270 stopni
-    NW: 5.495     // 315 stopni
-  }
+  startCoords: [20.9884, 50.01225]
 };
 
 // Layer Z-Index Configuration
