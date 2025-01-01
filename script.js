@@ -182,24 +182,6 @@ const demLayer = new ol.layer.Tile({
   zIndex: LAYER_ZINDEX.DEM,
 });
 
-const parcelLayer2 = new ol.layer.Tile({
-  source: new ol.source.TileWMS({
-    url: "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow",
-    params: {
-      FORMAT: "image/png",
-      TILED: true,
-      VERSION: "1.3.0",
-      REQUEST: "GetMap",
-      LAYERS: "dzialki,numery_dzialek",
-    },
-    transition: 0,
-    projection: "EPSG:2180",
-  }),
-  visible: false,
-  title: "Parcels",
-  zIndex: LAYER_ZINDEX.PARCELS,
-});
-
 const streetLayer = new ol.layer.Tile({
   source: new ol.source.TileWMS({
     url: "https://wms.epodgik.pl/cgi-bin/KrajowaIntegracjaPunktowAdresowych",
