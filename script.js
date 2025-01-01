@@ -481,9 +481,9 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.toggle('active');
         });
 
-        // Zamykanie menu po kliknięciu w mapę
-        document.getElementById('map').addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
+        // Zamykanie menu po kliknięciu poza nim
+        document.addEventListener('click', function(event) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                 sidebar.classList.remove('active');
             }
         });

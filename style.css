@@ -213,30 +213,32 @@ button i{
 }
 
 @media screen and (max-width:768px){
-    .grid-container{
-        grid-template-columns:1fr;
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        width: 100%;
+        max-width: 300px;
+        z-index: 1001;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
     }
-
-    .menu-toggle{
-        display:flex;
+    
+    .sidebar.active {
+        transform: translateX(100%);
     }
-
-    .sidebar{
-        background-color:rgba(45,45,45,.95);
-        left:-100%;
-        position:fixed;
-        top:0;
-        transition:left .3s ease;
-        z-index:1999;
+    
+    .grid-container {
+        grid-template-columns: 1fr !important;
     }
-
-    .sidebar.active{
-        left:0;
+    
+    .menu-toggle {
+        display: flex;
+        z-index: 1002;
     }
-
-    .map-container{
-        height:100vh;
-        width:100%;
+    
+    .map-container {
+        width: 100%;
+        height: 100vh;
     }
 }
 .tool-controls{
@@ -618,5 +620,11 @@ button i{
     to{
         opacity:1;
         transform:translate(-50%);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .direction-controls {
+        display: none;
     }
 }
