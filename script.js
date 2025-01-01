@@ -696,19 +696,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     window.ClearMeasure = ClearMeasure;
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
+    // Funkcja do przełączania pojedynczej warstwy
+    window.toggleLayer = toggleLayer;
+
+    // Mapowanie nazw warstw do obiektów warstw
+    window.ToggleLayersWMS_Osm = function() {
+        toggleLayer(osmLayer, 'osm');
+    };
     window.ToggleLayersWMS_Dzialki = function() {
         toggleLayer(parcelLayer, 'dzialki');
-    }
-
+    };
     window.ToggleLayersWMS_OrtoHD = function() {
         toggleLayer(ortoLayer, 'ortoHD');
-    }
-
-    window.ToogleLayersWMS_DEM = function() {
+    };
+    window.ToggleLayersWMS_DEM = function() {
         toggleLayer(demLayer, 'dem');
-    }
+    };
+    window.ToggleLayersWMS_Cave = function() {
+        toggleLayer(caveLayer, 'cave');
+    };
+    window.ToggleLayersWMS_Camp = function() {
+        toggleLayer(campLayer, 'camp');
+    };
+    window.ToggleLayersWMS_Kayak = function() {
+        toggleLayer(kayakLayer, 'kayak');
+    };
+    window.ToggleLayersWMS_Bike = function() {
+        toggleLayer(bikeLayer, 'bike');
+    };
 
-    window.ToogleLayersWMS_Wektory = function() {
+    // Specjalna obsługa dla warstw wektorowych
+    window.ToggleLayersWMS_Wektory = function() {
         const checkbox = document.getElementById('vector');
         const isVisible = checkbox.checked;
         
@@ -723,94 +741,50 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    window.ToogleLayersWMS_Szlaki = function() {
+    // Specjalna obsługa dla szlaków
+    window.ToggleLayersWMS_Szlaki = function() {
         const checkbox = document.getElementById('szlaki');
         const isChecked = checkbox.checked;
         const modal = document.getElementById('wrapper-trails');
+        const trailColors = ['red', 'blue', 'green', 'yellow', 'black'];
         
         if (isChecked) {
-            // Wyświetl okno modalne z wyborem szlaków
             modal.style.display = 'block';
-            // Domyślnie włącz wszystkie szlaki
-            Object.values(trailLayers).forEach(layer => layer.setVisible(true));
-            // Zaznacz wszystkie checkboxy
-            document.getElementById('trail-red').checked = true;
-            document.getElementById('trail-blue').checked = true;
-            document.getElementById('trail-green').checked = true;
-            document.getElementById('trail-yellow').checked = true;
-            document.getElementById('trail-black').checked = true;
+            trailColors.forEach(color => {
+                trailLayers[color]?.setVisible(true);
+                document.getElementById(`trail-${color}`).checked = true;
+            });
         } else {
-            // Ukryj okno modalne
             modal.style.display = 'none';
-            // Wyłącz wszystkie szlaki
-            Object.values(trailLayers).forEach(layer => layer.setVisible(false));
-            // Odznacz wszystkie checkboxy
-            document.getElementById('trail-red').checked = false;
-            document.getElementById('trail-blue').checked = false;
-            document.getElementById('trail-green').checked = false;
-            document.getElementById('trail-yellow').checked = false;
-            document.getElementById('trail-black').checked = false;
+            trailColors.forEach(color => {
+                trailLayers[color]?.setVisible(false);
+                document.getElementById(`trail-${color}`).checked = false;
+            });
         }
     }
 
     window.CloseWrapperTrails = function() {
         const modal = document.getElementById('wrapper-trails');
         modal.style.display = 'none';
-        // Odznacz główny checkbox szlaków
         document.getElementById('szlaki').checked = false;
-        // Wyłącz wszystkie szlaki
-        Object.values(trailLayers).forEach(layer => layer.setVisible(false));
-        // Odznacz wszystkie checkboxy
-        document.getElementById('trail-red').checked = false;
-        document.getElementById('trail-blue').checked = false;
-        document.getElementById('trail-green').checked = false;
-        document.getElementById('trail-yellow').checked = false;
-        document.getElementById('trail-black').checked = false;
+        const trailColors = ['red', 'blue', 'green', 'yellow', 'black'];
+        trailColors.forEach(color => {
+            trailLayers[color]?.setVisible(false);
+            document.getElementById(`trail-${color}`).checked = false;
+        });
     }
 
+    // Uproszczona obsługa pojedynczych szlaków
     window.toggleTrail = toggleTrail;
-
-    window.ToogleLayersWMS_Szlaki_Yellow = function() {
-      toggleTrail('yellow');
-    }
-
-    window.ToogleLayersWMS_Szlaki_Green = function() {
-      toggleTrail('green');
-    }
-
-    window.ToogleLayersWMS_Szlaki_Blue = function() {
-      toggleTrail('blue');
-    }
-
-    window.ToogleLayersWMS_Szlaki_Red = function() {
-      toggleTrail('red');
-    }
-
-    window.ToogleLayersWMS_Szlaki_Black = function() {
-      toggleTrail('black');
-    }
-
-    window.ToogleLayersWMS_Jaskinie = function() {
-        toggleLayer(caveLayer, 'cave');
-    }
-
-    window.ToggleLayersWMS_Camp = function() {
-        toggleLayer(campLayer, 'camp');
-    }
-
-    window.ToggleLayersWMS_Kayak = function() {
-        toggleLayer(kayakLayer, 'kayak');
-    }
-
-    window.ToggleLayersWMS_Bike = function() {
-        toggleLayer(bikeLayer, 'bike');
-    }
+    ['Yellow', 'Green', 'Blue', 'Red', 'Black'].forEach(color => {
+        window[`ToggleLayersWMS_Szlaki_${color}`] = function() {
+            toggleTrail(color.toLowerCase());
+        };
+    });
 
     // Kontrolki kierunkowe
     const directionControls = document.createElement('div');
-
     directionControls.className = 'direction-controls';
-
     directionControls.innerHTML = `
         <button type="button" class="direction-button" onclick="rotateMap('N')">N</button>
         <button type="button" class="direction-button" onclick="rotateMap('NE')">NE</button>

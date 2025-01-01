@@ -27,11 +27,11 @@
             <h3>WARSTWY</h3>
             <div class="checkbox-group">
                 <div class="checkbox-wrapper">
-                    <input id="osm" type="checkbox" onchange="ToogleLayersWMS_Osm()" checked>
+                    <input id="osm" type="checkbox" onchange="ToggleLayersWMS_Osm()" checked>
                     <label for="osm">Open Street Map</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input id="vector" type="checkbox" onchange="ToogleLayersWMS_Wektory()" checked>
+                    <input id="vector" type="checkbox" onchange="ToggleLayersWMS_Wektory()" checked>
                     <label for="vector">Warstwa wektorowa</label>
                 </div>
                 <div class="checkbox-wrapper">
@@ -43,15 +43,15 @@
                     <label for="ortoHD">Ortofotomapa</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input id="dem" type="checkbox" onchange="ToogleLayersWMS_DEM()">
+                    <input id="dem" type="checkbox" onchange="ToggleLayersWMS_DEM()">
                     <label for="dem">Numeryczny Model Terenu</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input id="szlaki" type="checkbox" onchange="ToogleLayersWMS_Szlaki()">
+                    <input id="szlaki" type="checkbox" onchange="ToggleLayersWMS_Szlaki()">
                     <label for="szlaki">Szlaki turystyczne</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input id="cave" type="checkbox" onchange="ToogleLayersWMS_Jaskinie()">
+                    <input id="cave" type="checkbox" onchange="ToggleLayersWMS_Cave()">
                     <label for="cave">Jaskinie i groty</label>
                 </div>
                 <div class="checkbox-wrapper">
@@ -117,9 +117,9 @@
         </div>
         <div class="modal-content">
             <h3>Czym jest i dla kogo jest aplikacja?</h3>
-            <p>DownView 2 jest projektem niekomercyjnym wykonanym w celach edukacyjnych. Zakres map zawiera się dla powiatu tarnowskiego i
-            okolic, jednakże niektóre usługi (np. OrtoHD, OSM czy działki) dostępne są dla całej Polski. Projekt skupiony jest głównie na rozwiązaniach
-            dla map historycznych. Dostarczane usługi mogą być przydatne dla archeologów, historyków, odkrywców czy detektorystów.</p>
+            <p>DownView 2 jest projektem niekomercyjnym wykonanym w celach edukacyjnych. Zakres map zawiera się dla całego świata,
+            jednakże większość usług (np. OrtoHD, OSM czy działki) dostępna jest tylko dla Polski. Dostarczane usługi mogą być 
+            przydatne dla podróżników, archeologów, historyków, odkrywców czy detektorystów.</p>
             
             <h3>Podstawowe aspekty techniczne aplikacji</h3>
             <p>Aplikacja korzysta z biblioteki OpenLayers6 i integruje
