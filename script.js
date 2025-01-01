@@ -57,11 +57,11 @@ const LAYER_ZINDEX = {
   OSM: 1,
   ORTO: 2,
   DEM: 3,
-  PARCELS: 5,
-  TRAILS: 6,
-  VECTOR: 8,
-  MARKERS: 9,
-  MEASURE: 10
+  PARCELS: 4,
+  TRAILS: 5,
+  VECTOR: 6,
+  MARKERS: 7,
+  MEASURE: 8
 };
 
 // Base Layers
