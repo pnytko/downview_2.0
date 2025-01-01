@@ -455,9 +455,55 @@ function createMarkerStyle(number) {
 
 // Funkcja do przełączania warstwy OSM
 function ToogleLayersWMS_Osm() {
-    const osmLayer = map.getLayers().item(0);
-    osmLayer.setVisible(!osmLayer.getVisible());
+    const checkbox = document.getElementById('osm');
+    osmLayer.setVisible(checkbox.checked);
 }
+
+// Funkcja do przełączania warstwy wektorowej
+function ToogleLayersWMS_Wektory() {
+    const checkbox = document.getElementById('vector');
+    vectorLayer.setVisible(checkbox.checked);
+}
+
+// Funkcja do przełączania warstwy działek
+function ToggleLayersWMS_Dzialki() {
+    const checkbox = document.getElementById('dzialki');
+    parcelLayer.setVisible(checkbox.checked);
+}
+
+// Funkcja do przełączania warstwy ortofotomapy
+function ToggleLayersWMS_OrtoHD() {
+    const checkbox = document.getElementById('ortoHD');
+    ortoLayer.setVisible(checkbox.checked);
+}
+
+// Funkcja do tworzenia warstwy szlaków
+const createTrailLayer = (layerId) => {
+  return new ol.layer.Tile({
+    source: new ol.source.TileWMS({
+      url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
+      params: {
+        FORMAT: "image/png",
+        TRANSPARENT: true,
+        VERSION: "1.1.1",
+        LAYERS: layerId,
+      },
+      transition: 0
+    }),
+    visible: false,
+    opacity: 0.8,
+    zIndex: LAYER_ZINDEX.TRAILS,
+  });
+};
+
+// Warstwy WMS dla szlaków
+const trailLayers = {
+    yellow: createTrailLayer("11"),   // szlak pieszy żółty
+    green: createTrailLayer("12"),    // szlak pieszy zielony
+    blue: createTrailLayer("13"),     // szlak pieszy niebieski
+    red: createTrailLayer("14"),      // szlak pieszy czerwony
+    black: createTrailLayer("15"),    // szlak pieszy czarny
+};
 
 // Funkcja do przełączania warstwy tras kajakowych
 function ToggleLayersWMS_Kayak() {
@@ -770,11 +816,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     window.ToggleLayersWMS_Dzialki = function() {
-        parcelLayer.setVisible(document.getElementById('dzialki-wms').checked);
+        parcelLayer.setVisible(document.getElementById('dzialki').checked);
     }
 
     window.ToggleLayersWMS_OrtoHD = function() {
-        ortoLayer.setVisible(document.getElementById('ortoHD-wms').checked);
+        ortoLayer.setVisible(document.getElementById('ortoHD').checked);
     }
 
     window.ToogleLayersWMS_DEM = function() {
@@ -782,7 +828,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     window.ToogleLayersWMS_Wektory = function() {
-        const checkbox = document.getElementById('vector-wms');
+        const checkbox = document.getElementById('vector');
         const isVisible = checkbox.checked;
         
         // Przełącz widoczność warstw wektorowych
