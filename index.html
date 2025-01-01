@@ -28,43 +28,43 @@
             <h3>WARSTWY</h3>
             <div class="checkbox-group">
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToogleLayersWMS_Osm()" id="osm" checked>
+                    <input id="osm" type="checkbox" onchange="ToogleLayersWMS_Osm()" checked>
                     <label for="osm">Open Street Map</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToogleLayersWMS_Wektory()" id="vector" checked>
+                    <input id="vector" type="checkbox" onchange="ToogleLayersWMS_Wektory()" checked>
                     <label for="vector">Warstwa wektorowa</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToggleLayersWMS_Dzialki()" id="dzialki">
+                    <input id="dzialki" type="checkbox" onchange="ToggleLayersWMS_Dzialki()">
                     <label for="dzialki">Ewidencja działek</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToggleLayersWMS_OrtoHD()" id="ortoHD">
+                    <input id="ortoHD" type="checkbox" onchange="ToggleLayersWMS_OrtoHD()">
                     <label for="ortoHD">Ortofotomapa</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToogleLayersWMS_DEM()" id="dem">
+                    <input id="dem" type="checkbox" onchange="ToogleLayersWMS_DEM()">
                     <label for="dem">Numeryczny Model Terenu</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" onclick="ToogleLayersWMS_Szlaki()" id="szlaki">
+                    <input id="szlaki" type="checkbox" onchange="ToogleLayersWMS_Szlaki()">
                     <label for="szlaki">Szlaki turystyczne</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" id="cave" onchange="ToogleLayersWMS_Jaskinie()">
+                    <input id="cave" type="checkbox" onchange="ToogleLayersWMS_Jaskinie()">
                     <label for="cave">Jaskinie i groty</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" id="camp" onchange="ToggleLayersWMS_Camp()">
+                    <input id="camp" type="checkbox" onchange="ToggleLayersWMS_Camp()">
                     <label for="camp">Miejsca biwakowe</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" id="kayak" onchange="ToggleLayersWMS_Kayak()">
+                    <input id="kayak" type="checkbox" onchange="ToggleLayersWMS_Kayak()">
                     <label for="kayak">Trasy kajakowe</label>
                 </div>
                 <div class="checkbox-wrapper">
-                    <input type="checkbox" id="bike" onchange="ToggleLayersWMS_Bike()">
+                    <input id="bike" type="checkbox" onchange="ToggleLayersWMS_Bike()">
                     <label for="bike">Trasy rowerowe</label>
                 </div>
             </div>
