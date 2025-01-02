@@ -14,6 +14,7 @@
 - [Usage](#usage)
 - [Map Layers](#map-layers)
 - [Tools](#tools)
+- [CI/CD Pipeline](#cicd-pipeline)
 
 ## 🎯 About
 DownView is an interactive map application designed for tourists and outdoor enthusiasts. It combines various map layers and tools to enhance the hiking and exploration experience. The application provides detailed trail information, terrain analysis, and measurement tools to help users plan and navigate their outdoor adventures.
@@ -121,3 +122,10 @@ Special thanks to:
 - OpenLayers community
 - OpenStreetMap contributors
 - All contributors and users of DownView
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for Continuous Integration and Continuous Deployment:
+
+- **CI (Continuous Integration)**: Automatically runs on pull requests to validate HTML and check for broken links
+- **CD (Continuous Deployment)**: Automatically deploys changes to production when merged to main branch
