@@ -1086,8 +1086,36 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Upewnij się, że funkcja jest dostępna globalnie
+    let markerActive = false;
     window.AddMarker = function() {
-        map.getTargetElement().style.cursor = 'crosshair';
+        const mapCanvas = map.getTargetElement().querySelector('canvas');
+        
+        // Jeśli narzędzie jest już aktywne, wyłącz je
+        if (markerActive) {
+            markerActive = false;
+            if (mapCanvas) {
+                mapCanvas.style.cursor = '';
+            }
+            if (clickListener) {
+                map.un('click', clickListener);
+                clickListener = null;
+            }
+            const button = document.querySelector('button[onclick="AddMarker()"]');
+            if (button) {
+                button.classList.remove('active');
+            }
+            return;
+        }
+
+        // Aktywuj narzędzie
+        markerActive = true;
+        if (mapCanvas) {
+            mapCanvas.style.cursor = 'crosshair';
+        }
+        const button = document.querySelector('button[onclick="AddMarker()"]');
+        if (button) {
+            button.classList.add('active');
+        }
         
         if (clickListener) {
             map.un('click', clickListener);
@@ -1103,9 +1131,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             markerCounter++;
 
             markerSource.addFeature(marker);
-            map.getTargetElement().style.cursor = 'default';
+            
+            // Wyłącz narzędzie po dodaniu znacznika
+            markerActive = false;
+            if (mapCanvas) {
+                mapCanvas.style.cursor = '';
+            }
             map.un('click', clickListener);
             clickListener = null;
+            const button = document.querySelector('button[onclick="AddMarker()"]');
+            if (button) {
+                button.classList.remove('active');
+            }
         };
 
         map.on('click', clickListener);
