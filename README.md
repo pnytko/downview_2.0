@@ -1,5 +1,9 @@
 # 🗺️ DownView - Interactive Tourist Map Application
 
+[![Continuous Deployment](https://github.com/pnytko/downview_2.0/actions/workflows/deploy.yml/badge.svg)](https://github.com/pnytko/downview_2.0/actions/workflows/deploy.yml)
+
+🌐 **[Live Demo](http://pnytko.pl/downview-2/)** - Always up to date thanks to Continuous Deployment!
+
 ![DownView Interface](img/ss1.png)
 
 ## 📋 Table of Contents
@@ -14,7 +18,15 @@
 ## 🎯 About
 DownView is an interactive map application designed for tourists and outdoor enthusiasts. It combines various map layers and tools to enhance the hiking and exploration experience. The application provides detailed trail information, terrain analysis, and measurement tools to help users plan and navigate their outdoor adventures.
 
+Thanks to Continuous Deployment methodology, all updates and improvements are automatically deployed to the production environment, ensuring users always have access to the latest features and fixes.
+
 ## ✨ Features
+
+### 🔄 Development & Deployment
+- **Continuous Deployment** - automatic deployment of updates
+- **Version Control** - Git-based development
+- **GitHub Actions** - automated deployment pipeline
+- **FTP Deployment** - reliable hosting updates
 
 ### 🗺️ Map Layers
 - **OpenStreetMap (OSM)** - base map layer
@@ -58,19 +70,19 @@ DownView is an interactive map application designed for tourists and outdoor ent
 
 ## 💻 Installation
 1. Clone the repository:
-\`\`\`bash
+```bash
 git clone https://github.com/your-username/downview.git
-\`\`\`
+```
 
 2. Start a local server (e.g., using Python):
-\`\`\`bash
+```bash
 python -m http.server
-\`\`\`
+```
 
 3. Open your browser and navigate to:
-\`\`\`
+```
 http://localhost:8000
-\`\`\`
+```
 
 ## 🎮 Usage
 
