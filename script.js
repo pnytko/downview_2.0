@@ -574,7 +574,6 @@ async function handleWeatherClick(evt) {
     if (!weatherActive) return;
     
     evt.preventDefault();
-    evt.stopPropagation();
     
     await DisplayWrapperWeather(evt.coordinate);
     
@@ -662,7 +661,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     map.on('pointermove', function(e) {
         const pixel = map.getEventPixel(e.originalEvent);
         const hit = map.hasFeatureAtPixel(pixel);
-        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+        const feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+            return feature;
+        });
+        
+        if (hit && feature && markerSource.getFeatures().includes(feature)) {
+            map.getViewport().style.cursor = 'pointer';
+        } else if (!weatherActive && !markerActive) {
+            map.getViewport().style.cursor = '';
+        }
     });
 
     // Dodanie warstw szlaków do mapy
