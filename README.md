@@ -2,7 +2,7 @@
 
 [![Continuous Deployment](https://github.com/pnytko/downview_2.0/actions/workflows/deploy.yml/badge.svg)](https://github.com/pnytko/downview_2.0/actions/workflows/deploy.yml)
 
-🌐 **[Live Demo](https://downview-2.pnytko.pl/)** - Always up to date thanks to Continuous Deployment!
+🌐 **[Live Demo](https://pnytko.pl/downview-2/)** - Always up to date thanks to Continuous Deployment!
 
 ![DownView Interface](img/ss1.png)
 
