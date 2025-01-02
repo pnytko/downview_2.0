@@ -1,10 +1,8 @@
 name: Deploy to SEOhost
 on:
-  # Uruchom przy utworzeniu taga (np. v1.0.0)
+  # Uruchom przy push na main
   push:
-    tags:
-      - 'v*'  # Wszystkie tagi zaczynające się od 'v'
-  
+    branches: [ main ]  # deployment przy każdym push na main
   # Pozwala na ręczne uruchomienie z interfejsu GitHub
   workflow_dispatch:
     inputs:
