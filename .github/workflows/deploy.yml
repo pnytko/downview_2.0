@@ -27,5 +27,5 @@ jobs:
         server: h22.seohost.pl
         username: srv41873
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /domains/downview-2.pnytko.pl/public_html/
+        server-dir: /domains/pnytko.pl/public_html/downview-2/
         dangerous-clean-slate: true
