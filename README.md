@@ -30,8 +30,9 @@ Thanks to Continuous Deployment methodology, all updates and improvements are au
 
 ### 🗺️ Map Layers
 - **OpenStreetMap (OSM)** - base map layer
+- **Vector Layer** - vector data visualization
+- **Land Parcels** - cadastral information (WMS)
 - **High-Resolution Orthophoto** - detailed aerial imagery
-- **Land Parcels** - cadastral information
 - **DEM (Digital Elevation Model)** - terrain elevation data
 - **Tourist Trails** - color-coded hiking paths:
   - Red trails
@@ -39,27 +40,28 @@ Thanks to Continuous Deployment methodology, all updates and improvements are au
   - Green trails
   - Yellow trails
   - Black trails
-- **Cave Locations** - marked cave entrances and information
+- **Cave Locations** - marked cave entrances with information
+- **Weather Information** - current weather data for selected locations
 
 ### 🛠️ Measurement Tools
 - **Length Measurement** - calculate distances along paths
 - **Area Measurement** - measure terrain areas
-- **Custom Markers** - add points of interest
-- **PDF Export** - save map views for offline use
+- **Custom Markers** - add and manage points of interest with descriptions
+- **Geolocation** - find and track user's position
 
-### 🎨 Customization
+### 🎨 Interface Features
 - **Layer Management** - toggle individual layers
-- **Opacity Control** - adjust layer visibility
-- **Projection Selection** - support for different coordinate systems:
-  - EPSG:4326
-  - EPSG:3857
-- **Coordinate Precision** - adjust coordinate display accuracy
-- **Optimized CSS** - reduced file size and improved performance through PurgeCSS
+- **Mobile-Friendly Menu** - responsive sidebar for mobile devices
+- **Draggable Windows** - movable modal windows for better UX
+- **Fullscreen Mode** - maximize map viewing area
+- **Map Rotation** - rotate map in 8 directions (N, NE, E, SE, S, SW, W, NW)
+- **Coordinate Display** - show cursor position coordinates
 
 ### 🧭 Navigation
-- **Direction Control** - rotate map in 8 directions (N, NE, E, SE, S, SW, W, NW)
-- **Fullscreen Mode** - maximize map viewing area
-- **Position Information** - display current cursor coordinates
+- **Zoom Controls** - intuitive zoom in/out
+- **Pan** - smooth map panning
+- **Direction Control** - precise rotation controls
+- **Layer Opacity** - adjustable layer transparency
 
 ## 🔧 Technologies
 - **OpenLayers 6** - main mapping library
