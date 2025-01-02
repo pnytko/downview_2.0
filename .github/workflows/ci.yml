@@ -26,10 +26,12 @@ jobs:
         run: html-validator --file index.html --verbose
 
       - name: Start local server
-        run: python -m http.server 8080 &
+        run: python -m http.server 8080 --bind 0.0.0.0 &
 
       - name: Wait for server
-        run: sleep 5
+        run: |
+          sleep 5
+          curl http://127.0.0.1:8080 -I || exit 1
 
       - name: Check for broken links
-        run: blc http://localhost:8080 -ro
+        run: blc http://127.0.0.1:8080 -ro
