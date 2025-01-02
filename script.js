@@ -180,7 +180,7 @@ const demLayer = new ol.layer.Tile({
   }),
   visible: false,
   title: "DEM",
-  zIndex: LAYER_ZINDEX.DEM,
+  zIndex: LAYER_ZINDEX.DEM
 });
 
 // Warstwa tras kajakowych
@@ -542,41 +542,28 @@ async function DisplayWrapperWeather(coordinates) {
 
     console.log('Pobrane dane pogodowe:', weatherData);
 
-    // Usuń poprzedni popup jeśli istnieje
-    CloseWrapperWeather();
-
-    // Stwórz wrapper
-    const wrapper = document.createElement('div');
-    wrapper.id = 'wrapperWeather';
-    wrapper.className = 'wrapper';
-    wrapper.style.display = 'block';
-
-    wrapper.innerHTML = `
-        <div class="wrapper-content">
-            <div class="wrapper-header">
-                <h2><i class="fas fa-cloud-sun"></i> Pogoda</h2>
-                <span class="close" onclick="CloseWrapperWeather()">&times;</span>
-            </div>
-            <div class="wrapper-body">
+    // Pokaż okno modalne
+    const wrapper = document.getElementById('wrapper-weather');
+    if (wrapper) {
+        const weatherInfo = wrapper.querySelector('#weather-info');
+        if (weatherInfo) {
+            weatherInfo.innerHTML = `
                 <p><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> ${weatherData.temperature_2m}°C</p>
                 <p><i class="fas fa-cloud-rain"></i> <strong>Opady:</strong> ${weatherData.precipitation} mm</p>
                 <p><i class="fas fa-cloud"></i> <strong>Zachmurzenie:</strong> ${weatherData.cloudcover}%</p>
                 <p><i class="fas fa-wind"></i> <strong>Prędkość wiatru:</strong> ${weatherData.windspeed_10m} km/h</p>
-            </div>
-        </div>
-    `;
-
-    // Dodaj do dokumentu
-    document.body.appendChild(wrapper);
-    console.log('Okno pogodowe zostało dodane do dokumentu');
-    makeDraggable(wrapper);
+            `;
+        }
+        wrapper.style.display = 'block';
+        console.log('Okno pogodowe zostało wyświetlone');
+    }
 }
 
 // Funkcja zamykająca okno pogodowe
 window.CloseWrapperWeather = function() {
-    const wrapper = document.getElementById('wrapperWeather');
+    const wrapper = document.getElementById('wrapper-weather');
     if (wrapper) {
-        wrapper.remove();
+        wrapper.style.display = 'none';
         console.log('Okno pogodowe zostało zamknięte');
     }
 };
