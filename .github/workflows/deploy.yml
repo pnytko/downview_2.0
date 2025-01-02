@@ -1,8 +1,17 @@
 name: Deploy to SEOhost
 on:
+  # Uruchom przy utworzeniu taga (np. v1.0.0)
   push:
-    branches: [ main ]  # lub master, zależnie od nazwy głównej gałęzi
-  workflow_dispatch:    # pozwala na ręczne uruchomienie
+    tags:
+      - 'v*'  # Wszystkie tagi zaczynające się od 'v'
+  
+  # Pozwala na ręczne uruchomienie z interfejsu GitHub
+  workflow_dispatch:
+    inputs:
+      deploy_message:
+        description: 'Wiadomość opisująca deployment'
+        required: true
+        default: 'Manual deployment'
 
 jobs:
   deploy:
@@ -10,6 +19,9 @@ jobs:
     steps:
     - name: 📂 Checkout repository
       uses: actions/checkout@v3
+    
+    - name: 📢 Echo deploy message
+      run: echo "Deploying with message - ${{ github.event.inputs.deploy_message || 'Tag based deployment' }}"
     
     - name: 📦 FTP Deploy
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
