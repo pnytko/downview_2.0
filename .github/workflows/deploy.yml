@@ -1,0 +1,21 @@
+name: Deploy to SEOhost
+on:
+  push:
+    branches: [ main ]  # lub master, zależnie od nazwy głównej gałęzi
+  workflow_dispatch:    # pozwala na ręczne uruchomienie
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 📂 Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: 📦 FTP Deploy
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: h22.seohost.pl
+        username: srv41873
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: /public_html/  # dostosuj tę ścieżkę jeśli jest inna
+        dangerous-clean-slate: true
