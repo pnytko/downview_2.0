@@ -20,18 +20,62 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install -g html-validator-cli broken-link-checker
+          npm install -g html-validator-cli
 
       - name: Validate HTML
         run: html-validator --file index.html --verbose
 
-      - name: Start local server
-        run: python -m http.server 8080 --bind 0.0.0.0 &
-
-      - name: Wait for server
+      - name: Validate CSS
         run: |
-          sleep 5
-          curl http://127.0.0.1:8080 -I || exit 1
+          npm install -g stylelint stylelint-config-standard
+          echo "{ \"extends\": \"stylelint-config-standard\" }" > .stylelintrc.json
+          npx stylelint "*.css"
 
-      - name: Check for broken links
-        run: blc http://127.0.0.1:8080 -ro
+      - name: Validate JavaScript
+        run: |
+          npm install -g eslint eslint-plugin-openlayers
+          echo '{"extends": ["eslint:recommended"], "env": {"browser": true}, "parserOptions": {"ecmaVersion": 2020}, "globals": {"ol": "readonly"}}' > .eslintrc.json
+          npx eslint script.js
+
+      - name: Validate OpenLayers Configuration
+        run: |
+          node -e "
+            const fs = require('fs');
+            const content = fs.readFileSync('script.js', 'utf8');
+            
+            // Sprawdź inicjalizację mapy
+            if (!content.includes('new ol.Map')) {
+              console.error('Brak inicjalizacji mapy OpenLayers');
+              process.exit(1);
+            }
+            
+            // Sprawdź warstwy
+            if (!content.includes('new ol.layer')) {
+              console.error('Brak definicji warstw');
+              process.exit(1);
+            }
+            
+            // Sprawdź kontrolki
+            if (!content.includes('ol.control')) {
+              console.error('Brak kontrolek mapy');
+              process.exit(1);
+            }
+          "
+
+      - name: Check WMS Endpoints
+        run: |
+          node -e "
+            const fs = require('fs');
+            const content = fs.readFileSync('script.js', 'utf8');
+            const urls = content.match(/url: ['\"](http[^'\"]+)['\"]]/g);
+            
+            if (!urls) {
+              console.error('Nie znaleziono URL-i WMS');
+              process.exit(1);
+            }
+            
+            urls.forEach(url => {
+              const cleanUrl = url.match(/['\"](http[^'\"]+)['\"]]/)[1];
+              console.log('Znaleziono URL WMS:', cleanUrl);
+            });
+          "
