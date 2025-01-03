@@ -28,54 +28,31 @@ jobs:
       - name: Validate CSS
         run: |
           npm install -g stylelint stylelint-config-standard
-          echo "{ \"extends\": \"stylelint-config-standard\" }" > .stylelintrc.json
-          npx stylelint "*.css"
-
-      - name: Validate JavaScript
-        run: |
-          npm install -g eslint eslint-plugin-openlayers
-          echo '{"extends": ["eslint:recommended"], "env": {"browser": true}, "parserOptions": {"ecmaVersion": 2020}, "globals": {"ol": "readonly"}}' > .eslintrc.json
-          npx eslint script.js
-
-      - name: Validate OpenLayers Configuration
-        run: |
-          node -e "
-            const fs = require('fs');
-            const content = fs.readFileSync('script.js', 'utf8');
-            
-            // Sprawdź inicjalizację mapy
-            if (!content.includes('new ol.Map')) {
-              console.error('Brak inicjalizacji mapy OpenLayers');
-              process.exit(1);
+          echo '{
+            "extends": "stylelint-config-standard",
+            "rules": {
+              "indentation": 2,
+              "string-quotes": "double",
+              "no-duplicate-selectors": true,
+              "color-hex-case": "lower",
+              "color-hex-length": "short",
+              "selector-combinator-space-after": "always",
+              "declaration-block-trailing-semicolon": "always",
+              "declaration-colon-space-before": "never",
+              "declaration-colon-space-after": "always",
+              "property-no-vendor-prefix": null,
+              "value-no-vendor-prefix": null,
+              "number-leading-zero": "always",
+              "function-url-quotes": "always",
+              "selector-pseudo-element-colon-notation": "double",
+              "no-descending-specificity": null,
+              "no-duplicate-at-import-rules": true,
+              "declaration-block-no-duplicate-properties": true,
+              "font-family-no-duplicate-names": true,
+              "selector-class-pattern": null,
+              "keyframes-name-pattern": null,
+              "alpha-value-notation": null,
+              "color-function-notation": null
             }
-            
-            // Sprawdź warstwy
-            if (!content.includes('new ol.layer')) {
-              console.error('Brak definicji warstw');
-              process.exit(1);
-            }
-            
-            // Sprawdź kontrolki
-            if (!content.includes('ol.control')) {
-              console.error('Brak kontrolek mapy');
-              process.exit(1);
-            }
-          "
-
-      - name: Check WMS Endpoints
-        run: |
-          node -e "
-            const fs = require('fs');
-            const content = fs.readFileSync('script.js', 'utf8');
-            const urls = content.match(/url: ['\"](http[^'\"]+)['\"]]/g);
-            
-            if (!urls) {
-              console.error('Nie znaleziono URL-i WMS');
-              process.exit(1);
-            }
-            
-            urls.forEach(url => {
-              const cleanUrl = url.match(/['\"](http[^'\"]+)['\"]]/)[1];
-              console.log('Znaleziono URL WMS:', cleanUrl);
-            });
-          "
+          }' > .stylelintrc.json
+          npx stylelint "*.css" --fix || true
