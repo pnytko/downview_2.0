@@ -422,16 +422,18 @@ function toggleTrail(color) {
 document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
+    const map = document.getElementById('map');
 
     if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', function() {
             sidebar.classList.toggle('active');
+            menuToggle.style.display = 'none';
         });
 
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
+        map.addEventListener('click', function() {
+            if (sidebar.classList.contains('active')) {
                 sidebar.classList.remove('active');
+                menuToggle.style.display = 'flex';
             }
         });
     }
