@@ -213,33 +213,48 @@ button i{
     background-color:var(--accent-color);
 }
 
-@media screen and (width <=768px){
+/* Mobile menu button */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+    background: var(--secondary-bg);
+    border: none;
+    padding: 10px;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+/* Mobile styles */
+@media screen and (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+
     .sidebar {
         position: fixed;
         left: -100%;
-        width: 100%;
-        max-width: 300px;
-        z-index: 1001;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease-in-out;
+        transition: left var(--transition-normal);
+        background: rgb(45 45 45 / 98%);
+        box-shadow: var(--shadow-lg);
     }
-    
+
     .sidebar.active {
-        transform: translateX(100%);
+        left: 0;
     }
-    
-    .grid-container {
-        grid-template-columns: 1fr !important;
-    }
-    
-    .menu-toggle {
-        display: flex;
-        z-index: 1002;
-    }
-    
+
+    /* Ensure the map container takes full width */
     .map-container {
         width: 100%;
-        height: 100vh;
+        margin-left: 0;
     }
 }
 
@@ -448,8 +463,7 @@ button i{
   background:linear-gradient(
     135deg,
     rgb(35 35 35 / 95%),
-    hsl(0deg 0% 8% / 90%)
-  );
+    hsl(0deg 0% 8% / 90%));
   border-bottom:1px solid hsl(0deg 0% 100% / 8%);
   cursor:move;
   display:flex;
@@ -519,8 +533,7 @@ button i{
   background:linear-gradient(
     135deg,
     rgb(45 45 45 / 90%),
-    rgb(35 35 35 / 80%)
-  );
+    rgb(35 35 35 / 80%));
   border:1px solid hsl(0deg 0% 100% / 8%);
   border-radius:var(--radius-sm);
   margin:5px 0;
@@ -531,8 +544,7 @@ button i{
   background:linear-gradient(
     135deg,
     rgb(55 55 55 / 90%),
-    rgb(45 45 45 / 80%)
-  );
+    rgb(45 45 45 / 80%));
 }
 
 .modal-content::-webkit-scrollbar{
@@ -653,8 +665,7 @@ button i{
   background: linear-gradient(
     135deg,
     rgb(45 45 45 / 90%),
-    rgb(25 25 25 / 80%)
-  );
+    rgb(25 25 25 / 80%));
   border: 1px solid hsl(0deg 0% 100% / 10%);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px 0 rgb(0 0 0 / 40%);

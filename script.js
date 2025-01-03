@@ -418,7 +418,7 @@ function toggleTrail(color) {
     }
 }
 
-// Mobile Menu Toggle
+// Mobile menu toggle
 document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
@@ -428,9 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.toggle('active');
         });
 
-        // Zamykanie menu po kliknięciu poza nim
+        // Close sidebar when clicking outside
         document.addEventListener('click', function(event) {
-            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
                 sidebar.classList.remove('active');
             }
         });
