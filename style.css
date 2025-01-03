@@ -70,16 +70,6 @@ body{
 h2{ font-size:var(--font-size-xl); }
 h3{ font-size:var(--font-size-lg); }
 
-.sidebar h3{
-  font-size:var(--font-size-base);
-  font-weight:var(--font-weight-medium);
-}
-
-.checkbox-wrapper label{
-  font-size:var(--font-size-sm);
-  font-weight:var(--font-weight-normal);
-}
-
 .grid-container{
   display:grid;
   grid-template-columns:auto 1fr;
@@ -696,8 +686,7 @@ button i{
   background: linear-gradient(
     135deg,
     rgb(35 35 35 / 95%),
-    hsl(0deg 0% 8% / 90%)
-  );
+    hsl(0deg 0% 8% / 90%));
   border-bottom: 1px solid hsl(0deg 0% 100% / 8%);
   cursor: move;
   display: flex;
