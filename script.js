@@ -250,7 +250,7 @@ const createCaveLayer = () => {
     };
 
     const caveSource = new ol.source.Vector({
-        url: "json_data/caves.geojson",
+        url: "layers_data/caves.geojson",
         format: new ol.format.GeoJSON()
     });
 
@@ -440,12 +440,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== OBSŁUGA OKIEN MODALNYCH ==========
 window.DisplayWrapperAbout = function() {
     const modal = document.getElementById('wrapper-about');
-    modal.style.display = 'block';
+    modal.style.display = 'block'
 }
 
 window.CloseWrapperAbout = function() {
     const modal = document.getElementById('wrapper-about');
-    modal.style.display = 'none';
+    modal.style.display = 'none'
 }
 
 // Funkcja do obsługi przeciągania okien modalnych
