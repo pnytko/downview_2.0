@@ -1,18 +1,36 @@
 # 1. Zacznij nową funkcjonalność
-git checkout main
-git pull
-git checkout -b feature/nowy-navbar
+
+git checkout main - Przełącza się na główną gałąź main. Upewniamy się, że pracujemy na najnowszej wersji głównej gałęzi projektu.
+
+git pull - Pobiera najnowsze zmiany z zdalnego repozytorium do lokalnego. Zapewnia, że lokalna gałąź main jest zsynchronizowana
+z wersją na GitHubie.
+
+git checkout -b feature/nowy-navbar - Tworzy nową gałąź o nazwie feature/nowy-navbar i automatycznie na nią przełącza. 
+-b oznacza "stwórz nową gałąź".
+
 
 # 2. Pracuj nad kodem i commituj
-git add .
-git commit -m "feature: add responsive navbar"
+
+git add . - Dodaje wszystkie zmienione pliki do "staging area" (obszaru przygotowania) przed wykonaniem commitu.
+
+git commit -m "feature: add responsive navbar" - Tworzy commit, czyli "zapis" zmian w historii projektu z wiadomością feature:
+add responsive navbar. -m pozwala dodać komunikat commitu bez otwierania edytora tekstu.
 
 # 3. Wypchnij zmiany
-git push -u origin feature/nowy-navbar
+
+git push -u origin feature/nowy-navbar - Wypycha lokalne zmiany do zdalnego repozytorium na GitHubie, tworząc nową gałąź
+feature/nowy-navbar w zdalnym repozytorium.-u origin feature/nowy-navbar oznacza, że gałąź lokalna zostaje powiązana 
+z zdalną, co w przyszłości pozwala używać samego git push bez dodatkowych parametrów.
 
 # 4. Utwórz PR na GitHubie
-# 5. Poczekaj na CI i code review
+
+# 5. Poczekaj na CI
+
 # 6. Po merge wrócić do main
-git checkout main
-git pull
-git branch -d feature/nowy-navbar
+
+git checkout main - Przełącza się z powrotem na główną gałąź main.
+
+git pull - Pobiera najnowsze zmiany z zdalnej gałęzi main, uwzględniając zaimplementowaną funkcjonalność po merge.
+
+git branch -d feature/nowy-navbar - Usuwa lokalną gałąź feature/nowy-navbar, ponieważ została już połączona (zmergowana) do main.
+-d oznacza "usuń", ale tylko jeśli gałąź została już zmergowana.
