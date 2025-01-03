@@ -1,0 +1,18 @@
+# 1. Zacznij nową funkcjonalność
+git checkout main
+git pull
+git checkout -b feature/nowy-navbar
+
+# 2. Pracuj nad kodem i commituj
+git add .
+git commit -m "feature: add responsive navbar"
+
+# 3. Wypchnij zmiany
+git push -u origin feature/nowy-navbar
+
+# 4. Utwórz PR na GitHubie
+# 5. Poczekaj na CI i code review
+# 6. Po merge wrócić do main
+git checkout main
+git pull
+git branch -d feature/nowy-navbar
