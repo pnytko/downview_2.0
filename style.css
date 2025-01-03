@@ -10,7 +10,7 @@
   --background-color:var(--secondary-bg);
   --text-color:var(--text-primary);
   --hover-color:var(--accent-color);
-  --font-primary:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-primary:"Inter", -apple-system, blinkmacsystemfont, "Segoe UI", roboto, oxygen, ubuntu, cantarell, sans-serif;
   --font-size-xs:0.75rem;
   --font-size-sm:0.875rem;
   --font-size-base:1rem;
@@ -40,11 +40,13 @@
   --radius-full:9999px;
   --sidebar-width:250px;
 }
+
 *{
   box-sizing:border-box;
   margin:0;
   padding:0;
 }
+
 body{
   font-size:var(--font-size-base);
   font-weight:var(--font-weight-normal);
@@ -55,9 +57,11 @@ body{
   color:var(--text-primary);
   overflow:hidden;
 }
+
  body,h2,h3{
   font-family:var(--font-primary);
 }
+
  h2,h3{
   font-weight:var(--font-weight-semibold);
   line-height:var(--line-height-tight);
@@ -75,11 +79,13 @@ h3{ font-size:var(--font-size-lg); }
   font-size:var(--font-size-sm);
   font-weight:var(--font-weight-normal);
 }
+
 .grid-container{
   display:grid;
   grid-template-columns:auto 1fr;
   height:100vh;
 }
+
 .grid-container,.map-container{
   overflow:hidden;
   position:relative;
@@ -93,9 +99,10 @@ h3{ font-size:var(--font-size-lg); }
 #map{
   width:100%;
 }
+
 .sidebar{
   background:rgba(45,45,45,.95);
-  border-right:1px solid hsla(0,0%,100%,.1);
+  border-right:1px solid hsla(0deg,0%,100%,.1);
   display:flex;
   flex-direction:column;
   height:100vh;
@@ -124,6 +131,7 @@ h3{ font-size:var(--font-size-lg); }
 #aboutButton i{
   font-size:1.2em;
 }
+
 .checkbox-group{
   display:flex;
   flex-direction:column;
@@ -138,7 +146,7 @@ h3{ font-size:var(--font-size-lg); }
   margin-top:var(--spacing-xs);
 }
 
-.checkbox-wrapper input[type=checkbox]{
+.checkbox-wrapper input[type="checkbox"]{
   margin-right:var(--spacing-sm);
 }
 
@@ -148,23 +156,25 @@ h3{ font-size:var(--font-size-lg); }
   text-align:center;
 }
 
-input[type=checkbox]{
+input[type="checkbox"]{
   accent-color:var(--accent-color);
   height:18px;
   width:18px;
 }
 
 
-input[type=number]{
+input[type="number"]{
   background:var(--primary-bg);
-  border:1px solid hsla(0,0%,100%,.1);
+  border:1px solid hsla(0deg,0%,100%,.1);
   border-radius:var(--radius-sm);
   font-size:var(--font-size-sm);
   padding:var(--spacing-xs) var(--spacing-sm);
 }
-button,input[type=number]{
+
+button,input[type="number"]{
   color:var(--text-primary);
 }
+
 button{
   align-items:center;
   background:var(--accent-color);
@@ -185,6 +195,7 @@ button:hover{
 button i{
   font-size:1.2em;
 }
+
 .menu-toggle{
     align-items:center;
     background-color:var(--secondary-bg);
@@ -212,7 +223,7 @@ button i{
     background-color:var(--accent-color);
 }
 
-@media screen and (max-width:768px){
+@media screen and (width <=768px){
     .sidebar {
         position: fixed;
         left: -100%;
@@ -241,6 +252,7 @@ button i{
         height: 100vh;
     }
 }
+
 .tools-grid {
     position: absolute;
     right: 10px;
@@ -332,7 +344,7 @@ button i{
     rgba(45,45,45,.9),
     rgba(25,25,25,.8)
   );
-  border:1px solid hsla(0,0%,100%,.1);
+  border:1px solid hsla(0deg,0%,100%,.1);
   border-radius:var(--radius-lg);
   box-shadow:0 8px 32px 0 rgba(0,0,0,.4);
   display:none;
@@ -347,15 +359,18 @@ button i{
   width:400px;
   z-index:999;
 }
+
 #wrapper-trails{
   top:20px;
   width:300px;
 }
+
 #wrapper-about,#wrapper-trails{
   left:calc(var(--sidebar-width) + 20px);
   position:absolute;
   transform:none;
 }
+
 #wrapper-about{
   bottom:20px;
   width:400px;
@@ -365,6 +380,7 @@ button i{
   max-height:300px;
   overflow:auto;
 }
+
 #wrapper-marker{
   left:50%;
   margin-left:-150px;
@@ -410,7 +426,8 @@ button i{
 .delete-marker-btn i{
   font-size:var(--font-size-base);
 }
-@media (max-width:768px){
+
+@media (width <=768px){
   #wrapper-trails{
     left:10px;
     max-width:300px;
@@ -425,6 +442,7 @@ button i{
   #wrapper-trails .checkbox-wrapper label{
     font-size:14px;
   }
+
   #wrapper-about{
     bottom:10px;
     left:10px;
@@ -440,9 +458,9 @@ button i{
   background:linear-gradient(
     135deg,
     rgba(35,35,35,.95),
-    hsla(0,0%,8%,.9)
+    hsla(0deg,0%,8%,.9)
   );
-  border-bottom:1px solid hsla(0,0%,100%,.08);
+  border-bottom:1px solid hsla(0deg,0%,100%,.08);
   cursor:move;
   display:flex;
   height:48px;
@@ -451,7 +469,7 @@ button i{
 }
 
 .modal-header h2{
-  color:hsla(0,0%,100%,.95);
+  color:hsla(0deg,0%,100%,.95);
   font-size:var(--font-size-lg);
   font-weight:var(--font-weight-medium);
   line-height:1;
@@ -460,7 +478,7 @@ button i{
 }
 
 .modal-content{
-  color:hsla(0,0%,100%,.9);
+  color:hsla(0deg,0%,100%,.9);
   max-height:calc(80vh - 60px);
   overflow-y:auto;
   padding:var(--spacing-md);
@@ -506,13 +524,14 @@ button i{
 .btn-close:hover i{
   transform:rotate(180deg);
 }
+
 .modal .checkbox-wrapper{
   background:linear-gradient(
     135deg,
     rgba(45,45,45,.9),
     rgba(35,35,35,.8)
   );
-  border:1px solid hsla(0,0%,100%,.08);
+  border:1px solid hsla(0deg,0%,100%,.08);
   border-radius:var(--radius-sm);
   margin:5px 0;
   padding:8px 12px;
@@ -525,6 +544,7 @@ button i{
     rgba(45,45,45,.8)
   );
 }
+
 .modal-content::-webkit-scrollbar{
   width:8px;
 }
@@ -535,13 +555,14 @@ button i{
 }
 
 .modal-content::-webkit-scrollbar-thumb{
-  background:hsla(0,0%,100%,.1);
+  background:hsla(0deg,0%,100%,.1);
   border-radius:4px;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover{
-  background:hsla(0,0%,100%,.2);
+  background:hsla(0deg,0%,100%,.2);
 }
+
 .tooltip{
   background:rgba(0,0,0,.8);
   border-radius:4px;
@@ -549,12 +570,14 @@ button i{
   font-size:12px;
   user-select:none;
 }
+
 .ol-tooltip,.tooltip{
   color:#fff;
   padding:4px 8px;
   position:relative;
   white-space:nowrap;
 }
+
 .ol-tooltip{
   background:var(--accent-color);
   border-radius:var(--radius-sm);
@@ -575,7 +598,7 @@ button i{
   color:#fff;
 }
 
-.ol-tooltip-measure:before,.ol-tooltip-static:before{
+.ol-tooltip-measure::before,.ol-tooltip-static::before{
   border-left:6px solid transparent;
   border-right:6px solid transparent;
   border-top:6px solid var(--accent-color);
@@ -586,9 +609,10 @@ button i{
   position:absolute;
 }
 
-.ol-tooltip-static:before{
+.ol-tooltip-static::before{
   border-top-color:var(--accent-color);
 }
+
 .modal-overlay{
   backdrop-filter:blur(5px);
   -webkit-backdrop-filter:blur(5px);
@@ -601,6 +625,7 @@ button i{
   width:100%;
   z-index:998;
 }
+
 .logo-overlay{
     bottom:20px;
     position:absolute;
@@ -619,13 +644,14 @@ button i{
         opacity:0;
         transform:translate(-50%, -20px);
     }
-    to{
+
+    100%{
         opacity:1;
         transform:translate(-50%);
     }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (width <= 768px) {
     .direction-controls {
         display: none;
     }
@@ -639,7 +665,7 @@ button i{
     rgba(45,45,45,.9),
     rgba(25,25,25,.8)
   );
-  border: 1px solid hsla(0,0%,100%,.1);
+  border: 1px solid hsla(0deg,0%,100%,.1);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px 0 rgba(0,0,0,.4);
   max-height: 80vh;
@@ -658,7 +684,7 @@ button i{
 }
 
 .wrapper-content {
-  color: hsla(0,0%,100%,.9);
+  color: hsla(0deg,0%,100%,.9);
   max-height: calc(80vh - 60px);
   overflow-y: auto;
 }
@@ -670,9 +696,9 @@ button i{
   background: linear-gradient(
     135deg,
     rgba(35,35,35,.95),
-    hsla(0,0%,8%,.9)
+    hsla(0deg,0%,8%,.9)
   );
-  border-bottom: 1px solid hsla(0,0%,100%,.08);
+  border-bottom: 1px solid hsla(0deg,0%,100%,.08);
   cursor: move;
   display: flex;
   height: 48px;
@@ -681,7 +707,7 @@ button i{
 }
 
 .wrapper-header h2 {
-  color: hsla(0,0%,100%,.95);
+  color: hsla(0deg,0%,100%,.95);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-medium);
   line-height: 1;
