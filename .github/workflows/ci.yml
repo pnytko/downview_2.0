@@ -59,7 +59,7 @@ jobs:
 
       - name: Validate JavaScript
         run: |
-          npm install -g eslint
+          npm install -g eslint@8.56.0
           echo '{
             "extends": "eslint:recommended",
             "env": {
