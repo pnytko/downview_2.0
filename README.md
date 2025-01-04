@@ -1,6 +1,6 @@
 # 🗺️ DownView - Interactive Tourist Map Application
 
-[![Continuous Deployment](https://github.com/pnytko/downview_2.0/actions/workflows/main.yml/badge.svg)](https://github.com/pnytko/downview_2.0/actions/workflows/main.yml)
+[![Continuous Deployment](https://github.com/pnytko/downview_2.0/actions/workflows/pages.yml/badge.svg)](https://github.com/pnytko/downview_2.0/actions/workflows/pages.yml)
 
 🌐 **[Live Demo](https://pnytko.pl/downview-2/)** - Always up to date thanks to Continuous Deployment!
 
