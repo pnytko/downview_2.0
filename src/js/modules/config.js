@@ -8,20 +8,7 @@ export const MAP_CONFIG = {
     startZoom: 18,
     
     // Współrzędne startowe
-    startCoords: [20.9884, 50.01225],
-    
-    // Konfiguracja warstw WMS
-    WMS: {
-        url: 'https://mapy.geoportal.gov.pl/wss/service/pub/guest/G2_GO_WMS/MapServer/WMSServer',
-        version: '1.3.0',
-        format: 'image/png',
-        transparent: true,
-        layers: {
-            RASTER: 'Raster',
-            DEM: 'DEM',
-            ORTOFOTO: 'Ortofotomapa'
-        }
-    }
+    startCoords: [20.9884, 50.01225]
 };
 
 /**

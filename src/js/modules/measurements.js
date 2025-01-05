@@ -30,7 +30,8 @@ export function initMeasurements(map) {
                 })
             })
         }),
-        zIndex: 8
+        zIndex: 8,
+        name: 'measure'
     });
     map.addLayer(measureVector);
     return measureVector;
