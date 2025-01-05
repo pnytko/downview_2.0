@@ -16,211 +16,33 @@ import {
     campLayer,
     bikeLayer
 } from './modules/layers.js';
+import {
+    makeDraggable,
+    displayWrapperAbout,
+    closeWrapperAbout,
+    closeWrapperTrails,
+    displayWrapperMarker,
+    closeWrapperMarker,
+    displayWrapperWeather,
+    closeWrapperWeather,
+    initModals
+} from './modules/modal.js';
 
-let selectedMarker = null;
-let markerActive = false;
-let clickListener = null;
+// Zmienne globalne
 let map;
-
-// Mobile menu toggle
-document.addEventListener('DOMContentLoaded', function() {
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    const mapContainer = document.getElementById('map');
-
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-            menuToggle.style.display = 'none';
-        });
-
-        mapContainer.addEventListener('click', function() {
-            if (sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                menuToggle.style.display = 'flex';
-            }
-        });
-    }
-});
+let markerCounter = 1;
+let markerActive = false;
+let weatherActive = false;
+let measurementActive = false;  // Dodana zmienna dla stanu pomiaru
+let clickListener = null;
 
 // ========== OBSŁUGA OKIEN MODALNYCH ==========
-window.DisplayWrapperAbout = function() {
-    const modal = document.getElementById('wrapper-about');
-    modal.style.display = 'block'
-}
-
-window.CloseWrapperAbout = function() {
-    const modal = document.getElementById('wrapper-about');
-    modal.style.display = 'none'
-}
-
-// Funkcja do obsługi przeciągania okien modalnych
-function makeDraggable(modal) {
-    const header = modal.querySelector('.modal-header, .wrapper-header');
-    let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
-
-    function dragStart(e) {
-        if ((e.target.closest('.modal-header') || e.target.closest('.wrapper-header')) && 
-            !e.target.closest('.btn-close') && !e.target.closest('.close')) {
-            isDragging = true;
-            
-            const transform = window.getComputedStyle(modal).transform;
-            const matrix = new DOMMatrix(transform);
-            xOffset = matrix.m41;
-            yOffset = matrix.m42;
-            
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-            
-            modal.style.cursor = 'grabbing';
-            header.style.cursor = 'grabbing';
-        }
-    }
-
-    function drag(e) {
-        if (isDragging) {
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-
-            xOffset = currentX;
-            yOffset = currentY;
-
-            setTranslate(currentX, currentY, modal);
-        }
-    }
-
-    function dragEnd(e) {
-        if (isDragging) {
-            isDragging = false;
-            modal.style.cursor = '';
-            header.style.cursor = 'move';
-        }
-    }
-
-    function setTranslate(xPos, yPos, el) {
-        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
-    }
-
-    modal.addEventListener('mousedown', dragStart, false);
-    document.addEventListener('mousemove', drag, false);
-    document.addEventListener('mouseup', dragEnd, false);
-}
-
-// Inicjalizacja przeciągania dla wszystkich okien modalnych
-document.addEventListener('DOMContentLoaded', () => {
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => makeDraggable(modal));
-});
-
-// Zmienne globalne dla pogody
-let weatherActive = false;
-
-// Funkcja do pobierania danych pogodowych
-async function getWeatherData(coordinates) {
-    const [lon, lat] = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,cloudcover,windspeed_10m`;
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.current;
-    } catch (error) {
-        return null;
-    }
-}
-
-// Funkcja wyświetlająca okno pogodowe
-async function DisplayWrapperWeather(coordinates) {
-    const weatherData = await getWeatherData(coordinates);
-    if (!weatherData) {
-        return;
-    }
-
-    // Pokaż okno modalne
-    const wrapper = document.getElementById('wrapper-weather');
-    if (wrapper) {
-        const weatherInfo = wrapper.querySelector('#weather-info');
-        if (weatherInfo) {
-            weatherInfo.innerHTML = `
-                <p><i class="fas fa-thermometer-half"></i> <strong>Temperatura:</strong> ${weatherData.temperature_2m}°C</p>
-                <p><i class="fas fa-cloud-rain"></i> <strong>Opady:</strong> ${weatherData.precipitation} mm</p>
-                <p><i class="fas fa-cloud"></i> <strong>Zachmurzenie:</strong> ${weatherData.cloudcover}%</p>
-                <p><i class="fas fa-wind"></i> <strong>Prędkość wiatru:</strong> ${weatherData.windspeed_10m} km/h</p>
-            `;
-        }
-        wrapper.style.display = 'block';
-    }
-}
-
-// Funkcja zamykająca okno pogodowe
-window.CloseWrapperWeather = function() {
-    const wrapper = document.getElementById('wrapper-weather');
-    if (wrapper) {
-        wrapper.style.display = 'none';
-    }
-};
-
-// Funkcja obsługująca kliknięcie na mapę dla pogody
-async function handleWeatherClick(evt) {
-    if (!weatherActive) return;
-    
-    evt.preventDefault();
-    
-    await DisplayWrapperWeather(evt.coordinate);
-    
-    // Dezaktywuj narzędzie po użyciu
-    weatherActive = false;
-    const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-    if (button) {
-        button.classList.remove('active');
-    }
-    map.getViewport().style.cursor = 'default';
-}
-
-// Funkcja przełączająca narzędzie pogody
-window.ToggleLayersWMS_Weather = function() {
-    // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (weatherActive) {
-        weatherActive = false;
-        map.getViewport().style.cursor = 'default';
-        const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-        if (button) {
-            button.classList.remove('active');
-        }
-        CloseWrapperWeather();
-        return;
-    }
-
-    // Aktywuj narzędzie
-    weatherActive = true;
-    map.getViewport().style.cursor = 'crosshair';
-    const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-    if (button) {
-        button.classList.add('active');
-    }
-};
-
-// Funkcja do przełączania warstw
-function toggleLayer(layer, checkboxId) {
-    const checkbox = document.getElementById(checkboxId);
-    layer.setVisible(checkbox.checked);
-}
-
-// Funkcja do przełączania pojedynczego szlaku
-function toggleTrail(color) {
-    const layer = trailLayers[color.toLowerCase()];
-    if (layer) {
-        const checkbox = document.getElementById(`trail-${color.toLowerCase()}`);
-        layer.setVisible(checkbox.checked);
-    }
-}
+window.DisplayWrapperAbout = displayWrapperAbout;
+window.CloseWrapperAbout = closeWrapperAbout;
+window.CloseWrapperTrails = closeWrapperTrails;
+window.DisplayWrapperMarker = displayWrapperMarker;
+window.CloseWrapperMarker = closeWrapperMarker;
+window.CloseWrapperWeather = closeWrapperWeather;
 
 // Map Initialization
 document.addEventListener('DOMContentLoaded', async function() {
@@ -260,12 +82,24 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Inicjalizacja kontrolek i pomiarów
         initControls(map);
         initMeasurements(map);
+        initModals();
 
         // Funkcje globalne dla pomiarów
-        window.MeasureLength = () => measureLength(map);
-        window.MeasureArea = () => measureArea(map);
-        window.ClearMeasure = () => clearMeasurements(map);
-        window.ToggleLayersWMS_Wektory = () => {
+        window.MeasureLength = () => {
+            measurementActive = true;
+            measureLength(map);
+        };
+        window.MeasureArea = () => {
+            measurementActive = true;
+            measureArea(map);
+        };
+        window.ClearMeasure = () => {
+            measurementActive = false;
+            clearMeasurements(map);
+        };
+
+        // ========== PRZEŁĄCZANIE WARSTW ==========
+        window.ToggleLayersWMS_Wektory = function() {
             const checkbox = document.getElementById('vector');
             const isChecked = checkbox.checked;
             
@@ -283,33 +117,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         };
 
-        // Zmiana kursora przy najechaniu na punkt
-        map.on('pointermove', function(e) {
-            const pixel = map.getEventPixel(e.originalEvent);
-            const hit = map.hasFeatureAtPixel(pixel);
-            const feature = map.forEachFeatureAtPixel(pixel, function(feature) {
-                return feature;
-            });
-            
-            if (hit && feature && markerSource.getFeatures().includes(feature)) {
-                map.getViewport().style.cursor = 'pointer';
-            } else if (!weatherActive) {
-                map.getViewport().style.cursor = '';
-            }
-        });
-
-        // Dodaj listener kliknięcia do mapy dla pogody
-        map.on('click', handleWeatherClick);
-
-        // ========== ZMIENNE GLOBALNE ==========
-        let draw; // current draw interaction
-        let sketch; // currently drawn feature
-        let measureTooltipElement;
-        let measureTooltip;
-
-        // ========== FUNKCJE POMIAROWE ==========
-
-        // ========== PRZEŁĄCZANIE WARSTW ==========
         // Mapowanie nazw warstw do obiektów warstw
         window.ToggleLayersWMS_Osm = function() {
             toggleLayer(osmLayer, 'osm');
@@ -336,35 +143,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Specjalna obsługa dla szlaków
         window.ToggleLayersWMS_Szlaki = function() {
             const checkbox = document.getElementById('szlaki');
-            const isChecked = checkbox.checked;
-            const modal = document.getElementById('wrapper-trails');
-            const trailColors = ['red', 'blue', 'green', 'yellow', 'black'];
-            
-            if (isChecked) {
-                modal.style.display = 'block';
-                trailColors.forEach(color => {
-                    trailLayers[color]?.setVisible(true);
-                    document.getElementById(`trail-${color}`).checked = true;
+            if (checkbox.checked) {
+                document.getElementById('wrapper-trails').style.display = 'block';
+                // Włącz wszystkie szlaki
+                ['red', 'blue', 'green', 'yellow', 'black'].forEach(color => {
+                    if (trailLayers[color]) {
+                        trailLayers[color].setVisible(true);
+                        document.getElementById(`trail-${color}`).checked = true;
+                    }
                 });
             } else {
-                modal.style.display = 'none';
-                trailColors.forEach(color => {
-                    trailLayers[color]?.setVisible(false);
-                    document.getElementById(`trail-${color}`).checked = false;
-                });
+                closeWrapperTrails();
             }
-        }
-
-        window.CloseWrapperTrails = function() {
-            const modal = document.getElementById('wrapper-trails');
-            modal.style.display = 'none';
-            document.getElementById('szlaki').checked = false;
-            const trailColors = ['red', 'blue', 'green', 'yellow', 'black'];
-            trailColors.forEach(color => {
-                trailLayers[color]?.setVisible(false);
-                document.getElementById(`trail-${color}`).checked = false;
-            });
-        }
+        };
 
         // Uproszczona obsługa pojedynczych szlaków
         window.toggleTrail = toggleTrail;
@@ -374,187 +165,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             };
         });
 
-        // Kontrolki kierunkowe
-        const directionControls = document.createElement('div');
-        directionControls.className = 'direction-controls';
-        directionControls.innerHTML = `
-            <button type="button" class="direction-button" onclick="rotateMap('N')">N</button>
-            <button type="button" class="direction-button" onclick="rotateMap('NE')">NE</button>
-            <button type="button" class="direction-button" onclick="rotateMap('E')">E</button>
-            <button type="button" class="direction-button" onclick="rotateMap('SE')">SE</button>
-            <button type="button" class="direction-button" onclick="rotateMap('S')">S</button>
-            <button type="button" class="direction-button" onclick="rotateMap('SW')">SW</button>
-            <button type="button" class="direction-button" onclick="rotateMap('W')">W</button>
-            <button type="button" class="direction-button" onclick="rotateMap('NW')">NW</button>
-        `;
-
-        const mapContainer = document.querySelector('.map-container');
-        mapContainer.appendChild(directionControls);
-
         // ========== PEŁNY EKRAN ==========
-        function FullScreen() {
-            const element = document.documentElement;
-
-            if (!document.fullscreenElement && !document.mozFullScreenElement &&
-                !document.webkitFullscreenElement && !document.msFullscreenElement) {
-                // Wejście w tryb pełnoekranowy
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                // Wyjście z trybu pełnoekranowego
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        }
-
-        // Upewniamy się, że funkcja jest dostępna globalnie
-        window.FullScreen = FullScreen;
-
-        // Funkcje obsługi znaczników
-        async function DisplayWrapperMarker(marker) {
-            selectedMarker = marker;
-            const coordinates = ol.proj.transform(marker.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
-            
-            // Display initial coordinates
-            document.getElementById('marker-coordinates').innerHTML = 
-                `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
-                 <div>Długość: ${coordinates[0].toFixed(6)}°</div>
-                 <div>Wysokość: Ładowanie...</div>`;
-            document.getElementById('wrapper-marker').style.display = 'block';
-
-            // Fetch elevation data
-            try {
-                const response = await fetch('https://api.open-elevation.com/api/v1/lookup', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        locations: [
-                            {
-                                latitude: coordinates[1],
-                                longitude: coordinates[0]
-                            }
-                        ]
-                    })
+        window.FullScreen = function() {
+            const elem = document.documentElement;
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    alert(`Błąd podczas przechodzenia w tryb pełnoekranowy: ${err.message}`);
                 });
-
-                const data = await response.json();
-                const elevation = data.results[0].elevation;
-
-                // Update the display with elevation data
-                document.getElementById('marker-coordinates').innerHTML = 
-                    `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
-                     <div>Długość: ${coordinates[0].toFixed(6)}°</div>
-                     <div>Wysokość: ${elevation.toFixed(2)} m n.p.m.</div>`;
-            } catch (error) {
-                // Obsługa błędów
-                let message = 'Wystąpił błąd podczas pobierania wysokości: ';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        message += 'Brak uprawnień do geolokalizacji.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        message += 'Informacja o lokalizacji jest niedostępna.';
-                        break;
-                    case error.TIMEOUT:
-                        message += 'Upłynął limit czasu określania lokalizacji.';
-                        break;
-                    default:
-                        message += 'Nieznany błąd.';
-                        break;
-                }
-                document.getElementById('marker-coordinates').innerHTML = 
-                    `<div>Szerokość: ${coordinates[1].toFixed(6)}°</div>
-                     <div>Długość: ${coordinates[0].toFixed(6)}°</div>
-                     <div>Wysokość: Błąd pobierania danych</div>`;
+            } else {
+                document.exitFullscreen();
             }
-        }
+        };
 
-        function CloseWrapperMarker() {
-            document.getElementById('wrapper-marker').style.display = 'none';
-            selectedMarker = null;
-        }
-
-        function DeleteMarker() {
-            if (selectedMarker) {
-                markerSource.removeFeature(selectedMarker);
-                CloseWrapperMarker();
-            }
-        }
-
-        // Dodanie funkcji do globalnego obiektu window
-        window.CloseWrapperMarker = CloseWrapperMarker;
-        window.DeleteMarker = DeleteMarker;
-
-        // Inicjalizacja przeciągania dla okna znacznika
-        const markerModal = document.getElementById('wrapper-marker');
-        const markerHeader = markerModal.querySelector('.modal-header');
-        
-        let isDragging = false;
-        let currentX;
-        let currentY;
-        let initialX;
-        let initialY;
-
-        markerHeader.addEventListener('mousedown', dragStart);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', dragEnd);
-
-        function dragStart(e) {
-            const rect = markerModal.getBoundingClientRect();
-            initialX = e.clientX - rect.left;
-            initialY = e.clientY - rect.top;
-
-            if (e.target === markerHeader) {
-                isDragging = true;
-            }
-        }
-
-        function drag(e) {
-            if (isDragging) {
-                e.preventDefault();
-                
-                const newX = e.clientX - initialX;
-                const newY = e.clientY - initialY;
-
-                markerModal.style.left = `${newX}px`;
-                markerModal.style.top = `${newY}px`;
-                markerModal.style.margin = '0';
-            }
-        }
-
-        function dragEnd(e) {
-            isDragging = false;
-        }
-
-        // Obsługa kliknięcia na znacznik
-        map.on('click', function(evt) {
-            const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
-                return feature;
-            });
-
-            if (feature && markerSource.getFeatures().includes(feature)) {
-                DisplayWrapperMarker(feature);
-            }
-        });
-
-        // Upewnij się, że funkcja jest dostępna globalnie
-        let markerCounter = 0;
+        // ========== OBSŁUGA ZNACZNIKÓW ==========
         window.AddMarker = function() {
             const mapCanvas = map.getTargetElement().querySelector('canvas');
             
@@ -575,6 +198,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return;
             }
 
+            // Wyłącz inne narzędzia
+            if (weatherActive) {
+                const weatherButton = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+                if (weatherButton) {
+                    weatherButton.classList.remove('active');
+                }
+                map.un('click', handleWeatherClick);
+                closeWrapperWeather();
+                weatherActive = false;
+            }
+
             // Aktywuj narzędzie
             markerActive = true;
             if (mapCanvas) {
@@ -584,11 +218,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (button) {
                 button.classList.add('active');
             }
-            
-            if (clickListener) {
-                map.un('click', clickListener);
-            }
 
+            // Dodaj listener kliknięcia
             clickListener = function(evt) {
                 const marker = new ol.Feature({
                     geometry: new ol.geom.Point(evt.coordinate)
@@ -612,134 +243,238 @@ document.addEventListener('DOMContentLoaded', async function() {
                     button.classList.remove('active');
                 }
             };
-
+            
             map.on('click', clickListener);
-        }
+        };
 
-        // Set willReadFrequently for the map's canvas
-        document.addEventListener('DOMContentLoaded', () => {
-          requestAnimationFrame(() => {
-            const mapCanvas = map.getTargetElement().querySelector('canvas');
-            if (mapCanvas) {
-              const newCanvas = document.createElement('canvas');
-              newCanvas.width = mapCanvas.width;
-              newCanvas.height = mapCanvas.height;
-              const ctx = newCanvas.getContext('2d', { willReadFrequently: true });
-              ctx.drawImage(mapCanvas, 0, 0);
-              mapCanvas.parentNode.replaceChild(newCanvas, mapCanvas);
+        window.DeleteMarker = function() {
+            const modal = document.getElementById('wrapper-marker');
+            const coordinates = document.getElementById('marker-coordinates').textContent;
+            const [lon, lat] = coordinates.match(/-?\d+\.\d+/g).map(Number);
+            
+            const features = markerSource.getFeatures();
+            features.forEach(feature => {
+                const coords = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
+                if (Math.abs(coords[0] - lon) < 0.000001 && Math.abs(coords[1] - lat) < 0.000001) {
+                    markerSource.removeFeature(feature);
+                }
+            });
+            
+            modal.style.display = 'none';
+        };
+
+        // Obsługa kliknięcia na znacznik
+        map.on('click', function(evt) {
+            // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
+            if (measurementActive) return;
+            
+            const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+                return feature;
+            });
+            
+            if (feature && feature.getGeometry().getType() === 'Point') {
+                displayWrapperMarker(feature);
             }
-          });
         });
 
-        // Funkcja geolokalizacji
-        function GetUserLocation() {
-            if (!navigator.geolocation) {
-                alert('Geolokalizacja nie jest wspierana przez twoją przeglądarkę');
-                return;
+        // Zmiana kursora po najechaniu na marker
+        map.on('pointermove', function(evt) {
+            const pixel = map.getEventPixel(evt.originalEvent);
+            const hit = map.hasFeatureAtPixel(pixel);
+            const feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+                return feature;
+            });
+            
+            if (hit && feature && feature.getGeometry().getType() === 'Point') {
+                map.getTargetElement().style.cursor = 'pointer';
+            } else {
+                map.getTargetElement().style.cursor = '';
+            }
+        });
+
+        // ========== OBSŁUGA POGODY ==========
+        async function getWeatherData(coordinates) {
+            const [lon, lat] = coordinates;
+            const params = new URLSearchParams({
+                latitude: lat,
+                longitude: lon,
+                hourly: WEATHER_CONFIG.params.hourly.join(','),
+                timezone: WEATHER_CONFIG.params.timezone
+            });
+            
+            const url = `${WEATHER_CONFIG.apiUrl}?${params.toString()}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Błąd podczas pobierania danych pogodowych:', error);
+                return null;
+            }
+        }
+
+        // Funkcja obsługująca kliknięcie na mapę dla pogody
+        async function handleWeatherClick(evt) {
+            if (!weatherActive) return;
+            
+            const coordinates = evt.coordinate;
+            const lonLat = displayWrapperWeather(coordinates);
+            
+            // Pobierz i wyświetl dane pogodowe
+            const weatherData = await getWeatherData(lonLat);
+            const weatherInfo = document.getElementById('weather-info');
+            
+            if (weatherData && weatherData.hourly) {
+                // Pobierz aktualne dane (pierwszy element z tablicy)
+                const currentTemp = weatherData.hourly.temperature_2m[0];
+                const currentPrecip = weatherData.hourly.precipitation[0];
+                const currentCloud = weatherData.hourly.cloudcover[0];
+                const currentWind = weatherData.hourly.windspeed_10m[0];
+                
+                // Wybierz odpowiednie emoji dla temperatury
+                let tempEmoji = '<span class="weather-emoji">🌡️</span>';
+                if (currentTemp <= 0) tempEmoji = '<span class="weather-emoji">❄️</span>';
+                else if (currentTemp >= 25) tempEmoji = '<span class="weather-emoji">🌞</span>';
+
+                // Wybierz emoji dla opadów
+                let precipEmoji = '<span class="weather-emoji">☔</span>';
+                if (currentPrecip === 0) precipEmoji = '<span class="weather-emoji">🌂</span>';
+
+                // Wybierz emoji dla zachmurzenia
+                let cloudEmoji = '<span class="weather-emoji">☁️</span>';
+                if (currentCloud < 25) cloudEmoji = '<span class="weather-emoji">☀️</span>';
+                else if (currentCloud < 50) cloudEmoji = '<span class="weather-emoji">🌤️</span>';
+                else if (currentCloud < 75) cloudEmoji = '<span class="weather-emoji">⛅</span>';
+
+                // Emoji dla wiatru
+                const windEmoji = '<span class="weather-emoji">💨</span>';
+                
+                weatherInfo.innerHTML = `
+                    <p>${tempEmoji} <strong>Temperatura:</strong> ${currentTemp}°C</p>
+                    <p>${precipEmoji} <strong>Opady:</strong> ${currentPrecip} mm</p>
+                    <p>${cloudEmoji} <strong>Zachmurzenie:</strong> ${currentCloud}%</p>
+                    <p>${windEmoji} <strong>Prędkość wiatru:</strong> ${currentWind} km/h</p>
+                `;
+            } else {
+                weatherInfo.innerHTML = '<p><span class="weather-emoji">❌</span> Nie udało się pobrać danych pogodowych.</p>';
             }
 
-            navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    // Konwersja współrzędnych do formatu OpenLayers
-                    const coordinates = ol.proj.fromLonLat([position.coords.longitude, position.coords.latitude]);
-                    
-                    // Animowane przejście do lokalizacji użytkownika
-                    const view = map.getView();
-                    view.animate({
-                        center: coordinates,
-                        zoom: 18,
-                        duration: 1000
-                    });
-
-                    // Tworzenie punktu lokalizacji
-                    const locationFeature = new ol.Feature({
-                        geometry: new ol.geom.Point(coordinates)
-                    });
-
-                    // Styl dla punktu lokalizacji
-                    const locationStyle = new ol.style.Style({
-                        image: new ol.style.Circle({
-                            radius: 8,
-                            fill: new ol.style.Fill({
-                                color: '#4285F4'
-                            }),
-                            stroke: new ol.style.Stroke({
-                                color: '#fff',
-                                width: 2
-                            })
-                        })
-                    });
-
-                    locationFeature.setStyle(locationStyle);
-
-                    // Usunięcie poprzedniego punktu lokalizacji, jeśli istnieje
-                    const locationSource = map.getLayers().getArray().find(layer => 
-                        layer.get('name') === 'userLocation'
-                    );
-                    if (locationSource) {
-                        map.removeLayer(locationSource);
-                    }
-
-                    // Utworzenie nowej warstwy dla punktu lokalizacji
-                    const locationLayer = new ol.layer.Vector({
-                        source: new ol.source.Vector({
-                            features: [locationFeature]
-                        }),
-                        name: 'userLocation',
-                        zIndex: LAYER_ZINDEX.MARKERS + 1
-                    });
-
-                    map.addLayer(locationLayer);
-                },
-                function(error) {
-                    let message = '';
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            message = 'Brak uprawnień do geolokalizacji.\n\n' +
-                                     'Aby zresetować uprawnienia:\n' +
-                                     '1. Kliknij ikonę kłódki obok adresu strony\n' +
-                                     '2. W ustawieniach lokalizacji wybierz "Resetuj uprawnienia"\n' +
-                                     '3. Odśwież stronę i spróbuj ponownie';
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            message = 'Nie można określić twojej lokalizacji';
-                            break;
-                        case error.TIMEOUT:
-                            message = 'Upłynął limit czasu określania lokalizacji';
-                            break;
-                        default:
-                            message = 'Wystąpił nieznany błąd podczas określania lokalizacji';
-                    }
-                    alert(message);
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
+            // Wyłącz narzędzie po użyciu
+            weatherActive = false;
+            const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+            if (button) {
+                button.classList.remove('active');
+            }
+            map.getTargetElement().style.cursor = '';
         }
 
-        // Upewniamy się, że funkcja jest dostępna globalnie
-        window.GetUserLocation = GetUserLocation;
+        // Funkcja przełączająca narzędzie pogody
+        window.ToggleLayersWMS_Weather = function() {
+            const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+            
+            if (weatherActive) {
+                weatherActive = false;
+                map.getTargetElement().style.cursor = '';
+                button.classList.remove('active');
+                map.un('click', handleWeatherClick);
+                closeWrapperWeather();
+            } else {
+                // Wyłącz inne narzędzia
+                if (markerActive) {
+                    const markerButton = document.querySelector('button[onclick="AddMarker()"]');
+                    if (markerButton) {
+                        markerButton.classList.remove('active');
+                    }
+                    if (clickListener) {
+                        map.un('click', clickListener);
+                        clickListener = null;
+                    }
+                    markerActive = false;
+                }
+                
+                weatherActive = true;
+                map.getTargetElement().style.cursor = 'crosshair';
+                button.classList.add('active');
+                map.on('click', handleWeatherClick);
+            }
+        };
+
+        // ========== GEOLOKALIZACJA ==========
+        window.GetUserLocation = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    // Sukces
+                    function(position) {
+                        const coords = ol.proj.fromLonLat([
+                            position.coords.longitude,
+                            position.coords.latitude
+                        ]);
+                        
+                        // Usuń poprzedni marker lokalizacji, jeśli istnieje
+                        const features = markerSource.getFeatures();
+                        features.forEach(feature => {
+                            if (feature.get('type') === 'location') {
+                                markerSource.removeFeature(feature);
+                            }
+                        });
+                        
+                        // Dodaj nowy marker lokalizacji
+                        const locationFeature = new ol.Feature({
+                            geometry: new ol.geom.Point(coords),
+                            type: 'location'
+                        });
+                        
+                        locationFeature.setStyle(
+                            new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: 6,
+                                    fill: new ol.style.Fill({
+                                        color: '#3399CC'
+                                    }),
+                                    stroke: new ol.style.Stroke({
+                                        color: '#fff',
+                                        width: 2
+                                    })
+                                })
+                            })
+                        );
+                        
+                        markerSource.addFeature(locationFeature);
+                        
+                        // Przesuń mapę do lokalizacji użytkownika
+                        map.getView().animate({
+                            center: coords,
+                            zoom: 15
+                        });
+                    },
+                    // Błąd
+                    function() {
+                        alert('Nie udało się uzyskać Twojej lokalizacji');
+                    }
+                );
+            } else {
+                alert('Twoja przeglądarka nie obsługuje geolokalizacji');
+            }
+        };
 
     } catch (error) {
-        // Obsługa błędów
-        let message = 'Wystąpił błąd podczas inicjalizacji mapy: ';
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                message += 'Brak uprawnień do geolokalizacji.';
-                break;
-            case error.POSITION_UNAVAILABLE:
-                message += 'Informacja o lokalizacji jest niedostępna.';
-                break;
-            case error.TIMEOUT:
-                message += 'Przekroczono czas oczekiwania na lokalizację.';
-                break;
-            default:
-                message += 'Nieznany błąd.';
-                break;
-        }
-        alert(message);
+        console.error('Błąd podczas inicjalizacji mapy:', error);
     }
 });
+
+// Funkcja do przełączania warstw
+function toggleLayer(layer, checkboxId) {
+    const checkbox = document.getElementById(checkboxId);
+    if (checkbox) {
+        layer.setVisible(checkbox.checked);
+    }
+}
+
+// Funkcja do przełączania pojedynczego szlaku
+function toggleTrail(color) {
+    const checkbox = document.getElementById(`trail-${color}`);
+    if (checkbox && trailLayers[color]) {
+        trailLayers[color].setVisible(checkbox.checked);
+    }
+}
