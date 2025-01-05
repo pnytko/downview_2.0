@@ -1,51 +1,6 @@
 // Import funkcji pomiarów
 import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
-
-// Globalna funkcja rotacji
-function rotateMap(direction) {
-    if (!map) {
-        return;
-    }
-
-    let rotation = 0;
-    switch (direction) {
-        case 'N':
-            rotation = 0;
-            break;
-        case 'NE':
-            rotation = -Math.PI / 4;
-            break;
-        case 'E':
-            rotation = -Math.PI / 2;
-            break;
-        case 'SE':
-            rotation = -3 * Math.PI / 4;
-            break;
-        case 'S':
-            rotation = Math.PI;
-            break;
-        case 'SW':
-            rotation = 3 * Math.PI / 4;
-            break;
-        case 'W':
-            rotation = Math.PI / 2;
-            break;
-        case 'NW':
-            rotation = Math.PI / 4;
-            break;
-        default:
-            return;
-    }
-    
-    const view = map.getView();
-    view.animate({
-        rotation: rotation,
-        duration: 500
-    });
-}
-
-// Upewniamy się, że funkcja jest globalna
-window.rotateMap = rotateMap;
+import { initControls } from './modules/control.js';
 
 // Constants
 const CONFIG = {
@@ -622,13 +577,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             minZoom: CONFIG.minZoom,
             maxZoom: CONFIG.maxZoom,
         }),
-        controls: [],  // Remove all default controls
+        controls: [],
         interactions: ol.interaction.defaults({
             doubleClickZoom: false
         }).extend([
             new ol.interaction.DragRotateAndZoom()
         ])
     });
+
+    // Inicjalizacja kontrolek mapy
+    initControls(map);
 
     // Inicjalizacja pomiarów
     const measureVector = initMeasurements(map);
