@@ -73,76 +73,45 @@ export function makeDraggable(modal) {
     if (!header) return;
 
     let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
-
-    function getTransformedPosition() {
-        const transform = window.getComputedStyle(modal).transform;
-        if (transform === 'none') return { x: 0, y: 0 };
-        
-        const matrix = new DOMMatrixReadOnly(transform);
-        return {
-            x: matrix.m41,
-            y: matrix.m42
-        };
-    }
+    let startX;
+    let startY;
+    let modalStartX;
+    let modalStartY;
 
     function dragStart(e) {
-        const pos = getTransformedPosition();
-        xOffset = pos.x;
-        yOffset = pos.y;
-        
-        initialX = e.clientX - xOffset;
-        initialY = e.clientY - yOffset;
-
         if (e.target === header || header.contains(e.target)) {
             isDragging = true;
-            modal.style.cursor = 'grabbing';
+            header.style.cursor = 'grabbing';
+
+            const rect = modal.getBoundingClientRect();
+            modalStartX = rect.left;
+            modalStartY = rect.top;
+            startX = e.clientX;
+            startY = e.clientY;
         }
     }
 
     function drag(e) {
         if (isDragging) {
             e.preventDefault();
-            
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
 
-            // Sprawdź granice okna
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-            const modalRect = modal.getBoundingClientRect();
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
 
-            // Ogranicz pozycję modala do granic okna
-            if (currentX < 0) currentX = 0;
-            if (currentY < 0) currentY = 0;
-            if (currentX + modalRect.width > windowWidth) currentX = windowWidth - modalRect.width;
-            if (currentY + modalRect.height > windowHeight) currentY = windowHeight - modalRect.height;
+            const newX = modalStartX + deltaX;
+            const newY = modalStartY + deltaY;
 
-            xOffset = currentX;
-            yOffset = currentY;
-
-            requestAnimationFrame(() => {
-                setTranslate(currentX, currentY, modal);
-            });
+            // Ustaw pozycję bez transform
+            modal.style.left = `${newX}px`;
+            modal.style.top = `${newY}px`;
         }
     }
 
     function dragEnd() {
         if (isDragging) {
-            initialX = currentX;
-            initialY = currentY;
             isDragging = false;
-            modal.style.cursor = '';
+            header.style.cursor = 'grab';
         }
-    }
-
-    function setTranslate(xPos, yPos, el) {
-        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
     }
 
     // Usuń poprzednie event listenery (jeśli istnieją)
@@ -151,11 +120,13 @@ export function makeDraggable(modal) {
     document.removeEventListener('mouseup', dragEnd);
 
     // Dodaj nowe event listenery
-    header.addEventListener('mousedown', dragStart, { passive: false });
-    document.addEventListener('mousemove', drag, { passive: false });
-    document.addEventListener('mouseup', dragEnd, { passive: true });
+    header.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
 
-    // Dodaj style wskazujące, że element można przeciągać
+    // Ustaw podstawowe style
+    modal.style.position = 'absolute';
+    modal.style.transform = 'none';
     header.style.cursor = 'grab';
 }
 

@@ -363,23 +363,15 @@ button i{
 .modal{
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
-  background:linear-gradient(
-    135deg,
-    rgb(45 45 45 / 90%),
-    rgb(25 25 25 / 80%));
+  background:linear-gradient(135deg, rgb(45 45 45 / 90%), rgb(25 25 25 / 80%));
   border:1px solid hsl(0deg 0% 100% / 10%);
   border-radius:var(--radius-lg);
   box-shadow:0 8px 32px 0 rgb(0 0 0 / 40%);
   display:none;
-  left:50%;
   max-height:80vh;
-  max-width:90vw;
   overflow:hidden;
   padding:0;
-  position:fixed;
-  top:50%;
-  transform:translate(-50%, -50%);
-  width:400px;
+  position:absolute;
   z-index:999;
 }
 
@@ -395,13 +387,13 @@ button i{
 }
 
 #wrapper-about{
-  bottom:20px;
-  width:400px;
+  top:20px;
+  width:300px;
 }
 
 #wrapper-about .modal-content{
-  max-height:300px;
-  overflow:auto;
+  max-height:400px;
+  overflow-y:auto;
 }
 
 #wrapper-marker{
@@ -467,9 +459,9 @@ button i{
   }
 
   #wrapper-about{
-    bottom:10px;
     left:10px;
     max-width:400px;
+    top:10px;
     width:calc(100% - 20px);
   }
 }
@@ -478,10 +470,7 @@ button i{
   align-items:center;
   backdrop-filter:blur(4px);
   -webkit-backdrop-filter:blur(4px);
-  background:linear-gradient(
-    135deg,
-    rgb(35 35 35 / 95%),
-    hsl(0deg 0% 8% / 90%));
+  background:linear-gradient(135deg, rgb(35 35 35 / 95%), hsl(0deg 0% 8% / 90%));
   border-bottom:1px solid hsl(0deg 0% 100% / 8%);
   cursor:move;
   display:flex;
@@ -548,10 +537,7 @@ button i{
 }
 
 .modal .checkbox-wrapper{
-  background:linear-gradient(
-    135deg,
-    rgb(45 45 45 / 90%),
-    rgb(35 35 35 / 80%));
+  background:linear-gradient(135deg, rgb(45 45 45 / 90%), rgb(35 35 35 / 80%));
   border:1px solid hsl(0deg 0% 100% / 8%);
   border-radius:var(--radius-sm);
   margin:5px 0;
@@ -559,10 +545,7 @@ button i{
 }
 
 .modal .checkbox-wrapper:hover{
-  background:linear-gradient(
-    135deg,
-    rgb(55 55 55 / 90%),
-    rgb(45 45 45 / 80%));
+  background:linear-gradient(135deg, rgb(55 55 55 / 90%), rgb(45 45 45 / 80%));
 }
 
 .modal-content::-webkit-scrollbar{
