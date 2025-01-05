@@ -1,53 +1,33 @@
 // Import funkcji pomiarów
 import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
 import { initControls } from './modules/control.js';
+import { MAP_CONFIG, LAYER_ZINDEX, STYLES, WEATHER_CONFIG } from './modules/config.js';
 
-// Constants
-const CONFIG = {
-  minZoom: 3,
-  maxZoom: 25,
-  startZoom: 18,
-  startCoords: [20.9884, 50.01225]
-};
-
-// Layer Z-Index Configuration
-const LAYER_ZINDEX = {
-  OSM: 1,
-  ORTO: 2,
-  DEM: 3,
-  PARCELS: 4,
-  TRAILS: 5,
-  VECTOR: 6,
-  MARKERS: 7,
-  MEASURE: 8,
-  WEATHER: 15
-};
-
-// Base Layers
+// Warstwy WMS
 const osmLayer = new ol.layer.Tile({
-  source: new ol.source.OSM(),
-  title: "OSM",
-  visible: true,
-  zIndex: LAYER_ZINDEX.OSM,
+    source: new ol.source.OSM(),
+    title: "OSM",
+    visible: true,
+    zIndex: LAYER_ZINDEX.OSM,
 });
 
 // Funkcja do tworzenia warstwy szlaków
 const createTrailLayer = (layerId) => {
-  return new ol.layer.Tile({
-    source: new ol.source.TileWMS({
-      url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
-      params: {
-        FORMAT: "image/png",
-        TRANSPARENT: true,
-        VERSION: "1.1.1",
-        LAYERS: layerId,
-      },
-      transition: 0
-    }),
-    visible: false,
-    opacity: 0.8,
-    zIndex: LAYER_ZINDEX.TRAILS,
-  });
+    return new ol.layer.Tile({
+        source: new ol.source.TileWMS({
+            url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
+            params: {
+                FORMAT: "image/png",
+                TRANSPARENT: true,
+                VERSION: "1.1.1",
+                LAYERS: layerId,
+            },
+            transition: 0
+        }),
+        visible: false,
+        opacity: 0.8,
+        zIndex: LAYER_ZINDEX.TRAILS,
+    });
 };
 
 // Warstwy WMS dla szlaków
@@ -91,24 +71,13 @@ const parcelLayer = new ol.layer.Tile({
 // Warstwa ortofotomapy
 const ortoLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
-        url: "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution",
+        url: MAP_CONFIG.WMS.url,
         params: {
-            TILED: true,
-            VERSION: "1.3.0",
-            REQUEST: "GetMap",
-            LAYERS: "Raster",
-            FORMAT: "image/jpeg",
-            BUFFER: 0,
-            WIDTH: 256,
-            HEIGHT: 256
-        },
-        tileGrid: new ol.tilegrid.TileGrid({
-            extent: [-20026376.39, -20048966.10, 20026376.39, 20048966.10],
-            resolutions: [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395],
-            tileSize: [256, 256]
-        }),
-        cacheSize: 256,
-        transition: 0
+            'LAYERS': MAP_CONFIG.WMS.layers.ORTOFOTO,
+            'VERSION': MAP_CONFIG.WMS.version,
+            'FORMAT': MAP_CONFIG.WMS.format,
+            'TRANSPARENT': MAP_CONFIG.WMS.transparent
+        }
     }),
     visible: false,
     title: "Ortofotomapa",
@@ -166,7 +135,7 @@ const createCaveLayer = () => {
         const features = feature.get('features');
         if (!features) {
             return new ol.style.Style({
-                image: new ol.style.Icon({ scale: 0.15, src: "./img/cave.png" }),
+                image: new ol.style.Icon({ scale: 0.15, src: "./src/assets/images/cave.png" }),
                 text: new ol.style.Text({
                     text: feature.get("NAZWA"),
                     font: "14px Inter",
@@ -181,7 +150,7 @@ const createCaveLayer = () => {
         if (map && map.getView().getResolution() < 10) {
             const feature = features[0];
             return new ol.style.Style({
-                image: new ol.style.Icon({ scale: 0.15, src: "./img/cave.png" }),
+                image: new ol.style.Icon({ scale: 0.15, src: "./src/assets/images/cave.png" }),
                 text: new ol.style.Text({
                     text: feature.get("NAZWA"),
                     font: "14px Inter",
@@ -296,7 +265,7 @@ const markerSource = new ol.source.Vector();
 const markerStyle = new ol.style.Style({
     image: new ol.style.Icon({
         anchor: [0.5, 1],
-        src: 'img/marker.png'
+        src: './src/assets/images/marker.png'
     }),
     text: new ol.style.Text({
         font: 'bold 12px Inter',
@@ -324,7 +293,7 @@ function createMarkerStyle(number) {
     return new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 1],
-            src: 'img/marker.png'
+            src: './src/assets/images/marker.png'
         }),
         text: new ol.style.Text({
             font: 'bold 12px Inter',
@@ -551,7 +520,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const logoOverlay = document.createElement('div');
     logoOverlay.className = 'logo-overlay';
     const logoImg = document.createElement('img');
-    logoImg.src = 'src/assets/images/img/logo.png';
+    logoImg.src = './src/assets/images/logo.png';
     logoImg.alt = 'Logo';
     logoOverlay.appendChild(logoImg);
     document.querySelector('.grid-container').appendChild(logoOverlay);
@@ -572,10 +541,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             markerLayer
         ],
         view: new ol.View({
-            center: ol.proj.fromLonLat(CONFIG.startCoords),
-            zoom: CONFIG.startZoom,
-            minZoom: CONFIG.minZoom,
-            maxZoom: CONFIG.maxZoom,
+            center: ol.proj.fromLonLat(MAP_CONFIG.startCoords),
+            zoom: MAP_CONFIG.startZoom,
+            minZoom: MAP_CONFIG.minZoom,
+            maxZoom: MAP_CONFIG.maxZoom,
         }),
         controls: [],
         interactions: ol.interaction.defaults({
