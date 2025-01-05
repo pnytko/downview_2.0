@@ -1,45 +1,39 @@
-// Zmienne globalne dla pomiarów
+// Stan pomiarów w domknięciu
 let measureTooltipElement;
 let measureTooltip;
 let draw;
 let sketch;
+let measureSource;
+let measureVector;
 
-// Funkcja pomiaru długości
-export function measureLength(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
-    }
-    addInteraction('LineString', map);
-}
-
-// Funkcja pomiaru powierzchni
-export function measureArea(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
-    }
-    addInteraction('Polygon', map);
-}
-
-// Funkcja czyszcząca pomiary
-export function clearMeasure(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
-    }
-    // Usuń wszystkie tooltips
-    let elements = document.getElementsByClassName('ol-tooltip');
-    while (elements[0]) {
-        elements[0].parentNode.removeChild(elements[0]);
-    }
-    // Resetuj zmienne tooltipów
-    measureTooltipElement = null;
-    measureTooltip = null;
-    // Wyczyść źródło wektora
-    if (window.measureSource) {
-        window.measureSource.clear();
-    }
+// Inicjalizacja warstwy pomiarowej
+export function initMeasurements(map) {
+    measureSource = new ol.source.Vector();
+    measureVector = new ol.layer.Vector({
+        source: measureSource,
+        style: new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 0, 0, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ff0000',
+                lineDash: [10, 10],
+                width: 2
+            }),
+            image: new ol.style.Circle({
+                radius: 5,
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000'
+                }),
+                fill: new ol.style.Fill({
+                    color: '#ff0000'
+                })
+            })
+        }),
+        zIndex: 8
+    });
+    map.addLayer(measureVector);
+    return measureVector;
 }
 
 // Tworzenie tooltipa dla pomiarów
@@ -59,12 +53,32 @@ function createMeasureTooltip(map) {
     map.addOverlay(measureTooltip);
 }
 
+// Formatowanie długości
+function formatLength(line) {
+    const length = ol.sphere.getLength(line);
+    if (length > 100) {
+        return (Math.round(length / 1000 * 100) / 100) + ' km';
+    }
+    return (Math.round(length * 100) / 100) + ' m';
+}
+
+// Formatowanie powierzchni
+function formatArea(polygon) {
+    const area = ol.sphere.getArea(polygon);
+    if (area >= 1000000) {
+        return (Math.round(area / 1000000 * 100) / 100) + ' km²';
+    } else if (area >= 10000) {
+        return (Math.round(area / 10000 * 100) / 100) + ' ha';
+    }
+    return (Math.round(area * 100) / 100) + ' m²';
+}
+
 // Dodawanie interakcji pomiarowej
 function addInteraction(type, map) {
     createMeasureTooltip(map);
     
     draw = new ol.interaction.Draw({
-        source: window.measureSource,
+        source: measureSource,
         type: type,
         style: new ol.style.Style({
             fill: new ol.style.Fill({
@@ -90,11 +104,11 @@ function addInteraction(type, map) {
     map.addInteraction(draw);
 
     let listener;
-    draw.on('drawstart', function(evt) {
+    draw.on('drawstart', (evt) => {
         sketch = evt.feature;
         let tooltipCoord = evt.coordinate;
 
-        listener = sketch.getGeometry().on('change', function(evt) {
+        listener = sketch.getGeometry().on('change', (evt) => {
             const geom = evt.target;
             let output;
             if (geom instanceof ol.geom.Polygon) {
@@ -109,7 +123,7 @@ function addInteraction(type, map) {
         });
     });
 
-    draw.on('drawend', function() {
+    draw.on('drawend', () => {
         measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
         measureTooltip.setOffset([0, -7]);
         sketch = null;
@@ -121,28 +135,53 @@ function addInteraction(type, map) {
     });
 }
 
-// Formatowanie długości
-function formatLength(line) {
-    const length = ol.sphere.getLength(line);
-    let output;
-    if (length > 100) {
-        output = (Math.round(length / 1000 * 100) / 100) + ' km';
-    } else {
-        output = (Math.round(length * 100) / 100) + ' m';
+// Publiczne API
+export function measureLength(map) {
+    if (draw) {
+        map.removeInteraction(draw);
+        draw = null;
     }
-    return output;
+    addInteraction('LineString', map);
 }
 
-// Formatowanie powierzchni
-function formatArea(polygon) {
-    const area = ol.sphere.getArea(polygon);
-    let output;
-    if (area >= 1000000) {  // 1 km² = 1,000,000 m²
-        output = (Math.round(area / 1000000 * 100) / 100) + ' km²';
-    } else if (area >= 10000) {  // 1 ha = 10,000 m²
-        output = (Math.round(area / 10000 * 100) / 100) + ' ha';
-    } else {
-        output = (Math.round(area * 100) / 100) + ' m²';
+export function measureArea(map) {
+    if (draw) {
+        map.removeInteraction(draw);
+        draw = null;
     }
-    return output;
+    addInteraction('Polygon', map);
+}
+
+export function clearMeasurements(map) {
+    if (draw) {
+        map.removeInteraction(draw);
+        draw = null;
+    }
+    
+    // Usuń wszystkie tooltips
+    let elements = document.getElementsByClassName('ol-tooltip');
+    while (elements[0]) {
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+    
+    // Resetuj zmienne tooltipów
+    measureTooltipElement = null;
+    measureTooltip = null;
+    
+    // Wyczyść źródło wektora
+    if (measureSource) {
+        measureSource.clear();
+    }
+}
+
+export function setMeasurementsVisible(visible) {
+    if (measureVector) {
+        measureVector.setVisible(visible);
+        
+        // Obsługa tooltipów
+        const tooltips = document.getElementsByClassName('ol-tooltip');
+        for (let tooltip of tooltips) {
+            tooltip.style.display = visible ? 'block' : 'none';
+        }
+    }
 }

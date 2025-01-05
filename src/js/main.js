@@ -1,5 +1,5 @@
-// Import funkcji pomiarowych
-import { measureLength, measureArea, clearMeasure } from './modules/measurements.js';
+// Import funkcji pomiarów
+import { initMeasurements, measureLength, measureArea, clearMeasurements, setMeasurementsVisible } from './modules/measurements.js';
 
 // Globalna funkcja rotacji
 function rotateMap(direction) {
@@ -333,30 +333,7 @@ const bikeLayer = new ol.layer.Tile({
 });
 
 // Źródło dla pomiarów
-window.measureSource = new ol.source.Vector();
-const measureVector = new ol.layer.Vector({
-    source: window.measureSource,
-    style: new ol.style.Style({
-        fill: new ol.style.Fill({
-            color: 'rgba(255, 0, 0, 0.2)'
-        }),
-        stroke: new ol.style.Stroke({
-            color: '#ff0000',
-            lineDash: [10, 10],
-            width: 2
-        }),
-        image: new ol.style.Circle({
-            radius: 5,
-            stroke: new ol.style.Stroke({
-                color: '#ff0000'
-            }),
-            fill: new ol.style.Fill({
-                color: '#ff0000'
-            })
-        })
-    }),
-    zIndex: LAYER_ZINDEX.MEASURE
-});
+let measureVector;
 
 // Warstwa dla znaczników
 let markerCounter = 0;
@@ -631,7 +608,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const logoOverlay = document.createElement('div');
     logoOverlay.className = 'logo-overlay';
     const logoImg = document.createElement('img');
-    logoImg.src = 'img/logo.png';
+    logoImg.src = 'src/assets/images/img/logo.png';
     logoImg.alt = 'Logo';
     logoOverlay.appendChild(logoImg);
     document.querySelector('.grid-container').appendChild(logoOverlay);
@@ -649,8 +626,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             campLayer,
             kayakLayer,
             bikeLayer,
-            markerLayer,
-            measureVector
+            markerLayer
         ],
         view: new ol.View({
             center: ol.proj.fromLonLat(CONFIG.startCoords),
@@ -666,6 +642,35 @@ document.addEventListener('DOMContentLoaded', async function() {
         ])
     });
 
+    // Inicjalizacja pomiarów
+    measureVector = initMeasurements(map);
+
+    // Funkcje globalne dla pomiarów
+    window.MeasureLength = () => measureLength(map);
+    window.MeasureArea = () => measureArea(map);
+    window.ClearMeasure = () => clearMeasurements(map);
+    window.ToggleLayersWMS_Wektory = () => {
+        const checkbox = document.getElementById('vector');
+        if (!checkbox) return;
+        
+        const isChecked = checkbox.checked;
+        
+        // Przełącz widoczność warstw wektorowych
+        markerLayer.setVisible(isChecked);
+        measureVector.setVisible(isChecked);
+        
+        // Obsługa tooltipów
+        const tooltips = document.getElementsByClassName('ol-tooltip');
+        for (let tooltip of tooltips) {
+            tooltip.style.display = isChecked ? 'block' : 'none';
+        }
+    };
+
+    // Funkcje globalne dla pomiarów
+    // window.MeasureLength = () => measurementManager.measureLength();
+    // window.MeasureArea = () => measurementManager.measureArea();
+    // window.ClearMeasure = () => measurementManager.clearMeasurements();
+
     // Dodaj warstwę pomiarową po inicjalizacji mapy
     // const measureLayer = initMeasureLayer();
     // map.addLayer(measureLayer);
@@ -680,7 +685,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         if (hit && feature && markerSource.getFeatures().includes(feature)) {
             map.getViewport().style.cursor = 'pointer';
-        } else if (!weatherActive && !markerActive) {
+        } else if (!weatherActive) {
             map.getViewport().style.cursor = '';
         }
     });
@@ -702,17 +707,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     let selectedMarker = null; // selected marker reference
 
     // ========== FUNKCJE POMIAROWE ==========
-    window.MeasureLength = function() {
-        measureLength(map);
-    }
+    // window.MeasureLength = function() {
+    //     measureLength(map);
+    // }
 
-    window.MeasureArea = function() {
-        measureArea(map);
-    }
+    // window.MeasureArea = function() {
+    //     measureArea(map);
+    // }
 
-    window.ClearMeasure = function() {
-        clearMeasure(map);
-    }
+    // window.ClearMeasure = function() {
+    //     clearMeasure(map);
+    // }
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     // Funkcja do przełączania pojedynczej warstwy
@@ -745,20 +750,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     // Specjalna obsługa dla warstw wektorowych
-    window.ToggleLayersWMS_Wektory = function() {
-        const checkbox = document.getElementById('vector');
-        const isChecked = checkbox.checked;
+    // window.ToggleLayersWMS_Wektory = function() {
+    //     const checkbox = document.getElementById('vector');
+    //     const isChecked = checkbox.checked;
         
-        // Przełącz widoczność warstw wektorowych
-        markerLayer.setVisible(isChecked);
-        measureVector.setVisible(isChecked);
+    //     // Przełącz widoczność warstw wektorowych
+    //     markerLayer.setVisible(isChecked);
+    //     measurementManager.setVisible(isChecked);
         
-        // Obsługa tooltipów
-        const tooltips = document.getElementsByClassName('ol-tooltip');
-        for (let tooltip of tooltips) {
-            tooltip.style.display = isChecked ? 'block' : 'none';
-        }
-    }
+    //     // Obsługa tooltipów
+    //     const tooltips = document.getElementsByClassName('ol-tooltip');
+    //     for (let tooltip of tooltips) {
+    //         tooltip.style.display = isChecked ? 'block' : 'none';
+    //     }
+    // }
 
     // Specjalna obsługa dla szlaków
     window.ToggleLayersWMS_Szlaki = function() {
