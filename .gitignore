@@ -4,6 +4,7 @@ package-lock.json
 
 # Project specific
 check_wms.py
+workflow.txt
 
 # IDE - VS Code
 .vscode/
