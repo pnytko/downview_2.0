@@ -1,3 +1,6 @@
+// Import funkcji pomiarowych
+import { measureLength, measureArea, clearMeasure } from './src/measurements.js';
+
 // Globalna funkcja rotacji
 function rotateMap(direction) {
     if (!map) {
@@ -329,20 +332,24 @@ const bikeLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.VECTOR
 });
 
-// Warstwa dla pomiarów
-const measureSource = new ol.source.Vector();
+// Źródło dla pomiarów
+window.measureSource = new ol.source.Vector();
 const measureVector = new ol.layer.Vector({
-    source: measureSource,
+    source: window.measureSource,
     style: new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 0, 0, 0.2)'
         }),
         stroke: new ol.style.Stroke({
             color: '#ff0000',
+            lineDash: [10, 10],
             width: 2
         }),
         image: new ol.style.Circle({
-            radius: 7,
+            radius: 5,
+            stroke: new ol.style.Stroke({
+                color: '#ff0000'
+            }),
             fill: new ol.style.Fill({
                 color: '#ff0000'
             })
@@ -638,12 +645,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             ortoLayer,
             parcelLayer,
             demLayer,
-            measureVector,
-            markerLayer,
             caveLayer,
             campLayer,
             kayakLayer,
             bikeLayer,
+            markerLayer,
+            measureVector
         ],
         view: new ol.View({
             center: ol.proj.fromLonLat(CONFIG.startCoords),
@@ -658,6 +665,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             new ol.interaction.DragRotateAndZoom()
         ])
     });
+
+    // Dodaj warstwę pomiarową po inicjalizacji mapy
+    // const measureLayer = initMeasureLayer();
+    // map.addLayer(measureLayer);
 
     // Zmiana kursora przy najechaniu na punkt
     map.on('pointermove', function(e) {
@@ -718,7 +729,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         measureTooltipElement = null;
         measureTooltip = null;
         // Wyczyść źródło wektora
-        measureSource.clear();
+        window.measureSource.clear();
     }
 
     function createMeasureTooltip() {
@@ -742,7 +753,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         createMeasureTooltip();
         
         draw = new ol.interaction.Draw({
-            source: measureSource,
+            source: window.measureSource,
             type: type,
             style: new ol.style.Style({
                 fill: new ol.style.Fill({
@@ -824,9 +835,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     // Dodajemy funkcje do globalnego obiektu window
-    window.MeasureLength = MeasureLength;
-    window.MeasureArea = MeasureArea;
-    window.ClearMeasure = ClearMeasure;
+    window.MeasureLength = () => measureLength(map);
+    window.MeasureArea = () => measureArea(map);
+    window.ClearMeasure = () => clearMeasure(map);
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     // Funkcja do przełączania pojedynczej warstwy
@@ -861,16 +872,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Specjalna obsługa dla warstw wektorowych
     window.ToggleLayersWMS_Wektory = function() {
         const checkbox = document.getElementById('vector');
-        const isVisible = checkbox.checked;
+        const isChecked = checkbox.checked;
         
         // Przełącz widoczność warstw wektorowych
-        markerLayer.setVisible(isVisible);
-        measureVector.setVisible(isVisible);
+        markerLayer.setVisible(isChecked);
+        measureVector.setVisible(isChecked);
         
         // Obsługa tooltipów
         const tooltips = document.getElementsByClassName('ol-tooltip');
         for (let tooltip of tooltips) {
-            tooltip.style.display = isVisible ? 'block' : 'none';
+            tooltip.style.display = isChecked ? 'block' : 'none';
         }
     }
 
