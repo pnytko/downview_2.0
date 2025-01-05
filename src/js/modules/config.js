@@ -27,6 +27,17 @@ export const LAYER_ZINDEX = {
 };
 
 /**
+ * Konfiguracja API pogodowego
+ */
+export const WEATHER_CONFIG = {
+    apiUrl: 'https://api.open-meteo.com/v1/forecast',
+    params: {
+        hourly: ['temperature_2m', 'precipitation', 'cloudcover', 'windspeed_10m'],
+        timezone: 'Europe/Warsaw'
+    }
+};
+
+/**
  * Konfiguracja stylów
  */
 export const STYLES = {
@@ -51,17 +62,6 @@ export const STYLES = {
             color: '#fff',
             width: 2
         }
-    }
-};
-
-/**
- * Konfiguracja API pogodowego
- */
-export const WEATHER_CONFIG = {
-    apiUrl: 'https://api.open-meteo.com/v1/forecast',
-    params: {
-        hourly: ['temperature_2m', 'precipitation', 'cloudcover', 'windspeed_10m'],
-        timezone: 'Europe/Warsaw'
     }
 };
 

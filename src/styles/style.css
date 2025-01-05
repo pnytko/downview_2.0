@@ -733,3 +733,31 @@ button i{
 .close:hover {
   opacity: 100%;
 }
+
+#wrapper-weather {
+    position: absolute;
+    width: 300px;
+    z-index: 1000;
+    left: 50%;
+    top: 20px;
+    transform: translate(-50%, 0);
+}
+
+#wrapper-weather.dragging {
+    transform: none;
+}
+
+#weather-info {
+    padding: var(--spacing-md);
+}
+
+#weather-info p {
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.weather-emoji {
+    font-size: 1.5em;
+}

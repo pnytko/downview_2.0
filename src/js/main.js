@@ -372,10 +372,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Funkcja przełączająca narzędzie pogody
         window.ToggleLayersWMS_Weather = function() {
             const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
+            const mapCanvas = map.getTargetElement().querySelector('canvas');
             
             if (weatherActive) {
                 weatherActive = false;
-                map.getTargetElement().style.cursor = '';
+                if (mapCanvas) {
+                    mapCanvas.style.cursor = '';
+                }
                 button.classList.remove('active');
                 map.un('click', handleWeatherClick);
                 closeWrapperWeather();
@@ -394,7 +397,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
                 
                 weatherActive = true;
-                map.getTargetElement().style.cursor = 'crosshair';
+                if (mapCanvas) {
+                    mapCanvas.style.cursor = 'crosshair';
+                }
                 button.classList.add('active');
                 map.on('click', handleWeatherClick);
             }
