@@ -396,19 +396,17 @@ button i{
   overflow-y:auto;
 }
 
-#wrapper-marker{
-  left:50%;
-  margin-left:-150px;
-  margin-top:-100px;
-  position:absolute;
-  top:50%;
-  user-select:none;
-  width:300px;
-  z-index:1000;
+#wrapper-marker {
+    position: absolute;
+    width: 300px;
+    z-index: 1000;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
-#wrapper-marker .modal-header{
-  cursor:move;
+#wrapper-marker.dragging {
+    transform: none;
 }
 
 .marker-info{

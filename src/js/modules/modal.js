@@ -83,6 +83,9 @@ export function makeDraggable(modal) {
             isDragging = true;
             header.style.cursor = 'grabbing';
 
+            // Dodaj klasę dragging przy rozpoczęciu przeciągania
+            modal.classList.add('dragging');
+
             const rect = modal.getBoundingClientRect();
             modalStartX = rect.left;
             modalStartY = rect.top;
@@ -101,7 +104,6 @@ export function makeDraggable(modal) {
             const newX = modalStartX + deltaX;
             const newY = modalStartY + deltaY;
 
-            // Ustaw pozycję bez transform
             modal.style.left = `${newX}px`;
             modal.style.top = `${newY}px`;
         }
@@ -111,6 +113,9 @@ export function makeDraggable(modal) {
         if (isDragging) {
             isDragging = false;
             header.style.cursor = 'grab';
+            
+            // Usuń klasę dragging po zakończeniu przeciągania
+            modal.classList.remove('dragging');
         }
     }
 
