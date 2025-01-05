@@ -1,5 +1,5 @@
 // Import funkcji pomiarowych
-import { measureLength, measureArea, clearMeasure } from './src/measurements.js';
+import { measureLength, measureArea, clearMeasure } from './measurements.js';
 
 // Globalna funkcja rotacji
 function rotateMap(direction) {
