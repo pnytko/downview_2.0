@@ -1,5 +1,5 @@
 // Import funkcji pomiarów
-import { initMeasurements, measureLength, measureArea, clearMeasurements, setMeasurementsVisible } from './modules/measurements.js';
+import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
 
 // Globalna funkcja rotacji
 function rotateMap(direction) {
@@ -512,21 +512,16 @@ async function getWeatherData(coordinates) {
         const data = await response.json();
         return data.current;
     } catch (error) {
-        console.error('Błąd podczas pobierania danych pogodowych:', error);
         return null;
     }
 }
 
 // Funkcja wyświetlająca okno pogodowe
 async function DisplayWrapperWeather(coordinates) {
-    console.log('Próba wyświetlenia okna pogodowego');
     const weatherData = await getWeatherData(coordinates);
     if (!weatherData) {
-        console.error('Nie udało się pobrać danych pogodowych');
         return;
     }
-
-    console.log('Pobrane dane pogodowe:', weatherData);
 
     // Pokaż okno modalne
     const wrapper = document.getElementById('wrapper-weather');
@@ -541,7 +536,6 @@ async function DisplayWrapperWeather(coordinates) {
             `;
         }
         wrapper.style.display = 'block';
-        console.log('Okno pogodowe zostało wyświetlone');
     }
 }
 
@@ -550,13 +544,11 @@ window.CloseWrapperWeather = function() {
     const wrapper = document.getElementById('wrapper-weather');
     if (wrapper) {
         wrapper.style.display = 'none';
-        console.log('Okno pogodowe zostało zamknięte');
     }
 };
 
 // Funkcja obsługująca kliknięcie na mapę dla pogody
 async function handleWeatherClick(evt) {
-    console.log('Kliknięcie na mapę', weatherActive);
     if (!weatherActive) return;
     
     evt.preventDefault();
@@ -574,8 +566,6 @@ async function handleWeatherClick(evt) {
 
 // Funkcja przełączająca narzędzie pogody
 window.ToggleLayersWMS_Weather = function() {
-    console.log('Przełączanie narzędzia pogody, obecny stan:', weatherActive);
-    
     // Jeśli narzędzie jest już aktywne, wyłącz je
     if (weatherActive) {
         weatherActive = false;
@@ -585,7 +575,6 @@ window.ToggleLayersWMS_Weather = function() {
             button.classList.remove('active');
         }
         CloseWrapperWeather();
-        console.log('Narzędzie pogody zostało wyłączone');
         return;
     }
 
@@ -596,7 +585,6 @@ window.ToggleLayersWMS_Weather = function() {
     if (button) {
         button.classList.add('active');
     }
-    console.log('Narzędzie pogody zostało aktywowane');
 };
 
 // Map Initialization
@@ -643,7 +631,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Inicjalizacja pomiarów
-    measureVector = initMeasurements(map);
+    const measureVector = initMeasurements(map);
 
     // Funkcje globalne dla pomiarów
     window.MeasureLength = () => measureLength(map);
@@ -665,15 +653,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             tooltip.style.display = isChecked ? 'block' : 'none';
         }
     };
-
-    // Funkcje globalne dla pomiarów
-    // window.MeasureLength = () => measurementManager.measureLength();
-    // window.MeasureArea = () => measurementManager.measureArea();
-    // window.ClearMeasure = () => measurementManager.clearMeasurements();
-
-    // Dodaj warstwę pomiarową po inicjalizacji mapy
-    // const measureLayer = initMeasureLayer();
-    // map.addLayer(measureLayer);
 
     // Zmiana kursora przy najechaniu na punkt
     map.on('pointermove', function(e) {
@@ -707,17 +686,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     let selectedMarker = null; // selected marker reference
 
     // ========== FUNKCJE POMIAROWE ==========
-    // window.MeasureLength = function() {
-    //     measureLength(map);
-    // }
-
-    // window.MeasureArea = function() {
-    //     measureArea(map);
-    // }
-
-    // window.ClearMeasure = function() {
-    //     clearMeasure(map);
-    // }
 
     // ========== PRZEŁĄCZANIE WARSTW ==========
     // Funkcja do przełączania pojedynczej warstwy
