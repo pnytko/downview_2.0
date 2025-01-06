@@ -1,38 +1,22 @@
 import { APP_STATE, ToolActions } from '../core/app-state.js';
-import { findVectorLayer } from './file-drop.js';
-
-// Stan pomiarów w domknięciu
-let measureTooltipElement;
-let measureTooltip;
-let draw;
-let sketch;
-
-// Inicjalizacja warstwy pomiarowej
-export function initMeasurements(map) {
-    // Użyj tej samej warstwy wektorowej co dla importowanych plików
-    const vectorLayer = findVectorLayer(map);
-    if (!vectorLayer) {
-        console.error('Nie znaleziono warstwy wektorowej');
-        return null;
-    }
-    return vectorLayer;
-}
+import { markerLayer } from './layers.js';
 
 // Tworzenie tooltipa dla pomiarów
 function createMeasureTooltip(map) {
-    if (measureTooltipElement) {
-        measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+    if (APP_STATE.measurement.tooltipElement) {
+        APP_STATE.measurement.tooltipElement.parentNode.removeChild(APP_STATE.measurement.tooltipElement);
     }
-    measureTooltipElement = document.createElement('div');
-    measureTooltipElement.className = 'ol-tooltip ol-tooltip-measure';
-    measureTooltip = new ol.Overlay({
-        element: measureTooltipElement,
+    APP_STATE.measurement.tooltipElement = document.createElement('div');
+    APP_STATE.measurement.tooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+    APP_STATE.measurement.tooltip = new ol.Overlay({
+        element: APP_STATE.measurement.tooltipElement,
         offset: [0, -15],
         positioning: 'bottom-center',
         stopEvent: false,
         insertFirst: false
     });
-    map.addOverlay(measureTooltip);
+    map.addOverlay(APP_STATE.measurement.tooltip);
+    APP_STATE.measurement.overlays.push(APP_STATE.measurement.tooltip);
 }
 
 // Formatowanie długości
@@ -57,18 +41,14 @@ function formatArea(polygon) {
 
 // Dodawanie interakcji pomiarowej
 function addInteraction(type, map) {
+    console.log('Dodawanie interakcji pomiarowej:', type);
+    
     // Aktywuj narzędzie pomiarów
     ToolActions.activateTool('measurement');
     
-    const vectorLayer = findVectorLayer(map);
-    if (!vectorLayer) {
-        console.error('Nie znaleziono warstwy wektorowej');
-        return;
-    }
-    
     const drawType = type === 'LineString' ? 'LineString' : 'Polygon';
-    draw = new ol.interaction.Draw({
-        source: vectorLayer.getSource(),
+    APP_STATE.measurement.draw = new ol.interaction.Draw({
+        source: markerLayer.getSource(),
         type: drawType,
         style: new ol.style.Style({
             fill: new ol.style.Fill({
@@ -90,15 +70,24 @@ function addInteraction(type, map) {
             })
         })
     });
-    map.addInteraction(draw);
+
+    map.addInteraction(APP_STATE.measurement.draw);
     createMeasureTooltip(map);
 
-    let listener;
-    draw.on('drawstart', function(evt) {
-        sketch = evt.feature;
+    APP_STATE.measurement.draw.on('drawstart', function(evt) {
+        console.log('Rozpoczęto rysowanie pomiaru');
+        
+        // Ustaw flagę, że pomiar jest aktywny
+        APP_STATE.measurement.active = true;
+        
+        // Ustaw sketch
+        APP_STATE.measurement.sketch = evt.feature;
+        APP_STATE.measurement.sketch.set('type', 'measurement');
+
+        /** @type {ol.Coordinate|undefined} */
         let tooltipCoord = evt.coordinate;
 
-        listener = sketch.getGeometry().on('change', function(evt) {
+        APP_STATE.measurement.listener = APP_STATE.measurement.sketch.getGeometry().on('change', function(evt) {
             const geom = evt.target;
             let output;
             if (geom instanceof ol.geom.Polygon) {
@@ -108,64 +97,133 @@ function addInteraction(type, map) {
                 output = formatLength(geom);
                 tooltipCoord = geom.getLastCoordinate();
             }
-            measureTooltipElement.innerHTML = output;
-            measureTooltip.setPosition(tooltipCoord);
+            APP_STATE.measurement.tooltipElement.innerHTML = output;
+            APP_STATE.measurement.tooltip.setPosition(tooltipCoord);
         });
     });
 
-    draw.on('drawend', function() {
-        measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
-        measureTooltip.setOffset([0, -7]);
-        sketch = null;
-        measureTooltipElement = null;
-        createMeasureTooltip(map);
-        ol.Observable.unByKey(listener);
+    APP_STATE.measurement.draw.on('drawend', function() {
+        console.log('Zakończono rysowanie pomiaru');
         
-        // Dezaktywuj narzędzie po zakończeniu pomiaru
-        ToolActions.deactivateAllTools();
-        map.removeInteraction(draw);
-        draw = null;
+        // Pobierz ostatnie współrzędne i wartość pomiaru
+        const geom = APP_STATE.measurement.sketch.getGeometry();
+        let output, tooltipCoord;
+        
+        if (geom instanceof ol.geom.Polygon) {
+            output = formatArea(geom);
+            tooltipCoord = geom.getInteriorPoint().getCoordinates();
+        } else if (geom instanceof ol.geom.LineString) {
+            output = formatLength(geom);
+            tooltipCoord = geom.getLastCoordinate();
+        }
+        
+        // Stwórz stały tooltip dla pomiaru
+        const tooltipElement = document.createElement('div');
+        tooltipElement.className = 'ol-tooltip ol-tooltip-static';
+        tooltipElement.innerHTML = output;
+        
+        const tooltip = new ol.Overlay({
+            element: tooltipElement,
+            offset: [0, -15],
+            positioning: 'bottom-center',
+            stopEvent: false,
+            insertFirst: false
+        });
+        
+        map.addOverlay(tooltip);
+        APP_STATE.measurement.overlays.push(tooltip);
+        tooltip.setPosition(tooltipCoord);
+        
+        // Ustaw styl dla zakończonego pomiaru
+        APP_STATE.measurement.sketch.setStyle(new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 0, 0, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#ff0000',
+                width: 2
+            })
+        }));
+        
+        // Wyłącz flagę aktywnego pomiaru
+        APP_STATE.measurement.active = false;
+        
+        // Usuń tymczasowy tooltip
+        if (APP_STATE.measurement.tooltipElement) {
+            APP_STATE.measurement.tooltipElement.parentNode.removeChild(APP_STATE.measurement.tooltipElement);
+        }
+        APP_STATE.measurement.tooltipElement = null;
+        APP_STATE.measurement.tooltip = null;
+        
+        // Usuń listener
+        ol.Observable.unByKey(APP_STATE.measurement.listener);
+        
+        // Usuń interakcję rysowania
+        map.removeInteraction(APP_STATE.measurement.draw);
+        APP_STATE.measurement.draw = null;
+        
+        console.log('Pomiar został dodany do warstwy:', markerLayer.getSource().getFeatures().length);
     });
 }
 
 // Publiczne API
 export function measureLength(map) {
+    console.log('Rozpoczynanie pomiaru długości');
     if (!APP_STATE.measurement.active) {
-        if (draw) {
-            map.removeInteraction(draw);
-            draw = null;
+        if (APP_STATE.measurement.draw) {
+            map.removeInteraction(APP_STATE.measurement.draw);
+            APP_STATE.measurement.draw = null;
         }
         addInteraction('LineString', map);
     }
 }
 
 export function measureArea(map) {
+    console.log('Rozpoczynanie pomiaru powierzchni');
     if (!APP_STATE.measurement.active) {
-        if (draw) {
-            map.removeInteraction(draw);
-            draw = null;
+        if (APP_STATE.measurement.draw) {
+            map.removeInteraction(APP_STATE.measurement.draw);
+            APP_STATE.measurement.draw = null;
         }
         addInteraction('Polygon', map);
     }
 }
 
+// Czyści pomiary
 export function clearMeasurements(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
+    console.log('Czyszczenie pomiarów');
+    
+    // Usuń interakcję rysowania
+    if (APP_STATE.measurement.draw) {
+        map.removeInteraction(APP_STATE.measurement.draw);
+        APP_STATE.measurement.draw = null;
     }
     
-    // Usuń wszystkie tooltips
-    let elements = document.getElementsByClassName('ol-tooltip');
-    while (elements[0]) {
-        elements[0].parentNode.removeChild(elements[0]);
+    // Usuń tooltip
+    if (APP_STATE.measurement.tooltipElement) {
+        const elem = APP_STATE.measurement.tooltipElement;
+        elem.parentNode.removeChild(elem);
+        APP_STATE.measurement.tooltipElement = null;
     }
     
-    // Wyczyść źródło
-    const vectorLayer = findVectorLayer(map);
-    if (vectorLayer) {
-        vectorLayer.getSource().clear();
-    }
+    // Usuń overlaye
+    APP_STATE.measurement.overlays.forEach(overlay => {
+        map.removeOverlay(overlay);
+    });
+    APP_STATE.measurement.overlays = [];
+    
+    // Usuń pomiary z warstwy
+    const features = markerLayer.getSource().getFeatures();
+    console.log('Liczba features przed czyszczeniem:', features.length);
+    
+    features.forEach(feature => {
+        // Usuń tylko features pomiarów, nie usuwaj markerów
+        if (feature.get('type') === 'measurement') {
+            markerLayer.getSource().removeFeature(feature);
+        }
+    });
+    
+    console.log('Liczba features po czyszczeniu:', markerLayer.getSource().getFeatures().length);
     
     // Dezaktywuj narzędzie
     ToolActions.deactivateAllTools();
@@ -173,14 +231,22 @@ export function clearMeasurements(map) {
 
 // Ustawia widoczność pomiarów
 export function setMeasurementsVisible(visible) {
-    const vectorLayer = findVectorLayer(map);
-    if (vectorLayer) {
-        vectorLayer.setVisible(visible);
+    console.log('Ustawianie widoczności pomiarów:', visible);
+    if (markerLayer) {
+        markerLayer.setVisible(visible);
     }
     
     // Pokaż/ukryj tooltips
-    const tooltips = document.getElementsByClassName('ol-tooltip');
-    for (let tooltip of tooltips) {
-        tooltip.style.display = visible ? 'block' : 'none';
-    }
+    APP_STATE.measurement.overlays.forEach(overlay => {
+        const element = overlay.getElement();
+        if (element) {
+            element.style.display = visible ? '' : 'none';
+        }
+    });
+}
+
+// Inicjalizacja warstwy pomiarowej
+export function initMeasurements(map) {
+    // Użyj tej samej warstwy co dla markerów
+    return markerLayer;
 }

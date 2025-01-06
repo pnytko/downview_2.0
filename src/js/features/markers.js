@@ -1,13 +1,6 @@
-import { markerSource, createMarkerStyle } from './layers.js';
+import { markerLayer, createMarkerStyle } from './layers.js';
 import { displayWrapperMarker } from '../ui/modal.js';
 import { APP_STATE, ToolActions } from '../core/app-state.js';
-
-// Stan narzędzia znaczników
-export const MARKER_STATE = {
-    active: false,
-    counter: 1,
-    clickListener: null
-};
 
 // Funkcje pobierania wysokości
 async function fetchWithTimeout(url, timeout = 5000) {
@@ -87,7 +80,7 @@ export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (MARKER_STATE.active) {
+    if (APP_STATE.marker.active) {
         deactivateMarkerTool(map, mapCanvas);
         return;
     }
@@ -96,40 +89,34 @@ export function addMarker(map) {
     activateMarkerTool(map, mapCanvas);
 }
 
+// Dodaje znacznik w określonych współrzędnych
+export function addMarkerAtCoordinates(coordinates) {
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(coordinates),
+        number: APP_STATE.marker.counter++,
+        type: 'marker'  // Dodajemy typ aby odróżnić od pomiarów
+    });
+    
+    feature.setStyle(createMarkerStyle(feature.get('number')));
+    markerLayer.getSource().addFeature(feature);
+    
+    return feature;
+}
+
 /**
  * Usuwa znacznik z mapy na podstawie współrzędnych
+ * @param {ol.Coordinate} coordinates - Współrzędne punktu
  */
-export function deleteMarker() {
-    const modal = document.getElementById('wrapper-marker');
-    const coordinatesElement = document.getElementById('marker-coordinates');
+export function deleteMarker(coordinates) {
+    const source = markerLayer.getSource();
+    const features = source.getFeatures();
     
-    if (!coordinatesElement || !coordinatesElement.textContent) {
-        console.error('Nie można znaleźć elementu z współrzędnymi lub jest pusty');
-        return;
-    }
-
-    try {
-        // Wyciągnij liczby ze stringa w formacie "Długość: X°\nSzerokość: Y°\nWysokość: Z m n.p.m."
-        const matches = coordinatesElement.textContent.match(/Długość:\s*(-?\d+\.\d+).*Szerokość:\s*(-?\d+\.\d+)/s);
-        if (!matches) {
-            console.error('Nie można sparsować współrzędnych z tekstu:', coordinatesElement.textContent);
-            return;
-        }
-
-        const [, lon, lat] = matches;
-        
-        const features = markerSource.getFeatures();
-        features.forEach(feature => {
-            const coords = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
-            if (Math.abs(coords[0] - parseFloat(lon)) < 0.000001 && Math.abs(coords[1] - parseFloat(lat)) < 0.000001) {
-                markerSource.removeFeature(feature);
-            }
-        });
-    } catch (error) {
-        console.error('Błąd podczas usuwania znacznika:', error);
-    } finally {
-        if (modal) {
-            modal.style.display = 'none';
+    for (let feature of features) {
+        const geometry = feature.getGeometry();
+        if (geometry.getCoordinates()[0] === coordinates[0] && 
+            geometry.getCoordinates()[1] === coordinates[1]) {
+            source.removeFeature(feature);
+            break;
         }
     }
 }
@@ -142,13 +129,13 @@ export function initMarkerHandlers(map) {
     // Obsługa kliknięcia na znacznik
     map.on('click', function(evt) {
         // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
-        if (APP_STATE.measurementActive) return;
+        if (APP_STATE.measurement.active) return;
         
         const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
             return feature;
         });
         
-        if (feature && feature.getGeometry().getType() === 'Point') {
+        if (feature && feature.get('type') === 'marker') {
             displayMarkerInfo(feature);
         }
     });
@@ -161,9 +148,9 @@ export function initMarkerHandlers(map) {
             return feature;
         });
         
-        if (hit && feature && feature.getGeometry().getType() === 'Point') {
+        if (hit && feature && feature.get('type') === 'marker') {
             map.getTargetElement().style.cursor = 'pointer';
-        } else {
+        } else if (!APP_STATE.marker.active && !APP_STATE.measurement.active) {
             map.getTargetElement().style.cursor = '';
         }
     });
@@ -171,36 +158,45 @@ export function initMarkerHandlers(map) {
 
 // Funkcje pomocnicze
 
-function deactivateMarkerTool(map, mapCanvas) {
-    MARKER_STATE.active = false;
-    mapCanvas.style.cursor = 'default';
-    if (MARKER_STATE.clickListener) {
-        map.un('click', MARKER_STATE.clickListener);
-        MARKER_STATE.clickListener = null;
-    }
-}
-
 function activateMarkerTool(map, mapCanvas) {
-    MARKER_STATE.active = true;
+    // Aktywuj narzędzie
+    ToolActions.activateTool('marker');
     mapCanvas.style.cursor = 'crosshair';
-    
-    // Funkcja obsługująca kliknięcie w mapę
-    MARKER_STATE.clickListener = function(evt) {
-        const coordinates = evt.coordinate;
-        const feature = new ol.Feature({
-            geometry: new ol.geom.Point(coordinates)
-        });
+
+    // Dodaj listener kliknięcia
+    APP_STATE.marker.clickListener = async function(evt) {
+        // Jeśli aktywny jest pomiar, nie dodawaj znacznika
+        if (APP_STATE.measurement.active) {
+            return;
+        }
+
+        const coords = evt.coordinate;
+        const coords4326 = ol.proj.transform(coords, 'EPSG:3857', 'EPSG:4326');
         
-        feature.setStyle(createMarkerStyle(MARKER_STATE.counter++));
-        markerSource.addFeature(feature);
-        
-        // Wyświetl modal z informacjami o znaczniku
-        const coords4326 = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-        displayMarkerInfo(feature);
-        
-        // Dezaktywuj narzędzie po dodaniu znacznika
-        deactivateMarkerTool(map, mapCanvas);
+        try {
+            const elevation = await getElevation(coords4326[1], coords4326[0]);
+            const formattedText = await formatMarkerCoordinates(coords4326[0], coords4326[1], elevation);
+            
+            const feature = addMarkerAtCoordinates(coords);
+            displayMarkerInfo(feature);
+            
+            // Dezaktywuj narzędzie po dodaniu znacznika
+            deactivateMarkerTool(map, mapCanvas);
+        } catch (error) {
+            console.error('Błąd podczas pobierania wysokości:', error);
+            alert('Nie udało się pobrać wysokości dla tego punktu');
+        }
     };
     
-    map.on('click', MARKER_STATE.clickListener);
+    map.on('click', APP_STATE.marker.clickListener);
+}
+
+export function deactivateMarkerTool(map, mapCanvas) {
+    ToolActions.deactivateAllTools();
+    mapCanvas.style.cursor = 'default';
+    
+    if (APP_STATE.marker.clickListener) {
+        map.un('click', APP_STATE.marker.clickListener);
+        APP_STATE.marker.clickListener = null;
+    }
 }

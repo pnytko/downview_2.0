@@ -28,10 +28,13 @@ export function toggleTrail(color) {
 
 // Przełącza widoczność wszystkich warstw wektorowych
 export function toggleVectorLayers(map) {
-    const checkbox = document.getElementById('wektory');
+    const checkbox = document.getElementById('vector');
     if (!checkbox) return;
 
     const isVisible = checkbox.checked;
+    
+    // Aktualizuj stan w APP_STATE
+    APP_STATE.layers.vector.visible = isVisible;
     
     // Przełącz widoczność warstwy znaczników
     markerLayer.setVisible(isVisible);

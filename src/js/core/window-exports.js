@@ -48,17 +48,8 @@ export function initializeWindowExports(map) {
         GetUserLocation: () => getUserLocation(map),
 
         // Pomiary
-        MeasureLength: () => {
-            APP_STATE.measurementActive = true;
-            measureLength(map);
-        },
-        MeasureArea: () => {
-            APP_STATE.measurementActive = true;
-            measureArea(map);
-        },
-        ClearMeasure: () => {
-            APP_STATE.measurementActive = false;
-            clearMeasurements(map);
-        }
+        MeasureLength: () => measureLength(map),
+        MeasureArea: () => measureArea(map),
+        ClearMeasurements: () => clearMeasurements(map)
     });
 }

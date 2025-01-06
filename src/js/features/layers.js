@@ -1,18 +1,12 @@
 import { APP_STATE, LAYER_ZINDEX } from '../core/app-state.js';
 
-// Stan warstw szlaków
-export const TRAILS_STATE = {
-    activeTrails: new Set(),
-    allTrailsVisible: true
-};
-
 // ========== PODSTAWOWE WARSTWY ==========
 
 // WARSTWA OSM
 export const osmLayer = new ol.layer.Tile({
     source: new ol.source.OSM(),
     title: "OSM",
-    visible: true,
+    visible: APP_STATE.layers.osm.visible,
     zIndex: LAYER_ZINDEX.OSM,
 });
 
@@ -29,7 +23,7 @@ export const ortoLayer = new ol.layer.Tile({
         transition: 0,
         projection: "EPSG:4326"
     }),
-    visible: false,
+    visible: APP_STATE.layers.orto.visible,
     title: "OrthoHD",
     zIndex: LAYER_ZINDEX.ORTO
 });
@@ -56,7 +50,7 @@ export const demLayer = new ol.layer.Tile({
         cacheSize: 256,
         transition: 0
     }),
-    visible: false,
+    visible: APP_STATE.layers.dem.visible,
     title: "DEM",
     zIndex: LAYER_ZINDEX.DEM,
 });
@@ -85,7 +79,7 @@ export const parcelLayer = new ol.layer.Tile({
         cacheSize: 256,
         transition: 0
     }),
-    visible: false,
+    visible: APP_STATE.layers.parcel.visible,
     title: "Działki",
     zIndex: LAYER_ZINDEX.PARCELS,
 });
@@ -122,35 +116,6 @@ export const trailLayers = {
 
 // ========== WARSTWA MARKERÓW ==========
 
-export const markerSource = new ol.source.Vector();
-
-export const markerStyle = new ol.style.Style({
-    image: new ol.style.Icon({
-        anchor: [0.5, 1],
-        src: './src/assets/images/marker.png'
-    }),
-    text: new ol.style.Text({
-        font: 'bold 12px Inter',
-        text: '',  // Tekst będzie ustawiony dla każdego znacznika osobno
-        offsetY: 25,  // Przesunięcie w dół
-        offsetX: 0,   // Wycentrowanie w osi X
-        textAlign: 'center',
-        fill: new ol.style.Fill({
-            color: '#000000'
-        }),
-        stroke: new ol.style.Stroke({
-            color: '#ffffff',
-            width: 3
-        })
-    })
-});
-
-export const markerLayer = new ol.layer.Vector({
-    source: markerSource,
-    style: markerStyle,
-    zIndex: LAYER_ZINDEX.MARKERS
-});
-
 // Funkcja do tworzenia stylu znacznika z numerem
 export const createMarkerStyle = (number) => {
     return new ol.style.Style({
@@ -175,6 +140,15 @@ export const createMarkerStyle = (number) => {
     });
 };
 
+// Warstwa znaczników
+export const markerLayer = new ol.layer.Vector({
+    source: new ol.source.Vector(),
+    style: createMarkerStyle(1),  // Domyślny styl dla pierwszego znacznika
+    visible: APP_STATE.layers.vector.visible,
+    title: 'Znaczniki',
+    zIndex: LAYER_ZINDEX.MARKERS
+});
+
 // ========== WARSTWY DODATKOWE ==========
 
 // Warstwa tras kajakowych
@@ -191,7 +165,7 @@ export const kayakLayer = new ol.layer.Tile({
         transition: 0
     }),
     opacity: 0.8,
-    visible: false,
+    visible: APP_STATE.layers.kayak.visible,
     title: 'Trasy kajakowe',
     zIndex: LAYER_ZINDEX.KAYAK
 });
@@ -210,7 +184,7 @@ export const campLayer = new ol.layer.Tile({
         transition: 0
     }),
     opacity: 0.5,
-    visible: false,
+    visible: APP_STATE.layers.camp.visible,
     title: 'Miejsca biwakowe',
     zIndex: LAYER_ZINDEX.CAMP
 });
@@ -229,7 +203,7 @@ export const bikeLayer = new ol.layer.Tile({
         transition: 0
     }),
     opacity: 0.8,
-    visible: false,
+    visible: APP_STATE.layers.bike.visible,
     title: 'Trasy rowerowe',
     zIndex: LAYER_ZINDEX.BIKE
 });

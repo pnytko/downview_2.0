@@ -19,6 +19,21 @@ export const APP_STATE = {
 
     // Stan warstw
     layers: {
+        // Stan warstw bazowych
+        osm: { visible: true },
+        orto: { visible: false },
+        dem: { visible: false },
+        parcel: { visible: false },
+        
+        // Stan warstw dodatkowych
+        kayak: { visible: false },
+        camp: { visible: false },
+        bike: { visible: false },
+        
+        // Stan warstw wektorowych
+        vector: { visible: true },
+        
+        // Stan szlaków
         activeTrails: new Set(),
         allTrailsVisible: true
     },
@@ -32,7 +47,13 @@ export const APP_STATE = {
     
     // Stan narzędzia pomiarów
     measurement: {
-        active: false
+        active: false,
+        tooltipElement: null,
+        tooltip: null,
+        draw: null,
+        sketch: null,
+        listener: null,
+        overlays: []  // Lista overlayów do usunięcia
     },
     
     // Stan narzędzia pogody
@@ -54,10 +75,11 @@ export const ToolActions = {
 
     // Aktywuje wybrane narzędzie
     activateTool(toolName) {
+        // Najpierw dezaktywuj wszystkie narzędzia
         this.deactivateAllTools();
-        APP_STATE.activeTool = toolName;
         
-        switch(toolName) {
+        // Aktywuj wybrane narzędzie
+        switch (toolName) {
             case 'marker':
                 APP_STATE.marker.active = true;
                 break;
@@ -68,5 +90,7 @@ export const ToolActions = {
                 APP_STATE.weather.active = true;
                 break;
         }
+        
+        APP_STATE.activeTool = toolName;
     }
 };
