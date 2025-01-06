@@ -10,7 +10,7 @@ export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.markerActive) {
+    if (APP_STATE.marker.active) {
         deactivateMarkerTool(map, mapCanvas);
         return;
     }
@@ -95,45 +95,35 @@ export function initMarkerHandlers(map) {
 // Funkcje pomocnicze
 
 function deactivateMarkerTool(map, mapCanvas) {
-    APP_STATE.markerActive = false;
-    if (mapCanvas) {
-        mapCanvas.style.cursor = '';
-    }
-    if (APP_STATE.clickListener) {
-        map.un('click', APP_STATE.clickListener);
-        APP_STATE.clickListener = null;
-    }
-    const button = document.querySelector('button[onclick="AddMarker()"]');
-    if (button) {
-        button.classList.remove('active');
+    APP_STATE.marker.active = false;
+    mapCanvas.style.cursor = 'default';
+    if (APP_STATE.markerClickListener) {
+        map.un('click', APP_STATE.markerClickListener);
+        APP_STATE.markerClickListener = null;
     }
 }
 
 function activateMarkerTool(map, mapCanvas) {
-    APP_STATE.markerActive = true;
-    if (mapCanvas) {
-        mapCanvas.style.cursor = 'crosshair';
-    }
-    const button = document.querySelector('button[onclick="AddMarker()"]');
-    if (button) {
-        button.classList.add('active');
-    }
-
-    // Dodaj listener kliknięcia
-    APP_STATE.clickListener = function(evt) {
-        const marker = new ol.Feature({
-            geometry: new ol.geom.Point(evt.coordinate)
+    APP_STATE.marker.active = true;
+    mapCanvas.style.cursor = 'crosshair';
+    
+    // Funkcja obsługująca kliknięcie w mapę
+    APP_STATE.markerClickListener = function(evt) {
+        const coordinates = evt.coordinate;
+        const feature = new ol.Feature({
+            geometry: new ol.geom.Point(coordinates)
         });
         
-        // Ustaw styl z numerem dla nowego znacznika
-        marker.setStyle(createMarkerStyle(APP_STATE.markerCounter));
-        APP_STATE.markerCounter++;
-
-        markerSource.addFeature(marker);
+        feature.setStyle(createMarkerStyle(APP_STATE.markerCounter++));
+        markerSource.addFeature(feature);
         
-        // Wyłącz narzędzie po dodaniu znacznika
+        // Wyświetl modal z informacjami o znaczniku
+        const coords4326 = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+        displayWrapperMarker(coords4326);
+        
+        // Dezaktywuj narzędzie po dodaniu znacznika
         deactivateMarkerTool(map, mapCanvas);
     };
     
-    map.on('click', APP_STATE.clickListener);
+    map.on('click', APP_STATE.markerClickListener);
 }

@@ -41,7 +41,7 @@ export function toggleWeather(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.weatherActive) {
+    if (APP_STATE.weather.active) {
         deactivateWeatherTool(map, mapCanvas);
         return;
     }
@@ -52,30 +52,29 @@ export function toggleWeather(map) {
 
 // Aktywuje narzędzie pogodowe
 function activateWeatherTool(map, mapCanvas) {
-    APP_STATE.weatherActive = true;
-    if (mapCanvas) {
-        mapCanvas.style.cursor = 'crosshair';
-    }
-
-    // Dodaj listener kliknięcia
-    APP_STATE.clickListener = async function(evt) {
+    APP_STATE.weather.active = true;
+    mapCanvas.style.cursor = 'crosshair';
+    
+    // Funkcja obsługująca kliknięcie w mapę
+    APP_STATE.weatherClickListener = async function(evt) {
         const coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-        await getWeatherData(coords);
+        const weatherData = await getWeatherData(coords);
+        if (weatherData) {
+            displayWeatherInfo(weatherData, coords);
+        }
         deactivateWeatherTool(map, mapCanvas);
     };
-
-    map.on('click', APP_STATE.clickListener);
+    
+    map.on('click', APP_STATE.weatherClickListener);
 }
 
 // Dezaktywuje narzędzie pogodowe
 function deactivateWeatherTool(map, mapCanvas) {
-    APP_STATE.weatherActive = false;
-    if (mapCanvas) {
-        mapCanvas.style.cursor = 'default';
-    }
-    if (APP_STATE.clickListener) {
-        map.un('click', APP_STATE.clickListener);
-        APP_STATE.clickListener = null;
+    APP_STATE.weather.active = false;
+    mapCanvas.style.cursor = 'default';
+    if (APP_STATE.weatherClickListener) {
+        map.un('click', APP_STATE.weatherClickListener);
+        APP_STATE.weatherClickListener = null;
     }
 }
 
@@ -105,7 +104,7 @@ async function getWeatherData(coords) {
             throw new Error('Nieprawidłowa struktura danych pogodowych');
         }
 
-        displayWeatherInfo(data, coords);
+        return data;
     } catch (error) {
         console.error('Szczegóły błędu:', error);
         alert('Nie udało się pobrać danych pogodowych');

@@ -16,13 +16,12 @@ export function closeWrapperTrails() {
 }
 
 // Funkcje obsługi okna znaczników
-export async function displayWrapperMarker(marker) {
+export async function displayWrapperMarker(coordinates) {
     const modal = document.getElementById('wrapper-marker');
     modal.style.display = 'block';
 
-    // Pobierz współrzędne znacznika
-    const coordinates = marker.getGeometry().getCoordinates();
-    const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+    // Współrzędne są już w formacie EPSG:4326 (lon, lat)
+    const lonLat = coordinates;
     
     // Najpierw pokaż współrzędne bez wysokości
     const initialCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: pobieranie...`;

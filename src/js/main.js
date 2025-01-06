@@ -2,7 +2,10 @@
 import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
 
 // Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
-import { initControls, rotateMap, resetRotation } from './modules/control.js';
+import { initControls } from './modules/control.js';
+
+// Import modułu kierunków - funkcje do obracania mapy
+import { initDirections, rotateMap, resetRotation } from './modules/directions.js';
 
 // Import konfiguracji - stałe i ustawienia dla mapy i pogody
 import { MAP_CONFIG, APP_STATE } from './modules/config.js';
@@ -87,6 +90,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Inicjalizacja komponentów
         initMeasurements(map);
         initControls(map);
+        initDirections(map);
         initModals();
         initMarkerHandlers(map);
         initTrailControls(); // Inicjalizacja komponentów

@@ -28,8 +28,14 @@ export const APP_STATE = {
     markerCounter: 1,
     
     // Flagi stanu narzędzi
-    markerActive: false,
-    weatherActive: false,
+    marker: {
+        active: false,
+        // Add other marker-related states here if needed
+    },
+    weather: {
+        active: false,
+        // Add other weather-related states here if needed
+    },
     measurementActive: false,
     
     // Referencja do listenera kliknięć
