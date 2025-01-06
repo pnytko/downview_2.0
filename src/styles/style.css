@@ -777,6 +777,7 @@ button i{
     width: 2em;
     text-align: center;
     color: var(--accent-color);
+    margin-right: var(--spacing-md);
 }
 
 #weather-info strong {
