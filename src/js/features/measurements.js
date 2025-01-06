@@ -1,42 +1,21 @@
-import { APP_STATE, ToolActions, LAYER_ZINDEX } from '../core/app-state.js';
+import { APP_STATE, ToolActions } from '../core/app-state.js';
+import { findVectorLayer } from './file-drop.js';
 
 // Stan pomiarów w domknięciu
 let measureTooltipElement;
 let measureTooltip;
 let draw;
 let sketch;
-let measureSource;
-let measureVector;
 
 // Inicjalizacja warstwy pomiarowej
 export function initMeasurements(map) {
-    measureSource = new ol.source.Vector();
-    measureVector = new ol.layer.Vector({
-        source: measureSource,
-        style: new ol.style.Style({
-            fill: new ol.style.Fill({
-                color: 'rgba(255, 0, 0, 0.2)'
-            }),
-            stroke: new ol.style.Stroke({
-                color: '#ff0000',
-                lineDash: [10, 10],
-                width: 2
-            }),
-            image: new ol.style.Circle({
-                radius: 5,
-                stroke: new ol.style.Stroke({
-                    color: '#ff0000'
-                }),
-                fill: new ol.style.Fill({
-                    color: '#ff0000'
-                })
-            })
-        }),
-        zIndex: LAYER_ZINDEX.MEASUREMENTS,
-        name: 'measure'
-    });
-    map.addLayer(measureVector);
-    return measureVector;
+    // Użyj tej samej warstwy wektorowej co dla importowanych plików
+    const vectorLayer = findVectorLayer(map);
+    if (!vectorLayer) {
+        console.error('Nie znaleziono warstwy wektorowej');
+        return null;
+    }
+    return vectorLayer;
 }
 
 // Tworzenie tooltipa dla pomiarów
@@ -59,25 +38,21 @@ function createMeasureTooltip(map) {
 // Formatowanie długości
 function formatLength(line) {
     const length = ol.sphere.getLength(line);
-    let output;
     if (length > 100) {
-        output = Math.round((length / 1000) * 100) / 100 + ' km';
-    } else {
-        output = Math.round(length * 100) / 100 + ' m';
+        return Math.round((length / 1000) * 100) / 100 + ' km';
     }
-    return output;
+    return Math.round(length * 100) / 100 + ' m';
 }
 
 // Formatowanie powierzchni
 function formatArea(polygon) {
     const area = ol.sphere.getArea(polygon);
-    let output;
-    if (area > 10000) {
-        output = Math.round((area / 1000000) * 100) / 100 + ' km\xB2';
-    } else {
-        output = Math.round(area * 100) / 100 + ' m\xB2';
+    if (area >= 1000000) {
+        return Math.round((area / 1000000) * 100) / 100 + ' km²';
+    } else if (area >= 10000) {
+        return Math.round((area / 10000) * 100) / 100 + ' ha';
     }
-    return output;
+    return Math.round(area * 100) / 100 + ' m²';
 }
 
 // Dodawanie interakcji pomiarowej
@@ -85,9 +60,15 @@ function addInteraction(type, map) {
     // Aktywuj narzędzie pomiarów
     ToolActions.activateTool('measurement');
     
+    const vectorLayer = findVectorLayer(map);
+    if (!vectorLayer) {
+        console.error('Nie znaleziono warstwy wektorowej');
+        return;
+    }
+    
     const drawType = type === 'LineString' ? 'LineString' : 'Polygon';
     draw = new ol.interaction.Draw({
-        source: measureSource,
+        source: vectorLayer.getSource(),
         type: drawType,
         style: new ol.style.Style({
             fill: new ol.style.Fill({
@@ -181,8 +162,9 @@ export function clearMeasurements(map) {
     }
     
     // Wyczyść źródło
-    if (measureSource) {
-        measureSource.clear();
+    const vectorLayer = findVectorLayer(map);
+    if (vectorLayer) {
+        vectorLayer.getSource().clear();
     }
     
     // Dezaktywuj narzędzie
@@ -191,8 +173,9 @@ export function clearMeasurements(map) {
 
 // Ustawia widoczność pomiarów
 export function setMeasurementsVisible(visible) {
-    if (measureVector) {
-        measureVector.setVisible(visible);
+    const vectorLayer = findVectorLayer(map);
+    if (vectorLayer) {
+        vectorLayer.setVisible(visible);
     }
     
     // Pokaż/ukryj tooltips

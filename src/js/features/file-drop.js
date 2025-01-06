@@ -17,6 +17,49 @@ const TRACK_STYLE = new ol.style.Style({
 });
 
 /**
+ * Znajduje lub tworzy warstwę wektorową na mapie
+ */
+export function findVectorLayer(map) {
+    let vectorLayer;
+    map.getLayers().forEach(layer => {
+        if (layer.get('name') === CONFIG.VECTOR_LAYER_NAME) {
+            vectorLayer = layer;
+        }
+    });
+
+    if (!vectorLayer) {
+        // Jeśli warstwa nie istnieje, stwórz ją
+        vectorLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 0, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    lineDash: [10, 10],
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 5,
+                    stroke: new ol.style.Stroke({
+                        color: '#ff0000'
+                    }),
+                    fill: new ol.style.Fill({
+                        color: '#ff0000'
+                    })
+                })
+            }),
+            zIndex: LAYER_ZINDEX.MARKERS,
+            name: CONFIG.VECTOR_LAYER_NAME
+        });
+        map.addLayer(vectorLayer);
+    }
+    
+    return vectorLayer;
+}
+
+/**
  * Inicjalizuje obsługę przeciągania plików na mapę
  */
 export function initFileDropHandler(map) {
@@ -27,19 +70,6 @@ export function initFileDropHandler(map) {
     }
 
     setupDropZone(document.body, files => handleFiles(files, map, vectorLayer));
-}
-
-/**
- * Znajduje warstwę wektorową na mapie
- */
-function findVectorLayer(map) {
-    let vectorLayer;
-    map.getLayers().forEach(layer => {
-        if (layer.get('name') === CONFIG.VECTOR_LAYER_NAME) {
-            vectorLayer = layer;
-        }
-    });
-    return vectorLayer;
 }
 
 /**
