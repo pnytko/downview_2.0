@@ -34,7 +34,48 @@ export const WEATHER_CONFIG = {
     params: {
         hourly: ['temperature_2m', 'precipitation', 'cloudcover', 'windspeed_10m'],
         timezone: 'Europe/Warsaw'
+    },
+    // Konfiguracja ikon dla różnych warunków pogodowych
+    icons: {
+        // Ikony temperatury
+        temperature: {
+            cold: 'fa-thermometer-empty',
+            normal: 'fa-thermometer-half',
+            hot: 'fa-thermometer-full'
+        },
+        // Ikony opadów
+        precipitation: {
+            none: 'fa-umbrella',
+            rain: 'fa-cloud-rain'
+        },
+        // Ikony zachmurzenia
+        cloudcover: {
+            clear: 'fa-sun',
+            fewClouds: 'fa-cloud-sun',
+            partlyCloudy: 'fa-cloud-sun',
+            mostlyCloudy: 'fa-cloud'
+        },
+        // Ikona wiatru
+        wind: 'fa-wind',
+        // Ikona błędu
+        error: 'fa-exclamation-circle'
     }
+};
+
+/**
+ * Stan globalny aplikacji
+ */
+export const APP_STATE = {
+    // Stan licznika markerów
+    markerCounter: 1,
+    
+    // Flagi stanu narzędzi
+    markerActive: false,
+    weatherActive: false,
+    measurementActive: false,
+    
+    // Referencja do listenera kliknięć
+    clickListener: null
 };
 
 /**

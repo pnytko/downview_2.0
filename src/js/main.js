@@ -1,7 +1,13 @@
-// Import funkcji pomiarów
+// Import modułu pomiarów - funkcje do mierzenia odległości i powierzchni na mapie
 import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
+
+// Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
 import { initControls } from './modules/control.js';
-import { MAP_CONFIG, LAYER_ZINDEX, STYLES, WEATHER_CONFIG } from './modules/config.js';
+
+// Import konfiguracji - stałe i ustawienia dla mapy i pogody
+import { MAP_CONFIG, WEATHER_CONFIG, APP_STATE } from './modules/config.js';
+
+// Import warstw mapy - definicje wszystkich warstw (OSM, ortofoto, szlaki, itp.)
 import {
     osmLayer,
     ortoLayer,
@@ -10,14 +16,14 @@ import {
     trailLayers,
     markerLayer,
     markerSource,
-    markerStyle,
     createMarkerStyle,
     kayakLayer,
     campLayer,
     bikeLayer
 } from './modules/layers.js';
+
+// Import obsługi okien modalnych - funkcje do wyświetlania/ukrywania i zarządzania oknami
 import {
-    makeDraggable,
     displayWrapperAbout,
     closeWrapperAbout,
     closeWrapperTrails,
@@ -27,17 +33,11 @@ import {
     closeWrapperWeather,
     initModals
 } from './modules/modal.js';
-import { WEATHER_ICONS } from './modules/weatherIcons.js';
 
-// Zmienne globalne
+// Zmienna mapy
 let map;
-let markerCounter = 1;
-let markerActive = false;
-let weatherActive = false;
-let measurementActive = false;  // Dodana zmienna dla stanu pomiaru
-let clickListener = null;
 
-// ========== OBSŁUGA OKIEN MODALNYCH ==========
+// Obsługa okien modalnych
 window.DisplayWrapperAbout = displayWrapperAbout;
 window.CloseWrapperAbout = closeWrapperAbout;
 window.CloseWrapperTrails = closeWrapperTrails;
@@ -45,7 +45,7 @@ window.DisplayWrapperMarker = displayWrapperMarker;
 window.CloseWrapperMarker = closeWrapperMarker;
 window.CloseWrapperWeather = closeWrapperWeather;
 
-// Map Initialization
+// Inicjalizacja mapy
 document.addEventListener('DOMContentLoaded', async function() {
     try {
         map = new ol.Map({
@@ -78,15 +78,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Funkcje globalne dla pomiarów
         window.MeasureLength = () => {
-            measurementActive = true;
+            APP_STATE.measurementActive = true;
             measureLength(map);
         };
         window.MeasureArea = () => {
-            measurementActive = true;
+            APP_STATE.measurementActive = true;
             measureArea(map);
         };
         window.ClearMeasure = () => {
-            measurementActive = false;
+            APP_STATE.measurementActive = false;
             clearMeasurements(map);
         };
 
@@ -174,14 +174,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             const mapCanvas = map.getTargetElement().querySelector('canvas');
             
             // Jeśli narzędzie jest już aktywne, wyłącz je
-            if (markerActive) {
-                markerActive = false;
+            if (APP_STATE.markerActive) {
+                APP_STATE.markerActive = false;
                 if (mapCanvas) {
                     mapCanvas.style.cursor = '';
                 }
-                if (clickListener) {
-                    map.un('click', clickListener);
-                    clickListener = null;
+                if (APP_STATE.clickListener) {
+                    map.un('click', APP_STATE.clickListener);
+                    APP_STATE.clickListener = null;
                 }
                 const button = document.querySelector('button[onclick="AddMarker()"]');
                 if (button) {
@@ -191,18 +191,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             // Wyłącz inne narzędzia
-            if (weatherActive) {
+            if (APP_STATE.weatherActive) {
                 const weatherButton = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
                 if (weatherButton) {
                     weatherButton.classList.remove('active');
                 }
                 map.un('click', handleWeatherClick);
                 closeWrapperWeather();
-                weatherActive = false;
+                APP_STATE.weatherActive = false;
             }
 
             // Aktywuj narzędzie
-            markerActive = true;
+            APP_STATE.markerActive = true;
             if (mapCanvas) {
                 mapCanvas.style.cursor = 'crosshair';
             }
@@ -212,31 +212,31 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             // Dodaj listener kliknięcia
-            clickListener = function(evt) {
+            APP_STATE.clickListener = function(evt) {
                 const marker = new ol.Feature({
                     geometry: new ol.geom.Point(evt.coordinate)
                 });
                 
                 // Ustaw styl z numerem dla nowego znacznika
-                marker.setStyle(createMarkerStyle(markerCounter));
-                markerCounter++;
+                marker.setStyle(createMarkerStyle(APP_STATE.markerCounter));
+                APP_STATE.markerCounter++;
 
                 markerSource.addFeature(marker);
                 
                 // Wyłącz narzędzie po dodaniu znacznika
-                markerActive = false;
+                APP_STATE.markerActive = false;
                 if (mapCanvas) {
                     mapCanvas.style.cursor = '';
                 }
-                map.un('click', clickListener);
-                clickListener = null;
+                map.un('click', APP_STATE.clickListener);
+                APP_STATE.clickListener = null;
                 const button = document.querySelector('button[onclick="AddMarker()"]');
                 if (button) {
                     button.classList.remove('active');
                 }
             };
             
-            map.on('click', clickListener);
+            map.on('click', APP_STATE.clickListener);
         };
 
         window.DeleteMarker = function() {
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Obsługa kliknięcia na znacznik
         map.on('click', function(evt) {
             // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
-            if (measurementActive) return;
+            if (APP_STATE.measurementActive) return;
             
             const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
                 return feature;
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         // Funkcja obsługująca kliknięcie na mapę dla pogody
         async function handleWeatherClick(evt) {
-            if (!weatherActive) return;
+            if (!APP_STATE.weatherActive) return;
             
             const coordinates = evt.coordinate;
             const lonLat = displayWrapperWeather(coordinates);
@@ -325,22 +325,22 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const currentWind = weatherData.hourly.windspeed_10m[0];
                 
                 // Wybierz odpowiednią ikonę dla temperatury
-                let tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.normal}"></i>`;
-                if (currentTemp <= 0) tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.cold}"></i>`;
-                else if (currentTemp >= 25) tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.hot}"></i>`;
+                let tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.normal}"></i>`;
+                if (currentTemp <= 0) tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.cold}"></i>`;
+                else if (currentTemp >= 25) tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.hot}"></i>`;
 
                 // Wybierz ikonę dla opadów
-                let precipIcon = `<i class="fas ${WEATHER_ICONS.precipitation.rain}"></i>`;
-                if (currentPrecip === 0) precipIcon = `<i class="fas ${WEATHER_ICONS.precipitation.none}"></i>`;
+                let precipIcon = `<i class="fas ${WEATHER_CONFIG.icons.precipitation.rain}"></i>`;
+                if (currentPrecip === 0) precipIcon = `<i class="fas ${WEATHER_CONFIG.icons.precipitation.none}"></i>`;
 
                 // Wybierz ikonę dla zachmurzenia
-                let cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.mostlyCloudy}"></i>`;
-                if (currentCloud < 25) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.clear}"></i>`;
-                else if (currentCloud < 50) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.fewClouds}"></i>`;
-                else if (currentCloud < 75) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.partlyCloudy}"></i>`;
+                let cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.mostlyCloudy}"></i>`;
+                if (currentCloud < 25) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.clear}"></i>`;
+                else if (currentCloud < 50) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.fewClouds}"></i>`;
+                else if (currentCloud < 75) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.partlyCloudy}"></i>`;
 
                 // Ikona dla wiatru
-                const windIcon = `<i class="fas ${WEATHER_ICONS.wind}"></i>`;
+                const windIcon = `<i class="fas ${WEATHER_CONFIG.icons.wind}"></i>`;
                 
                 weatherInfo.innerHTML = `
                     <div class="weather-row">
@@ -369,11 +369,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     </div>
                 `;
             } else {
-                weatherInfo.innerHTML = `<p><i class="fas ${WEATHER_ICONS.error}"></i> Nie udało się pobrać danych pogodowych.</p>`;
+                weatherInfo.innerHTML = `<p><i class="fas ${WEATHER_CONFIG.icons.error}"></i> Nie udało się pobrać danych pogodowych.</p>`;
             }
 
             // Wyłącz narzędzie po użyciu
-            weatherActive = false;
+            APP_STATE.weatherActive = false;
             const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
             if (button) {
                 button.classList.remove('active');
@@ -386,8 +386,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
             const mapCanvas = map.getTargetElement().querySelector('canvas');
             
-            if (weatherActive) {
-                weatherActive = false;
+            if (APP_STATE.weatherActive) {
+                APP_STATE.weatherActive = false;
                 if (mapCanvas) {
                     mapCanvas.style.cursor = '';
                 }
@@ -396,19 +396,19 @@ document.addEventListener('DOMContentLoaded', async function() {
                 closeWrapperWeather();
             } else {
                 // Wyłącz inne narzędzia
-                if (markerActive) {
+                if (APP_STATE.markerActive) {
                     const markerButton = document.querySelector('button[onclick="AddMarker()"]');
                     if (markerButton) {
                         markerButton.classList.remove('active');
                     }
-                    if (clickListener) {
-                        map.un('click', clickListener);
-                        clickListener = null;
+                    if (APP_STATE.clickListener) {
+                        map.un('click', APP_STATE.clickListener);
+                        APP_STATE.clickListener = null;
                     }
-                    markerActive = false;
+                    APP_STATE.markerActive = false;
                 }
                 
-                weatherActive = true;
+                APP_STATE.weatherActive = true;
                 if (mapCanvas) {
                     mapCanvas.style.cursor = 'crosshair';
                 }
