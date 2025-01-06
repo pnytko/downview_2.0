@@ -2,11 +2,7 @@ import { APP_STATE } from './config.js';
 import { trailLayers, markerLayer } from './layers.js';
 import { closeWrapperTrails } from './modal.js';
 
-/**
- * Przełącza widoczność pojedynczej warstwy
- * @param {ol.layer.Layer} layer - Warstwa do przełączenia
- * @param {string} checkboxId - ID checkboxa kontrolującego warstwę
- */
+// Przełącza widoczność pojedynczej warstwy
 export function toggleLayer(layer, checkboxId) {
     const checkbox = document.getElementById(checkboxId);
     if (checkbox) {
@@ -14,10 +10,7 @@ export function toggleLayer(layer, checkboxId) {
     }
 }
 
-/**
- * Przełącza widoczność pojedynczego szlaku
- * @param {string} color - Kolor szlaku (red, blue, green, yellow, black)
- */
+// Przełącza widoczność pojedynczego szlaku
 export function toggleTrail(color) {
     const checkbox = document.getElementById(`trail-${color}`);
     if (trailLayers[color]) {
@@ -25,10 +18,7 @@ export function toggleTrail(color) {
     }
 }
 
-/**
- * Przełącza widoczność wszystkich warstw wektorowych
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Przełącza widoczność wszystkich warstw wektorowych
 export function toggleVectorLayers(map) {
     const checkbox = document.getElementById('vector');
     const isChecked = checkbox.checked;
@@ -47,9 +37,7 @@ export function toggleVectorLayers(map) {
     }
 }
 
-/**
- * Przełącza widoczność wszystkich szlaków
- */
+// Przełącza widoczność wszystkich szlaków
 export function toggleAllTrails() {
     const checkbox = document.getElementById('szlaki');
     const isChecked = checkbox.checked;
@@ -69,9 +57,7 @@ export function toggleAllTrails() {
     });
 }
 
-/**
- * Inicjalizuje obsługę przełączania pojedynczych szlaków
- */
+// Inicjalizuje obsługę przełączania pojedynczych szlaków
 export function initTrailControls() {
     ['Yellow', 'Green', 'Blue', 'Red', 'Black'].forEach(color => {
         window[`ToggleLayersWMS_Szlaki_${color}`] = () => toggleTrail(color.toLowerCase());

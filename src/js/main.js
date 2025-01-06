@@ -1,61 +1,35 @@
 // Import modułu pomiarów - funkcje do mierzenia odległości i powierzchni na mapie
-import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
+import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js'; // Import modułu pomiarów - funkcje do mierzenia odległości i powierzchni na mapie
 
 // Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
-import { initControls } from './modules/control.js';
+import { initControls, rotateMap, resetRotation } from './modules/control.js'; // Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
 
 // Import konfiguracji - stałe i ustawienia dla mapy i pogody
-import { MAP_CONFIG, APP_STATE } from './modules/config.js';
+import { MAP_CONFIG, APP_STATE } from './modules/config.js'; // Import konfiguracji - stałe i ustawienia dla mapy i pogody
 
 // Import warstw mapy - definicje wszystkich warstw
-import {
-    osmLayer,
-    ortoLayer,
-    demLayer,
-    parcelLayer,
-    trailLayers,
-    markerLayer,
-    markerSource,
-    createMarkerStyle,
-    kayakLayer,
-    campLayer,
-    bikeLayer
-} from './modules/layers.js';
+import { osmLayer, ortoLayer, demLayer, parcelLayer, trailLayers, markerLayer, markerSource, createMarkerStyle, kayakLayer, campLayer, bikeLayer } from './modules/layers.js'; // Import warstw mapy - definicje wszystkich warstw
 
 // Import obsługi okien modalnych - funkcje do wyświetlania/ukrywania i zarządzania oknami
-import {
-    displayWrapperAbout,
-    closeWrapperAbout,
-    closeWrapperTrails,
-    displayWrapperMarker,
-    closeWrapperMarker,
-    closeWrapperWeather,
-    initModals
-} from './modules/modal.js';
+import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, CloseWrapperWeather, initModals } from './modules/modal.js'; // Import obsługi okien modalnych - funkcje do wyświetlania/ukrywania i zarządzania oknami
 
 // Import modułu znaczników - funkcje do dodawania i usuwania znaczników
-import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js';
+import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js'; // Import modułu znaczników - funkcje do dodawania i usuwania znaczników
 
 // Import modułu pogody
-import { toggleWeather } from './modules/weather.js';
+import { toggleWeather } from './modules/weather.js'; // Import modułu pogody
 
 // Import modułu geolokalizacji
-import { getUserLocation } from './modules/geolocation.js';
+import { getUserLocation } from './modules/geolocation.js'; // Import modułu geolokalizacji
 
 // Import modułu pełnego ekranu
-import { toggleFullScreen } from './modules/fullscreen.js';
+import { toggleFullScreen } from './modules/fullscreen.js'; // Import modułu pełnego ekranu
 
 // Import kontroli warstw
-import { 
-    toggleLayer, 
-    toggleTrail, 
-    toggleVectorLayers, 
-    toggleAllTrails,
-    initTrailControls 
-} from './modules/layers-controls.js';
+import { toggleLayer, toggleTrail, toggleVectorLayers, toggleAllTrails, initTrailControls } from './modules/layers-controls.js'; // Import kontroli warstw
 
 // Zmienna mapy
-let map;
+let map; // Zmienna mapy
 
 // Eksport funkcji do window dla dostępu z HTML
 Object.assign(window, {
@@ -64,14 +38,12 @@ Object.assign(window, {
     CloseWrapperTrails: closeWrapperTrails,
     DisplayWrapperMarker: displayWrapperMarker,
     CloseWrapperMarker: closeWrapperMarker,
-    CloseWrapperWeather: closeWrapperWeather,
+    CloseWrapperWeather: CloseWrapperWeather,
     AddMarker: () => addMarker(map),
     DeleteMarker: deleteMarker,
     ToggleLayersWMS_Weather: () => toggleWeather(map),
-    GetUserLocation: () => getUserLocation(map),
-    FullScreen: toggleFullScreen,
-    ToggleLayersWMS_Wektory: () => toggleVectorLayers(map),
     ToggleLayersWMS_Osm: () => toggleLayer(osmLayer, 'osm'),
+    ToggleLayersWMS_Wektory: () => toggleVectorLayers(map),
     ToggleLayersWMS_Dzialki: () => toggleLayer(parcelLayer, 'dzialki'),
     ToggleLayersWMS_OrtoHD: () => toggleLayer(ortoLayer, 'ortoHD'),
     ToggleLayersWMS_DEM: () => toggleLayer(demLayer, 'dem'),
@@ -79,8 +51,10 @@ Object.assign(window, {
     ToggleLayersWMS_Kayak: () => toggleLayer(kayakLayer, 'kayak'),
     ToggleLayersWMS_Bike: () => toggleLayer(bikeLayer, 'bike'),
     ToggleLayersWMS_Szlaki: toggleAllTrails,
-    toggleTrail: toggleTrail
-});
+    toggleTrail: toggleTrail,
+    rotateMap: (direction) => rotateMap(map, direction),
+    resetRotation: () => resetRotation(map)
+}); // Eksport funkcji do window dla dostępu z HTML
 
 // Inicjalizacja mapy
 document.addEventListener('DOMContentLoaded', async function() {
@@ -106,14 +80,14 @@ document.addEventListener('DOMContentLoaded', async function() {
             }),
             controls: [],
             interactions: ol.interaction.defaults({doubleClickZoom: false})
-        });
+        }); // Inicjalizacja mapy
 
         // Inicjalizacja komponentów
         initMeasurements(map);
         initControls(map);
         initModals();
         initMarkerHandlers(map);
-        initTrailControls();
+        initTrailControls(); // Inicjalizacja komponentów
 
         // Funkcje globalne dla pomiarów
         window.MeasureLength = () => {
@@ -127,9 +101,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         window.ClearMeasure = () => {
             APP_STATE.measurementActive = false;
             clearMeasurements(map);
-        };
+        }; // Funkcje globalne dla pomiarów
 
     } catch (error) {
         console.error('Błąd podczas inicjalizacji mapy:', error);
     }
-});
+}); 

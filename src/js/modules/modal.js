@@ -51,19 +51,24 @@ export function closeWrapperMarker() {
 }
 
 // Funkcje obsługi okna pogody
-export function displayWrapperWeather(coordinates) {
-    const modal = document.getElementById('wrapper-weather');
-    modal.style.display = 'block';
-    
-    // Konwersja współrzędnych
-    const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-    const weatherInfo = document.getElementById('weather-info');
-    weatherInfo.innerHTML = '<p>Ładowanie danych pogodowych...</p>';
-    
-    return lonLat;
+export function displayWrapperWeather(content, coordinates) {
+    const wrapper = document.getElementById('wrapper-weather');
+    wrapper.innerHTML = `
+        <div class="modal-header">
+            <h2>Warunki pogodowe</h2>
+            <button class="btn-close" onclick="CloseWrapperWeather()">
+                <i class="fas fa-power-off"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            ${content}
+        </div>
+    `;
+    wrapper.style.display = 'block';
+    makeDraggable(wrapper);
 }
 
-export function closeWrapperWeather() {
+export function CloseWrapperWeather() {
     const modal = document.getElementById('wrapper-weather');
     modal.style.display = 'none';
 }

@@ -94,10 +94,12 @@ export function resetRotation(map) {
  */
 export function initControls(map) {
     // Podpięcie funkcji do window dla dostępu z HTML
-    window.rotateMap = (direction) => rotateMap(map, direction);
-    window.rotateLeft = () => rotateMap(map, 'left');
-    window.rotateRight = () => rotateMap(map, 'right');
-    window.zoomIn = () => zoomIn(map);
-    window.zoomOut = () => zoomOut(map);
-    window.resetRotation = () => resetRotation(map);
+    Object.assign(window, {
+        rotateMap: (direction) => rotateMap(map, direction),
+        rotateLeft: () => rotateMap(map, 'left'),
+        rotateRight: () => rotateMap(map, 'right'),
+        resetRotation: () => resetRotation(map),
+        zoomIn: () => zoomIn(map),
+        zoomOut: () => zoomOut(map)
+    });
 }

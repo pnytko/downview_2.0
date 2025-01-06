@@ -48,7 +48,7 @@
                 </div>
                 <div class="checkbox-wrapper">
                     <input id="dem" type="checkbox" onchange="ToggleLayersWMS_DEM()">
-                    <label for="dem">Numeryczny Model Terenu</label>
+                    <label for="dem">Rzeźba terenu</label>
                 </div>
                 <div class="checkbox-wrapper">
                     <input id="szlaki" type="checkbox" onchange="ToggleLayersWMS_Szlaki()">
@@ -80,7 +80,19 @@
                 <i class="fas fa-bars"></i>
             </button>
             <div id="map"></div>
-            
+
+            <!-- Navigation Controls -->
+            <div class="nav-controls">
+                <button onclick="rotateMap('N')" class="nav-button" title="Północ">N</button>
+                <button onclick="rotateMap('NE')" class="nav-button" title="Północny-Wschód">NE</button>
+                <button onclick="rotateMap('E')" class="nav-button" title="Wschód">E</button>
+                <button onclick="rotateMap('SE')" class="nav-button" title="Południowy-Wschód">SE</button>
+                <button onclick="rotateMap('S')" class="nav-button" title="Południe">S</button>
+                <button onclick="rotateMap('SW')" class="nav-button" title="Południowy-Zachód">SW</button>
+                <button onclick="rotateMap('W')" class="nav-button" title="Zachód">W</button>
+                <button onclick="rotateMap('NW')" class="nav-button" title="Północny-Zachód">NW</button>
+            </div>
+
             <!-- Tool Controls -->
             <div class="tools-grid">
                 <button onclick="MeasureLength()" class="tool-button" title="Pomiar odległości">
