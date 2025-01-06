@@ -5,7 +5,7 @@ import { initMeasurements, measureLength, measureArea, clearMeasurements } from 
 import { initControls } from './modules/control.js';
 
 // Import konfiguracji - stałe i ustawienia dla mapy i pogody
-import { MAP_CONFIG, WEATHER_CONFIG, APP_STATE } from './modules/config.js';
+import { MAP_CONFIG, APP_STATE } from './modules/config.js';
 
 // Import warstw mapy - definicje wszystkich warstw (OSM, ortofoto, szlaki, itp.)
 import {
@@ -29,13 +29,18 @@ import {
     closeWrapperTrails,
     displayWrapperMarker,
     closeWrapperMarker,
-    displayWrapperWeather,
     closeWrapperWeather,
     initModals
 } from './modules/modal.js';
 
 // Import modułu znaczników - funkcje do dodawania i usuwania znaczników
 import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js';
+
+// Import modułu pogody
+import { toggleWeather } from './modules/weather.js';
+
+// Import modułu geolokalizacji
+import { getUserLocation } from './modules/geolocation.js';
 
 // Zmienna mapy
 let map;
@@ -49,7 +54,9 @@ Object.assign(window, {
     CloseWrapperMarker: closeWrapperMarker,
     CloseWrapperWeather: closeWrapperWeather,
     AddMarker: () => addMarker(map),
-    DeleteMarker: deleteMarker
+    DeleteMarker: deleteMarker,
+    ToggleLayersWMS_Weather: () => toggleWeather(map),
+    GetUserLocation: () => getUserLocation(map)
 });
 
 // Inicjalizacja mapy
@@ -177,196 +184,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         };
 
-        // ========== OBSŁUGA POGODY ==========
-        async function getWeatherData(coordinates) {
-            const [lon, lat] = coordinates;
-            const params = new URLSearchParams({
-                latitude: lat,
-                longitude: lon,
-                hourly: WEATHER_CONFIG.params.hourly.join(','),
-                timezone: WEATHER_CONFIG.params.timezone
-            });
-            
-            const url = `${WEATHER_CONFIG.apiUrl}?${params.toString()}`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Błąd podczas pobierania danych pogodowych:', error);
-                return null;
-            }
-        }
-
-        // Funkcja obsługująca kliknięcie na mapę dla pogody
-        async function handleWeatherClick(evt) {
-            if (!APP_STATE.weatherActive) return;
-            
-            const coordinates = evt.coordinate;
-            const lonLat = displayWrapperWeather(coordinates);
-            
-            // Pobierz i wyświetl dane pogodowe
-            const weatherData = await getWeatherData(lonLat);
-            const weatherInfo = document.getElementById('weather-info');
-            
-            if (weatherData && weatherData.hourly) {
-                // Pobierz aktualne dane (pierwszy element z tablicy)
-                const currentTemp = weatherData.hourly.temperature_2m[0];
-                const currentPrecip = weatherData.hourly.precipitation[0];
-                const currentCloud = weatherData.hourly.cloudcover[0];
-                const currentWind = weatherData.hourly.windspeed_10m[0];
-                
-                // Wybierz odpowiednią ikonę dla temperatury
-                let tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.normal}"></i>`;
-                if (currentTemp <= 0) tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.cold}"></i>`;
-                else if (currentTemp >= 25) tempIcon = `<i class="fas ${WEATHER_CONFIG.icons.temperature.hot}"></i>`;
-
-                // Wybierz ikonę dla opadów
-                let precipIcon = `<i class="fas ${WEATHER_CONFIG.icons.precipitation.rain}"></i>`;
-                if (currentPrecip === 0) precipIcon = `<i class="fas ${WEATHER_CONFIG.icons.precipitation.none}"></i>`;
-
-                // Wybierz ikonę dla zachmurzenia
-                let cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.mostlyCloudy}"></i>`;
-                if (currentCloud < 25) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.clear}"></i>`;
-                else if (currentCloud < 50) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.fewClouds}"></i>`;
-                else if (currentCloud < 75) cloudIcon = `<i class="fas ${WEATHER_CONFIG.icons.cloudcover.partlyCloudy}"></i>`;
-
-                // Ikona dla wiatru
-                const windIcon = `<i class="fas ${WEATHER_CONFIG.icons.wind}"></i>`;
-                
-                weatherInfo.innerHTML = `
-                    <div class="weather-row">
-                        <div class="weather-label">
-                            ${tempIcon} <strong>Temperatura:</strong>
-                        </div>
-                        <div class="weather-value">${currentTemp}°C</div>
-                    </div>
-                    <div class="weather-row">
-                        <div class="weather-label">
-                            ${precipIcon} <strong>Opady:</strong>
-                        </div>
-                        <div class="weather-value">${currentPrecip} mm</div>
-                    </div>
-                    <div class="weather-row">
-                        <div class="weather-label">
-                            ${cloudIcon} <strong>Zachmurzenie:</strong>
-                        </div>
-                        <div class="weather-value">${currentCloud}%</div>
-                    </div>
-                    <div class="weather-row">
-                        <div class="weather-label">
-                            ${windIcon} <strong>Wiatr:</strong>
-                        </div>
-                        <div class="weather-value">${currentWind} km/h</div>
-                    </div>
-                `;
-            } else {
-                weatherInfo.innerHTML = `<p><i class="fas ${WEATHER_CONFIG.icons.error}"></i> Nie udało się pobrać danych pogodowych.</p>`;
-            }
-
-            // Wyłącz narzędzie po użyciu
-            APP_STATE.weatherActive = false;
-            const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-            if (button) {
-                button.classList.remove('active');
-            }
-            map.getTargetElement().style.cursor = '';
-        }
-
-        // Funkcja przełączająca narzędzie pogody
-        window.ToggleLayersWMS_Weather = function() {
-            const button = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-            const mapCanvas = map.getTargetElement().querySelector('canvas');
-            
-            if (APP_STATE.weatherActive) {
-                APP_STATE.weatherActive = false;
-                if (mapCanvas) {
-                    mapCanvas.style.cursor = '';
-                }
-                button.classList.remove('active');
-                map.un('click', handleWeatherClick);
-                closeWrapperWeather();
-            } else {
-                // Wyłącz inne narzędzia
-                if (APP_STATE.markerActive) {
-                    const markerButton = document.querySelector('button[onclick="AddMarker()"]');
-                    if (markerButton) {
-                        markerButton.classList.remove('active');
-                    }
-                    if (APP_STATE.clickListener) {
-                        map.un('click', APP_STATE.clickListener);
-                        APP_STATE.clickListener = null;
-                    }
-                    APP_STATE.markerActive = false;
-                }
-                
-                APP_STATE.weatherActive = true;
-                if (mapCanvas) {
-                    mapCanvas.style.cursor = 'crosshair';
-                }
-                button.classList.add('active');
-                map.on('click', handleWeatherClick);
-            }
-        };
-
-        // ========== GEOLOKALIZACJA ==========
-        window.GetUserLocation = function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    // Sukces
-                    function(position) {
-                        const coords = ol.proj.fromLonLat([
-                            position.coords.longitude,
-                            position.coords.latitude
-                        ]);
-                        
-                        // Usuń poprzedni marker lokalizacji, jeśli istnieje
-                        const features = markerSource.getFeatures();
-                        features.forEach(feature => {
-                            if (feature.get('type') === 'location') {
-                                markerSource.removeFeature(feature);
-                            }
-                        });
-                        
-                        // Dodaj nowy marker lokalizacji
-                        const locationFeature = new ol.Feature({
-                            geometry: new ol.geom.Point(coords),
-                            type: 'location'
-                        });
-                        
-                        locationFeature.setStyle(
-                            new ol.style.Style({
-                                image: new ol.style.Circle({
-                                    radius: 6,
-                                    fill: new ol.style.Fill({
-                                        color: '#3399CC'
-                                    }),
-                                    stroke: new ol.style.Stroke({
-                                        color: '#fff',
-                                        width: 2
-                                    })
-                                })
-                            })
-                        );
-                        
-                        markerSource.addFeature(locationFeature);
-                        
-                        // Przesuń mapę do lokalizacji użytkownika
-                        map.getView().animate({
-                            center: coords,
-                            zoom: 15
-                        });
-                    },
-                    // Błąd
-                    function() {
-                        alert('Nie udało się uzyskać Twojej lokalizacji');
-                    }
-                );
-            } else {
-                alert('Twoja przeglądarka nie obsługuje geolokalizacji');
-            }
-        };
+        // ========== OBSŁUGA WARSTW ==========
 
     } catch (error) {
         console.error('Błąd podczas inicjalizacji mapy:', error);
