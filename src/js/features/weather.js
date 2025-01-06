@@ -1,5 +1,5 @@
 import { displayWrapperWeather, CloseWrapperWeather } from '../ui/modal.js';
-import { APP_STATE, ToolActions } from '../core/app-state.js';
+import { APP_STATE, StateActions } from '../core/app-state.js';
 
 // Konfiguracja API pogodowego
 const WEATHER_CONFIG = {
@@ -18,13 +18,13 @@ export function toggleWeather(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.weather.active) {
+    if (APP_STATE.tools.weather.active) {
         deactivateWeatherTool(map, mapCanvas);
         return;
     }
 
     // Aktywuj narzędzie
-    ToolActions.activateTool('weather');
+    StateActions.tools.activate('weather');
     activateWeatherTool(map, mapCanvas);
 }
 
@@ -35,7 +35,7 @@ function activateWeatherTool(map, mapCanvas) {
     mapCanvas.style.cursor = 'crosshair';
     
     // Funkcja obsługująca kliknięcie w mapę
-    APP_STATE.weather.clickListener = async function(evt) {
+    APP_STATE.tools.weather.clickListener = async function(evt) {
         const coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
         const weatherData = await getWeatherData(coords);
         if (weatherData) {
@@ -44,19 +44,19 @@ function activateWeatherTool(map, mapCanvas) {
         deactivateWeatherTool(map, mapCanvas);
     };
     
-    map.on('click', APP_STATE.weather.clickListener);
+    map.on('click', APP_STATE.tools.weather.clickListener);
 }
 
 /**
  * Dezaktywuje narzędzie pogodowe
  */
 function deactivateWeatherTool(map, mapCanvas) {
-    ToolActions.deactivateAllTools();
+    StateActions.tools.deactivateAll();
     mapCanvas.style.cursor = 'default';
     
-    if (APP_STATE.weather.clickListener) {
-        map.un('click', APP_STATE.weather.clickListener);
-        APP_STATE.weather.clickListener = null;
+    if (APP_STATE.tools.weather.clickListener) {
+        map.un('click', APP_STATE.tools.weather.clickListener);
+        APP_STATE.tools.weather.clickListener = null;
     }
 }
 

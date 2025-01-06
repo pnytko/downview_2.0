@@ -1,13 +1,14 @@
 import { trailLayers, markerLayer } from './layers.js';
 import { displayWrapperTrails, closeWrapperTrails } from '../ui/modal.js';
 import { setMeasurementsVisible } from './measurements.js';
-import { APP_STATE } from '../core/app-state.js';
+import { APP_STATE, StateActions } from '../core/app-state.js';
 
 // Przełącza widoczność pojedynczej warstwy
 export function toggleLayer(layer, checkboxId) {
     const checkbox = document.getElementById(checkboxId);
     if (checkbox) {
         layer.setVisible(checkbox.checked);
+        StateActions.layers.toggleLayer(checkboxId, checkbox.checked);
     }
 }
 
@@ -18,11 +19,7 @@ export function toggleTrail(color) {
         const isVisible = layer.getVisible();
         layer.setVisible(!isVisible);
         
-        if (!isVisible) {
-            APP_STATE.layers.activeTrails.add(color);
-        } else {
-            APP_STATE.layers.activeTrails.delete(color);
-        }
+        StateActions.layers.toggleTrail(color, !isVisible);
     }
 }
 
@@ -34,7 +31,7 @@ export function toggleVectorLayers(map) {
     const isVisible = checkbox.checked;
     
     // Aktualizuj stan w APP_STATE
-    APP_STATE.layers.vector.visible = isVisible;
+    StateActions.layers.setVectorVisibility(isVisible);
     
     // Przełącz widoczność warstwy znaczników
     markerLayer.setVisible(isVisible);
@@ -72,16 +69,12 @@ export function toggleAllTrails() {
     }
     
     // Zmień stan widoczności wszystkich szlaków
-    APP_STATE.layers.allTrailsVisible = isVisible;
+    StateActions.layers.setAllTrailsVisibility(isVisible);
     
     // Zaktualizuj widoczność warstw
     Object.entries(trailLayers).forEach(([color, layer]) => {
         layer.setVisible(isVisible);
-        if (isVisible) {
-            APP_STATE.layers.activeTrails.add(color);
-        } else {
-            APP_STATE.layers.activeTrails.delete(color);
-        }
+        StateActions.layers.toggleTrail(color, isVisible);
     });
 }
 

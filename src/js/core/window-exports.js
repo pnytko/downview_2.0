@@ -5,7 +5,7 @@ import { toggleLayer, toggleVectorLayers, toggleAllTrails, toggleTrail } from '.
 import { toggleFullScreen } from '../utils/fullscreen.js';
 import { getUserLocation } from '../utils/geolocation.js';
 import { rotateMap } from '../features/directions.js';
-import { measureLength, measureArea, clearMeasurements } from '../features/measurements.js';
+import { measureLength, measureArea, clearMeasurements, deactivateMeasurementTool } from '../features/measurements.js';
 import { osmLayer, ortoLayer, demLayer, parcelLayer, kayakLayer, campLayer, bikeLayer } from '../features/layers.js';
 import { APP_STATE } from './app-state.js';
 
@@ -25,7 +25,11 @@ export function initializeWindowExports(map) {
 
         // Znaczniki
         AddMarker: () => addMarker(map),
-        DeleteMarker: deleteMarker,
+        DeleteMarker: () => {
+            const feature = APP_STATE.tools.marker.currentFeature;
+            const coordinates = feature.getGeometry().getCoordinates();
+            deleteMarker(coordinates);
+        },
 
         // Warstwy
         ToggleLayersWMS_Weather: () => toggleWeather(map),

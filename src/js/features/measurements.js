@@ -1,22 +1,25 @@
-import { APP_STATE, ToolActions } from '../core/app-state.js';
+import { APP_STATE, StateActions } from '../core/app-state.js';
 import { markerLayer } from './layers.js';
 
 // Tworzenie tooltipa dla pomiarów
 function createMeasureTooltip(map) {
-    if (APP_STATE.measurement.tooltipElement) {
-        APP_STATE.measurement.tooltipElement.parentNode.removeChild(APP_STATE.measurement.tooltipElement);
+    const state = APP_STATE.tools.measurement;
+    const drawing = state.drawing;
+    
+    if (drawing.tooltipElement) {
+        drawing.tooltipElement.parentNode.removeChild(drawing.tooltipElement);
     }
-    APP_STATE.measurement.tooltipElement = document.createElement('div');
-    APP_STATE.measurement.tooltipElement.className = 'ol-tooltip ol-tooltip-measure';
-    APP_STATE.measurement.tooltip = new ol.Overlay({
-        element: APP_STATE.measurement.tooltipElement,
+    drawing.tooltipElement = document.createElement('div');
+    drawing.tooltipElement.className = 'ol-tooltip ol-tooltip-measure';
+    drawing.tooltip = new ol.Overlay({
+        element: drawing.tooltipElement,
         offset: [0, -15],
         positioning: 'bottom-center',
         stopEvent: false,
         insertFirst: false
     });
-    map.addOverlay(APP_STATE.measurement.tooltip);
-    APP_STATE.measurement.overlays.push(APP_STATE.measurement.tooltip);
+    map.addOverlay(drawing.tooltip);
+    state.overlays.push(drawing.tooltip);
 }
 
 // Formatowanie długości
@@ -44,10 +47,17 @@ function addInteraction(type, map) {
     console.log('Dodawanie interakcji pomiarowej:', type);
     
     // Aktywuj narzędzie pomiarów
-    ToolActions.activateTool('measurement');
+    StateActions.tools.activate('measurement');
+    
+    // Upewnij się, że warstwa wektorowa jest widoczna
+    markerLayer.setVisible(true);
+    StateActions.layers.setVectorVisibility(true);
     
     const drawType = type === 'LineString' ? 'LineString' : 'Polygon';
-    APP_STATE.measurement.draw = new ol.interaction.Draw({
+    const state = APP_STATE.tools.measurement;
+    const drawing = state.drawing;
+    
+    drawing.draw = new ol.interaction.Draw({
         source: markerLayer.getSource(),
         type: drawType,
         style: new ol.style.Style({
@@ -71,23 +81,23 @@ function addInteraction(type, map) {
         })
     });
 
-    map.addInteraction(APP_STATE.measurement.draw);
+    map.addInteraction(drawing.draw);
     createMeasureTooltip(map);
 
-    APP_STATE.measurement.draw.on('drawstart', function(evt) {
+    drawing.draw.on('drawstart', function(evt) {
         console.log('Rozpoczęto rysowanie pomiaru');
         
         // Ustaw flagę, że pomiar jest aktywny
-        APP_STATE.measurement.active = true;
+        state.active = true;
         
         // Ustaw sketch
-        APP_STATE.measurement.sketch = evt.feature;
-        APP_STATE.measurement.sketch.set('type', 'measurement');
+        drawing.sketch = evt.feature;
+        drawing.sketch.set('type', 'measurement');
 
         /** @type {ol.Coordinate|undefined} */
         let tooltipCoord = evt.coordinate;
 
-        APP_STATE.measurement.listener = APP_STATE.measurement.sketch.getGeometry().on('change', function(evt) {
+        drawing.listener = drawing.sketch.getGeometry().on('change', function(evt) {
             const geom = evt.target;
             let output;
             if (geom instanceof ol.geom.Polygon) {
@@ -97,16 +107,16 @@ function addInteraction(type, map) {
                 output = formatLength(geom);
                 tooltipCoord = geom.getLastCoordinate();
             }
-            APP_STATE.measurement.tooltipElement.innerHTML = output;
-            APP_STATE.measurement.tooltip.setPosition(tooltipCoord);
+            drawing.tooltipElement.innerHTML = output;
+            drawing.tooltip.setPosition(tooltipCoord);
         });
     });
 
-    APP_STATE.measurement.draw.on('drawend', function() {
+    drawing.draw.on('drawend', function() {
         console.log('Zakończono rysowanie pomiaru');
         
         // Pobierz ostatnie współrzędne i wartość pomiaru
-        const geom = APP_STATE.measurement.sketch.getGeometry();
+        const geom = drawing.sketch.getGeometry();
         let output, tooltipCoord;
         
         if (geom instanceof ol.geom.Polygon) {
@@ -131,11 +141,11 @@ function addInteraction(type, map) {
         });
         
         map.addOverlay(tooltip);
-        APP_STATE.measurement.overlays.push(tooltip);
+        state.overlays.push(tooltip);
         tooltip.setPosition(tooltipCoord);
         
         // Ustaw styl dla zakończonego pomiaru
-        APP_STATE.measurement.sketch.setStyle(new ol.style.Style({
+        drawing.sketch.setStyle(new ol.style.Style({
             fill: new ol.style.Fill({
                 color: 'rgba(255, 0, 0, 0.2)'
             }),
@@ -146,21 +156,21 @@ function addInteraction(type, map) {
         }));
         
         // Wyłącz flagę aktywnego pomiaru
-        APP_STATE.measurement.active = false;
+        state.active = false;
         
         // Usuń tymczasowy tooltip
-        if (APP_STATE.measurement.tooltipElement) {
-            APP_STATE.measurement.tooltipElement.parentNode.removeChild(APP_STATE.measurement.tooltipElement);
+        if (drawing.tooltipElement) {
+            drawing.tooltipElement.parentNode.removeChild(drawing.tooltipElement);
         }
-        APP_STATE.measurement.tooltipElement = null;
-        APP_STATE.measurement.tooltip = null;
+        drawing.tooltipElement = null;
+        drawing.tooltip = null;
         
         // Usuń listener
-        ol.Observable.unByKey(APP_STATE.measurement.listener);
+        ol.Observable.unByKey(drawing.listener);
         
         // Usuń interakcję rysowania
-        map.removeInteraction(APP_STATE.measurement.draw);
-        APP_STATE.measurement.draw = null;
+        map.removeInteraction(drawing.draw);
+        drawing.draw = null;
         
         console.log('Pomiar został dodany do warstwy:', markerLayer.getSource().getFeatures().length);
     });
@@ -169,10 +179,12 @@ function addInteraction(type, map) {
 // Publiczne API
 export function measureLength(map) {
     console.log('Rozpoczynanie pomiaru długości');
-    if (!APP_STATE.measurement.active) {
-        if (APP_STATE.measurement.draw) {
-            map.removeInteraction(APP_STATE.measurement.draw);
-            APP_STATE.measurement.draw = null;
+    if (!APP_STATE.tools.measurement.active) {
+        const state = APP_STATE.tools.measurement;
+        const drawing = state.drawing;
+        if (drawing.draw) {
+            map.removeInteraction(drawing.draw);
+            drawing.draw = null;
         }
         addInteraction('LineString', map);
     }
@@ -180,10 +192,12 @@ export function measureLength(map) {
 
 export function measureArea(map) {
     console.log('Rozpoczynanie pomiaru powierzchni');
-    if (!APP_STATE.measurement.active) {
-        if (APP_STATE.measurement.draw) {
-            map.removeInteraction(APP_STATE.measurement.draw);
-            APP_STATE.measurement.draw = null;
+    if (!APP_STATE.tools.measurement.active) {
+        const state = APP_STATE.tools.measurement;
+        const drawing = state.drawing;
+        if (drawing.draw) {
+            map.removeInteraction(drawing.draw);
+            drawing.draw = null;
         }
         addInteraction('Polygon', map);
     }
@@ -193,24 +207,27 @@ export function measureArea(map) {
 export function clearMeasurements(map) {
     console.log('Czyszczenie pomiarów');
     
+    const state = APP_STATE.tools.measurement;
+    const drawing = state.drawing;
+    
     // Usuń interakcję rysowania
-    if (APP_STATE.measurement.draw) {
-        map.removeInteraction(APP_STATE.measurement.draw);
-        APP_STATE.measurement.draw = null;
+    if (drawing.draw) {
+        map.removeInteraction(drawing.draw);
+        drawing.draw = null;
     }
     
     // Usuń tooltip
-    if (APP_STATE.measurement.tooltipElement) {
-        const elem = APP_STATE.measurement.tooltipElement;
+    if (drawing.tooltipElement) {
+        const elem = drawing.tooltipElement;
         elem.parentNode.removeChild(elem);
-        APP_STATE.measurement.tooltipElement = null;
+        drawing.tooltipElement = null;
     }
     
     // Usuń overlaye
-    APP_STATE.measurement.overlays.forEach(overlay => {
+    state.overlays.forEach(overlay => {
         map.removeOverlay(overlay);
     });
-    APP_STATE.measurement.overlays = [];
+    state.overlays = [];
     
     // Usuń pomiary z warstwy
     const features = markerLayer.getSource().getFeatures();
@@ -226,7 +243,29 @@ export function clearMeasurements(map) {
     console.log('Liczba features po czyszczeniu:', markerLayer.getSource().getFeatures().length);
     
     // Dezaktywuj narzędzie
-    ToolActions.deactivateAllTools();
+    StateActions.tools.deactivateAll();
+}
+
+// Dezaktywuje narzędzie pomiarów
+export function deactivateMeasurementTool(map) {
+    const state = APP_STATE.tools.measurement;
+    const drawing = state.drawing;
+    
+    // Usuń interakcję rysowania
+    if (drawing.draw) {
+        map.removeInteraction(drawing.draw);
+        drawing.draw = null;
+    }
+    
+    // Usuń tooltip
+    if (drawing.tooltipElement) {
+        drawing.tooltipElement.parentNode.removeChild(drawing.tooltipElement);
+        drawing.tooltipElement = null;
+        drawing.tooltip = null;
+    }
+    
+    // Dezaktywuj narzędzie
+    state.active = false;
 }
 
 // Ustawia widoczność pomiarów
@@ -237,7 +276,7 @@ export function setMeasurementsVisible(visible) {
     }
     
     // Pokaż/ukryj tooltips
-    APP_STATE.measurement.overlays.forEach(overlay => {
+    APP_STATE.tools.measurement.overlays.forEach(overlay => {
         const element = overlay.getElement();
         if (element) {
             element.style.display = visible ? '' : 'none';

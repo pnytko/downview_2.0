@@ -19,78 +19,138 @@ export const APP_STATE = {
 
     // Stan warstw
     layers: {
-        // Stan warstw bazowych
+        // Warstwy bazowe
         osm: { visible: true },
         orto: { visible: false },
         dem: { visible: false },
         parcel: { visible: false },
-        
-        // Stan warstw dodatkowych
         kayak: { visible: false },
         camp: { visible: false },
         bike: { visible: false },
-        
-        // Stan warstw wektorowych
-        vector: { visible: true },
-        
+
+        // Warstwy wektorowe
+        vector: {
+            visible: false
+        },
+
         // Stan szlaków
+        allTrailsVisible: false,
         activeTrails: new Set(),
-        allTrailsVisible: true
-    },
-    
-    // Stan narzędzia znaczników
-    marker: {
-        active: false,
-        counter: 1,
-        clickListener: null
-    },
-    
-    // Stan narzędzia pomiarów
-    measurement: {
-        active: false,
-        tooltipElement: null,
-        tooltip: null,
-        draw: null,
-        sketch: null,
-        listener: null,
-        overlays: []  // Lista overlayów do usunięcia
-    },
-    
-    // Stan narzędzia pogody
-    weather: {
-        active: false,
-        clickListener: null
-    }
-};
-
-// Akcje dla narzędzi
-export const ToolActions = {
-    // Dezaktywuje wszystkie narzędzia
-    deactivateAllTools() {
-        APP_STATE.marker.active = false;
-        APP_STATE.measurement.active = false;
-        APP_STATE.weather.active = false;
-        APP_STATE.activeTool = null;
-    },
-
-    // Aktywuje wybrane narzędzie
-    activateTool(toolName) {
-        // Najpierw dezaktywuj wszystkie narzędzia
-        this.deactivateAllTools();
-        
-        // Aktywuj wybrane narzędzie
-        switch (toolName) {
-            case 'marker':
-                APP_STATE.marker.active = true;
-                break;
-            case 'measurement':
-                APP_STATE.measurement.active = true;
-                break;
-            case 'weather':
-                APP_STATE.weather.active = true;
-                break;
+        trails: {
+            red: { visible: false },
+            blue: { visible: false },
+            green: { visible: false },
+            yellow: { visible: false },
+            black: { visible: false }
         }
+    },
+    
+    // Stan narzędzi
+    tools: {
+        // Stan narzędzia znaczników
+        marker: {
+            active: false,
+            counter: 1,
+            clickListener: null,
+            currentFeature: null  // Aktualnie wybrany marker
+        },
         
-        APP_STATE.activeTool = toolName;
+        // Stan narzędzia pomiarów
+        measurement: {
+            active: false,
+            drawing: {
+                source: null,
+                vector: null,
+                draw: null,
+                sketch: null,
+                listener: null,
+                tooltipElement: null,
+                tooltip: null
+            },
+            overlays: []  // Lista overlayów do usunięcia
+        },
+
+        // Stan narzędzia pogody
+        weather: {
+            active: false,
+            clickListener: null
+        }
+    },
+    
+    // Stan interfejsu
+    ui: {
+        modals: {
+            trails: { visible: false },
+            marker: { visible: false },
+            weather: { visible: false }
+        },
+        tooltips: {
+            visible: true
+        }
     }
 };
+
+// Akcje do zarządzania stanem aplikacji
+export const StateActions = {
+    // Akcje dla narzędzi
+    tools: {
+        activate: (toolName) => {
+            // Dezaktywuj wszystkie narzędzia
+            StateActions.tools.deactivateAll();
+            
+            // Aktywuj wybrane narzędzie
+            if (APP_STATE.tools[toolName]) {
+                APP_STATE.tools[toolName].active = true;
+            }
+        },
+        
+        deactivateAll: () => {
+            // Dezaktywuj wszystkie narzędzia
+            Object.keys(APP_STATE.tools).forEach(toolName => {
+                if (APP_STATE.tools[toolName]) {
+                    APP_STATE.tools[toolName].active = false;
+                }
+            });
+        }
+    },
+
+    // Akcje dla warstw
+    layers: {
+        toggleLayer: (layerName, visible) => {
+            if (APP_STATE.layers[layerName]) {
+                APP_STATE.layers[layerName].visible = visible;
+            }
+        },
+
+        toggleTrail: (trailColor, visible) => {
+            if (APP_STATE.layers.trails[trailColor]) {
+                APP_STATE.layers.trails[trailColor].visible = visible;
+                if (visible) {
+                    APP_STATE.layers.activeTrails.add(trailColor);
+                } else {
+                    APP_STATE.layers.activeTrails.delete(trailColor);
+                }
+            }
+        },
+
+        setVectorVisibility: (visible) => {
+            APP_STATE.layers.vector.visible = visible;
+        },
+
+        setAllTrailsVisibility: (visible) => {
+            APP_STATE.layers.allTrailsVisible = visible;
+        }
+    },
+
+    // Akcje dla UI
+    ui: {
+        toggleModal: (modalName, visible) => {
+            if (APP_STATE.ui.modals[modalName]) {
+                APP_STATE.ui.modals[modalName].visible = visible;
+            }
+        }
+    }
+};
+
+// Eksportuj też poprzednią nazwę dla kompatybilności wstecznej
+export const ToolActions = StateActions.tools;

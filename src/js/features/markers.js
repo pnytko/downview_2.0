@@ -1,6 +1,6 @@
 import { markerLayer, createMarkerStyle } from './layers.js';
 import { displayWrapperMarker } from '../ui/modal.js';
-import { APP_STATE, ToolActions } from '../core/app-state.js';
+import { APP_STATE, StateActions } from '../core/app-state.js';
 
 // Funkcje pobierania wysokości
 async function fetchWithTimeout(url, timeout = 5000) {
@@ -60,7 +60,11 @@ export async function displayMarkerInfo(feature) {
     const coordinates = feature.getGeometry().getCoordinates();
     const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
     
+    // Zapisz aktualny feature
+    APP_STATE.tools.marker.currentFeature = feature;
+    
     // Pokaż modal z początkowymi danymi
+    StateActions.ui.toggleModal('marker', true);
     displayWrapperMarker(formatMarkerCoordinates(lonLat[0], lonLat[1], 'pobieranie...'));
     
     try {
@@ -80,7 +84,7 @@ export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.marker.active) {
+    if (APP_STATE.tools.marker.active) {
         deactivateMarkerTool(map, mapCanvas);
         return;
     }
@@ -93,7 +97,7 @@ export function addMarker(map) {
 export function addMarkerAtCoordinates(coordinates) {
     const feature = new ol.Feature({
         geometry: new ol.geom.Point(coordinates),
-        number: APP_STATE.marker.counter++,
+        number: APP_STATE.tools.marker.counter++,
         type: 'marker'  // Dodajemy typ aby odróżnić od pomiarów
     });
     
@@ -119,6 +123,9 @@ export function deleteMarker(coordinates) {
             break;
         }
     }
+    
+    // Zamknij modal
+    StateActions.ui.toggleModal('marker', false);
 }
 
 /**
@@ -129,7 +136,7 @@ export function initMarkerHandlers(map) {
     // Obsługa kliknięcia na znacznik
     map.on('click', function(evt) {
         // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
-        if (APP_STATE.measurement.active) return;
+        if (APP_STATE.tools.measurement.active) return;
         
         const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
             return feature;
@@ -150,7 +157,7 @@ export function initMarkerHandlers(map) {
         
         if (hit && feature && feature.get('type') === 'marker') {
             map.getTargetElement().style.cursor = 'pointer';
-        } else if (!APP_STATE.marker.active && !APP_STATE.measurement.active) {
+        } else if (!APP_STATE.tools.marker.active && !APP_STATE.tools.measurement.active) {
             map.getTargetElement().style.cursor = '';
         }
     });
@@ -160,13 +167,13 @@ export function initMarkerHandlers(map) {
 
 function activateMarkerTool(map, mapCanvas) {
     // Aktywuj narzędzie
-    ToolActions.activateTool('marker');
+    StateActions.tools.activate('marker');
     mapCanvas.style.cursor = 'crosshair';
 
     // Dodaj listener kliknięcia
-    APP_STATE.marker.clickListener = async function(evt) {
+    APP_STATE.tools.marker.clickListener = async function(evt) {
         // Jeśli aktywny jest pomiar, nie dodawaj znacznika
-        if (APP_STATE.measurement.active) {
+        if (APP_STATE.tools.measurement.active) {
             return;
         }
 
@@ -188,15 +195,15 @@ function activateMarkerTool(map, mapCanvas) {
         }
     };
     
-    map.on('click', APP_STATE.marker.clickListener);
+    map.on('click', APP_STATE.tools.marker.clickListener);
 }
 
 export function deactivateMarkerTool(map, mapCanvas) {
-    ToolActions.deactivateAllTools();
+    StateActions.tools.deactivateAll();
     mapCanvas.style.cursor = 'default';
     
-    if (APP_STATE.marker.clickListener) {
-        map.un('click', APP_STATE.marker.clickListener);
-        APP_STATE.marker.clickListener = null;
+    if (APP_STATE.tools.marker.clickListener) {
+        map.un('click', APP_STATE.tools.marker.clickListener);
+        APP_STATE.tools.marker.clickListener = null;
     }
 }
