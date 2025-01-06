@@ -1,4 +1,4 @@
-import { LAYER_ZINDEX } from './config.js';
+import { LAYER_ZINDEX } from '../core/config.js';
 
 // ========== PODSTAWOWE WARSTWY ==========
 

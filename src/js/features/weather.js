@@ -1,3 +1,6 @@
+import { APP_STATE } from '../core/config.js';
+import { displayWrapperWeather, CloseWrapperWeather } from '../ui/modal.js';
+
 // Konfiguracja API pogodowego
 const WEATHER_CONFIG = {
     apiUrl: 'https://api.open-meteo.com/v1/forecast',
@@ -32,9 +35,6 @@ const WEATHER_ICONS = {
     // Ikona błędu
     error: 'fa-exclamation-circle'
 };
-
-import { APP_STATE } from './config.js';
-import { displayWrapperWeather, CloseWrapperWeather } from './modal.js';
 
 // Przełącza narzędzie pogodowe
 export function toggleWeather(map) {

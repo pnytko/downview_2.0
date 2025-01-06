@@ -1,6 +1,6 @@
-import { APP_STATE } from './config.js';
+import { APP_STATE } from '../core/config.js';
 import { trailLayers, markerLayer } from './layers.js';
-import { closeWrapperTrails } from './modal.js';
+import { closeWrapperTrails } from '../ui/modal.js';
 
 // Przełącza widoczność pojedynczej warstwy
 export function toggleLayer(layer, checkboxId) {

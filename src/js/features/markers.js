@@ -1,6 +1,6 @@
-import { APP_STATE } from './config.js';
+import { APP_STATE } from '../core/config.js';
 import { markerSource, createMarkerStyle } from './layers.js';
-import { displayWrapperMarker } from './modal.js';
+import { displayWrapperMarker } from '../ui/modal.js';
 
 /**
  * Dodaje nowy znacznik na mapę

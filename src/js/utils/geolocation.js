@@ -1,4 +1,4 @@
-import { MAP_CONFIG } from './config.js';
+import { MAP_CONFIG } from '../core/config.js';
 
 /**
  * Pobiera i wyświetla lokalizację użytkownika na mapie

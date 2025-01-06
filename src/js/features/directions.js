@@ -1,4 +1,4 @@
-import { CONTROLS_CONFIG } from './config.js';
+import { CONTROLS_CONFIG } from '../core/config.js';
 
 /**
  * Obraca mapę w określonym kierunku
