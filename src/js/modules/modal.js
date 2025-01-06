@@ -24,19 +24,22 @@ export async function displayWrapperMarker(marker) {
     const coordinates = marker.getGeometry().getCoordinates();
     const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
     
-    // Pobierz wysokość z OpenElevation API
+    // Najpierw pokaż współrzędne bez wysokości
+    const initialCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: pobieranie...`;
+    document.getElementById('marker-coordinates').innerText = initialCoords;
+    
+    // Asynchronicznie pobierz i zaktualizuj wysokość
     try {
         const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lonLat[1]},${lonLat[0]}`);
         const data = await response.json();
         const elevation = data.results[0].elevation;
         
-        // Formatowanie współrzędnych
+        // Zaktualizuj tekst o wysokość
         const formattedCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: ${elevation.toFixed(1)} m n.p.m.`;
-        
         document.getElementById('marker-coordinates').innerText = formattedCoords;
     } catch (error) {
         console.error('Błąd podczas pobierania wysokości:', error);
-        // W przypadku błędu wyświetl współrzędne bez wysokości
+        // W przypadku błędu zaktualizuj tekst o informację o błędzie
         const formattedCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: niedostępna`;
         document.getElementById('marker-coordinates').innerText = formattedCoords;
     }

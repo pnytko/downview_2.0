@@ -34,16 +34,23 @@ import {
     initModals
 } from './modules/modal.js';
 
+// Import modułu znaczników - funkcje do dodawania i usuwania znaczników
+import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js';
+
 // Zmienna mapy
 let map;
 
-// Obsługa okien modalnych
-window.DisplayWrapperAbout = displayWrapperAbout;
-window.CloseWrapperAbout = closeWrapperAbout;
-window.CloseWrapperTrails = closeWrapperTrails;
-window.DisplayWrapperMarker = displayWrapperMarker;
-window.CloseWrapperMarker = closeWrapperMarker;
-window.CloseWrapperWeather = closeWrapperWeather;
+// Eksport funkcji do window dla dostępu z HTML
+Object.assign(window, {
+    DisplayWrapperAbout: displayWrapperAbout,
+    CloseWrapperAbout: closeWrapperAbout,
+    CloseWrapperTrails: closeWrapperTrails,
+    DisplayWrapperMarker: displayWrapperMarker,
+    CloseWrapperMarker: closeWrapperMarker,
+    CloseWrapperWeather: closeWrapperWeather,
+    AddMarker: () => addMarker(map),
+    DeleteMarker: deleteMarker
+});
 
 // Inicjalizacja mapy
 document.addEventListener('DOMContentLoaded', async function() {
@@ -71,10 +78,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             interactions: ol.interaction.defaults({doubleClickZoom: false})
         });
 
-        // Inicjalizacja kontrolek i pomiarów
-        initControls(map);
+        // Inicjalizacja komponentów
         initMeasurements(map);
+        initControls(map);
         initModals();
+        initMarkerHandlers(map);
 
         // Funkcje globalne dla pomiarów
         window.MeasureLength = () => {
@@ -168,121 +176,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 document.exitFullscreen();
             }
         };
-
-        // ========== OBSŁUGA ZNACZNIKÓW ==========
-        window.AddMarker = function() {
-            const mapCanvas = map.getTargetElement().querySelector('canvas');
-            
-            // Jeśli narzędzie jest już aktywne, wyłącz je
-            if (APP_STATE.markerActive) {
-                APP_STATE.markerActive = false;
-                if (mapCanvas) {
-                    mapCanvas.style.cursor = '';
-                }
-                if (APP_STATE.clickListener) {
-                    map.un('click', APP_STATE.clickListener);
-                    APP_STATE.clickListener = null;
-                }
-                const button = document.querySelector('button[onclick="AddMarker()"]');
-                if (button) {
-                    button.classList.remove('active');
-                }
-                return;
-            }
-
-            // Wyłącz inne narzędzia
-            if (APP_STATE.weatherActive) {
-                const weatherButton = document.querySelector('button[onclick="ToggleLayersWMS_Weather()"]');
-                if (weatherButton) {
-                    weatherButton.classList.remove('active');
-                }
-                map.un('click', handleWeatherClick);
-                closeWrapperWeather();
-                APP_STATE.weatherActive = false;
-            }
-
-            // Aktywuj narzędzie
-            APP_STATE.markerActive = true;
-            if (mapCanvas) {
-                mapCanvas.style.cursor = 'crosshair';
-            }
-            const button = document.querySelector('button[onclick="AddMarker()"]');
-            if (button) {
-                button.classList.add('active');
-            }
-
-            // Dodaj listener kliknięcia
-            APP_STATE.clickListener = function(evt) {
-                const marker = new ol.Feature({
-                    geometry: new ol.geom.Point(evt.coordinate)
-                });
-                
-                // Ustaw styl z numerem dla nowego znacznika
-                marker.setStyle(createMarkerStyle(APP_STATE.markerCounter));
-                APP_STATE.markerCounter++;
-
-                markerSource.addFeature(marker);
-                
-                // Wyłącz narzędzie po dodaniu znacznika
-                APP_STATE.markerActive = false;
-                if (mapCanvas) {
-                    mapCanvas.style.cursor = '';
-                }
-                map.un('click', APP_STATE.clickListener);
-                APP_STATE.clickListener = null;
-                const button = document.querySelector('button[onclick="AddMarker()"]');
-                if (button) {
-                    button.classList.remove('active');
-                }
-            };
-            
-            map.on('click', APP_STATE.clickListener);
-        };
-
-        window.DeleteMarker = function() {
-            const modal = document.getElementById('wrapper-marker');
-            const coordinates = document.getElementById('marker-coordinates').textContent;
-            const [lon, lat] = coordinates.match(/-?\d+\.\d+/g).map(Number);
-            
-            const features = markerSource.getFeatures();
-            features.forEach(feature => {
-                const coords = ol.proj.transform(feature.getGeometry().getCoordinates(), 'EPSG:3857', 'EPSG:4326');
-                if (Math.abs(coords[0] - lon) < 0.000001 && Math.abs(coords[1] - lat) < 0.000001) {
-                    markerSource.removeFeature(feature);
-                }
-            });
-            
-            modal.style.display = 'none';
-        };
-
-        // Obsługa kliknięcia na znacznik
-        map.on('click', function(evt) {
-            // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
-            if (APP_STATE.measurementActive) return;
-            
-            const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
-                return feature;
-            });
-            
-            if (feature && feature.getGeometry().getType() === 'Point') {
-                displayWrapperMarker(feature);
-            }
-        });
-
-        // Zmiana kursora po najechaniu na marker
-        map.on('pointermove', function(evt) {
-            const pixel = map.getEventPixel(evt.originalEvent);
-            const hit = map.hasFeatureAtPixel(pixel);
-            const feature = map.forEachFeatureAtPixel(pixel, function(feature) {
-                return feature;
-            });
-            
-            if (hit && feature && feature.getGeometry().getType() === 'Point') {
-                map.getTargetElement().style.cursor = 'pointer';
-            } else {
-                map.getTargetElement().style.cursor = '';
-            }
-        });
 
         // ========== OBSŁUGA POGODY ==========
         async function getWeatherData(coordinates) {
