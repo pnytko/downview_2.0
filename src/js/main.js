@@ -48,15 +48,6 @@ window.CloseWrapperWeather = closeWrapperWeather;
 // Map Initialization
 document.addEventListener('DOMContentLoaded', async function() {
     try {
-        // Dodanie logo
-        const logoOverlay = document.createElement('div');
-        logoOverlay.className = 'logo-overlay';
-        const logoImg = document.createElement('img');
-        logoImg.src = './src/assets/images/logo.png';
-        logoImg.alt = 'Logo';
-        logoOverlay.appendChild(logoImg);
-        document.querySelector('.grid-container').appendChild(logoOverlay);
-
         map = new ol.Map({
             target: 'map',
             layers: [
