@@ -53,7 +53,9 @@ Object.assign(window, {
     ToggleLayersWMS_Szlaki: toggleAllTrails,
     toggleTrail: toggleTrail,
     rotateMap: (direction) => rotateMap(map, direction),
-    resetRotation: () => resetRotation(map)
+    resetRotation: () => resetRotation(map),
+    FullScreen: toggleFullScreen,
+    GetUserLocation: () => getUserLocation(map)
 }); // Eksport funkcji do window dla dostępu z HTML
 
 // Inicjalizacja mapy
