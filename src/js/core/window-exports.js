@@ -5,7 +5,7 @@ import { toggleWeather } from '../features/weather.js';
 import { toggleLayer, toggleVectorLayers, toggleAllTrails, toggleTrail } from '../features/layers-controls.js';
 import { toggleFullScreen } from '../utils/fullscreen.js';
 import { getUserLocation } from '../utils/geolocation.js';
-import { rotateMap, resetRotation } from '../features/directions.js';
+import { rotateMap } from '../features/directions.js';
 import { measureLength, measureArea, clearMeasurements } from '../features/measurements.js';
 import { osmLayer, ortoLayer, demLayer, parcelLayer, kayakLayer, campLayer, bikeLayer } from '../features/layers.js';
 
@@ -15,7 +15,7 @@ import { osmLayer, ortoLayer, demLayer, parcelLayer, kayakLayer, campLayer, bike
  */
 export function initializeWindowExports(map) {
     Object.assign(window, {
-        // Funkcje modalne
+        // Funkcje okien modalnych
         DisplayWrapperAbout: displayWrapperAbout,
         CloseWrapperAbout: closeWrapperAbout,
         CloseWrapperTrails: closeWrapperTrails,
@@ -42,7 +42,6 @@ export function initializeWindowExports(map) {
 
         // Funkcje kierunków
         rotateMap: (direction) => rotateMap(map, direction),
-        resetRotation: () => resetRotation(map),
 
         // Inne funkcje
         FullScreen: toggleFullScreen,

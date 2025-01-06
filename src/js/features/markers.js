@@ -2,6 +2,76 @@ import { APP_STATE } from '../core/config.js';
 import { markerSource, createMarkerStyle } from './layers.js';
 import { displayWrapperMarker } from '../ui/modal.js';
 
+// Funkcje pobierania wysokości
+async function fetchWithTimeout(url, timeout = 5000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
+async function getElevation(lat, lon, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetchWithTimeout(
+                `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`,
+                5000
+            );
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Otrzymano nieprawidłowy format odpowiedzi");
+            }
+            const data = await response.json();
+            return data.results[0].elevation;
+        } catch (error) {
+            if (i === retries - 1) throw error; // Rzuć błąd tylko przy ostatniej próbie
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Zwiększający się czas oczekiwania
+        }
+    }
+}
+
+/**
+ * Formatuje współrzędne markera z wysokością
+ * @param {number} lon - Długość geograficzna
+ * @param {number} lat - Szerokość geograficzna
+ * @param {number|string} elevation - Wysokość lub informacja o błędzie
+ * @returns {string} Sformatowany tekst z współrzędnymi
+ */
+function formatMarkerCoordinates(lon, lat, elevation) {
+    return `Długość: ${lon.toFixed(6)}°\nSzerokość: ${lat.toFixed(6)}°\nWysokość: ${
+        typeof elevation === 'number' ? `${elevation.toFixed(1)} m n.p.m.` : elevation
+    }`;
+}
+
+/**
+ * Wyświetla informacje o markerze wraz z wysokością
+ * @param {ol.Feature} feature - Feature markera
+ */
+export async function displayMarkerInfo(feature) {
+    const coordinates = feature.getGeometry().getCoordinates();
+    const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+    
+    // Pokaż modal z początkowymi danymi
+    displayWrapperMarker(formatMarkerCoordinates(lonLat[0], lonLat[1], 'pobieranie...'));
+    
+    try {
+        const elevation = await getElevation(lonLat[1], lonLat[0]);
+        displayWrapperMarker(formatMarkerCoordinates(lonLat[0], lonLat[1], elevation));
+    } catch (error) {
+        console.error('Błąd podczas pobierania wysokości:', error);
+        displayWrapperMarker(formatMarkerCoordinates(lonLat[0], lonLat[1], 'niedostępna'));
+    }
+}
+
 /**
  * Dodaje nowy znacznik na mapę
  * @param {ol.Map} map - Instancja mapy OpenLayers
@@ -72,7 +142,7 @@ export function initMarkerHandlers(map) {
         });
         
         if (feature && feature.getGeometry().getType() === 'Point') {
-            displayWrapperMarker(feature);
+            displayMarkerInfo(feature);
         }
     });
 
@@ -119,7 +189,7 @@ function activateMarkerTool(map, mapCanvas) {
         
         // Wyświetl modal z informacjami o znaczniku
         const coords4326 = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-        displayWrapperMarker(coords4326);
+        displayMarkerInfo(feature);
         
         // Dezaktywuj narzędzie po dodaniu znacznika
         deactivateMarkerTool(map, mapCanvas);

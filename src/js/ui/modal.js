@@ -16,32 +16,46 @@ export function closeWrapperTrails() {
 }
 
 // Funkcje obsługi okna znaczników
-export async function displayWrapperMarker(coordinates) {
+async function fetchWithTimeout(url, timeout = 5000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
+async function getElevation(lat, lon, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetchWithTimeout(
+                `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`,
+                5000
+            );
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Otrzymano nieprawidłowy format odpowiedzi");
+            }
+            const data = await response.json();
+            return data.results[0].elevation;
+        } catch (error) {
+            if (i === retries - 1) throw error; // Rzuć błąd tylko przy ostatniej próbie
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Zwiększający się czas oczekiwania
+        }
+    }
+}
+
+export async function displayWrapperMarker(formattedText) {
     const modal = document.getElementById('wrapper-marker');
     modal.style.display = 'block';
-
-    // Współrzędne są już w formacie EPSG:4326 (lon, lat)
-    const lonLat = coordinates;
-    
-    // Najpierw pokaż współrzędne bez wysokości
-    const initialCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: pobieranie...`;
-    document.getElementById('marker-coordinates').innerText = initialCoords;
-    
-    // Asynchronicznie pobierz i zaktualizuj wysokość
-    try {
-        const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lonLat[1]},${lonLat[0]}`);
-        const data = await response.json();
-        const elevation = data.results[0].elevation;
-        
-        // Zaktualizuj tekst o wysokość
-        const formattedCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: ${elevation.toFixed(1)} m n.p.m.`;
-        document.getElementById('marker-coordinates').innerText = formattedCoords;
-    } catch (error) {
-        console.error('Błąd podczas pobierania wysokości:', error);
-        // W przypadku błędu zaktualizuj tekst o informację o błędzie
-        const formattedCoords = `Długość: ${lonLat[0].toFixed(6)}°\nSzerokość: ${lonLat[1].toFixed(6)}°\nWysokość: niedostępna`;
-        document.getElementById('marker-coordinates').innerText = formattedCoords;
-    }
+    document.getElementById('marker-coordinates').innerText = formattedText;
 }
 
 export function closeWrapperMarker() {

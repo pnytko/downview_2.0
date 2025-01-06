@@ -67,11 +67,3 @@ export const STYLES = {
         }
     }
 };
-
-// Konfiguracja kontrolek mapy
-export const CONTROLS_CONFIG = {
-    rotation: {
-        angle: 0.2,        // Kąt obrotu w radianach
-        animationMs: 500   // Czas animacji w milisekundach
-    }
-};

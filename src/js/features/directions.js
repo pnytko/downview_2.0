@@ -1,10 +1,9 @@
-import { CONTROLS_CONFIG } from '../core/config.js';
+// Konfiguracja rotacji mapy
+const ROTATION_CONFIG = {
+    animationMs: 500   // Czas animacji w milisekundach
+};
 
-/**
- * Obraca mapę w określonym kierunku
- * @param {ol.Map} map - Instancja mapy OpenLayers
- * @param {string} direction - Kierunek obrotu ('N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW')
- */
+// Obraca mapę w określonym kierunku (N, NE, E, SE, S, SW, W, NW)
 export function rotateMap(map, direction) {
     const view = map.getView();
     let rotation = 0;
@@ -40,30 +39,6 @@ export function rotateMap(map, direction) {
     
     view.animate({
         rotation: rotation,
-        duration: CONTROLS_CONFIG.rotation.animationMs
-    });
-}
-
-/**
- * Resetuje rotację mapy do 0 (północ)
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
-export function resetRotation(map) {
-    const view = map.getView();
-    view.animate({
-        rotation: 0,
-        duration: CONTROLS_CONFIG.rotation.animationMs
-    });
-}
-
-/**
- * Inicjalizuje kontrolki kierunków i podpina je do window
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
-export function initDirections(map) {
-    // Podpięcie funkcji do window dla dostępu z HTML
-    Object.assign(window, {
-        rotateMap: (direction) => rotateMap(map, direction),
-        resetRotation: () => resetRotation(map)
+        duration: ROTATION_CONFIG.animationMs
     });
 }

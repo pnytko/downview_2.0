@@ -1,4 +1,7 @@
-import { CONTROLS_CONFIG } from '../core/config.js';
+// Konfiguracja kontrolek
+const ZOOM_CONFIG = {
+    animationMs: 300   // Czas animacji przybliżania/oddalania w milisekundach
+};
 
 /**
  * Przybliża widok mapy
@@ -9,7 +12,7 @@ export function zoomIn(map) {
     const zoom = view.getZoom();
     view.animate({
         zoom: zoom + 1,
-        duration: CONTROLS_CONFIG.zoom.animationMs
+        duration: ZOOM_CONFIG.animationMs
     });
 }
 
@@ -22,7 +25,7 @@ export function zoomOut(map) {
     const zoom = view.getZoom();
     view.animate({
         zoom: zoom - 1,
-        duration: CONTROLS_CONFIG.zoom.animationMs
+        duration: ZOOM_CONFIG.animationMs
     });
 }
 
