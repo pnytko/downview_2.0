@@ -27,6 +27,7 @@ import {
     closeWrapperWeather,
     initModals
 } from './modules/modal.js';
+import { WEATHER_ICONS } from './modules/weatherIcons.js';
 
 // Zmienne globalne
 let map;
@@ -332,32 +333,52 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const currentCloud = weatherData.hourly.cloudcover[0];
                 const currentWind = weatherData.hourly.windspeed_10m[0];
                 
-                // Wybierz odpowiednie emoji dla temperatury
-                let tempEmoji = '<span class="weather-emoji">🌡️</span>';
-                if (currentTemp <= 0) tempEmoji = '<span class="weather-emoji">❄️</span>';
-                else if (currentTemp >= 25) tempEmoji = '<span class="weather-emoji">🌞</span>';
+                // Wybierz odpowiednią ikonę dla temperatury
+                let tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.normal}"></i>`;
+                if (currentTemp <= 0) tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.cold}"></i>`;
+                else if (currentTemp >= 25) tempIcon = `<i class="fas ${WEATHER_ICONS.temperature.hot}"></i>`;
 
-                // Wybierz emoji dla opadów
-                let precipEmoji = '<span class="weather-emoji">☔</span>';
-                if (currentPrecip === 0) precipEmoji = '<span class="weather-emoji">🌂</span>';
+                // Wybierz ikonę dla opadów
+                let precipIcon = `<i class="fas ${WEATHER_ICONS.precipitation.rain}"></i>`;
+                if (currentPrecip === 0) precipIcon = `<i class="fas ${WEATHER_ICONS.precipitation.none}"></i>`;
 
-                // Wybierz emoji dla zachmurzenia
-                let cloudEmoji = '<span class="weather-emoji">☁️</span>';
-                if (currentCloud < 25) cloudEmoji = '<span class="weather-emoji">☀️</span>';
-                else if (currentCloud < 50) cloudEmoji = '<span class="weather-emoji">🌤️</span>';
-                else if (currentCloud < 75) cloudEmoji = '<span class="weather-emoji">⛅</span>';
+                // Wybierz ikonę dla zachmurzenia
+                let cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.mostlyCloudy}"></i>`;
+                if (currentCloud < 25) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.clear}"></i>`;
+                else if (currentCloud < 50) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.fewClouds}"></i>`;
+                else if (currentCloud < 75) cloudIcon = `<i class="fas ${WEATHER_ICONS.cloudcover.partlyCloudy}"></i>`;
 
-                // Emoji dla wiatru
-                const windEmoji = '<span class="weather-emoji">💨</span>';
+                // Ikona dla wiatru
+                const windIcon = `<i class="fas ${WEATHER_ICONS.wind}"></i>`;
                 
                 weatherInfo.innerHTML = `
-                    <p>${tempEmoji} <strong>Temperatura:</strong> ${currentTemp}°C</p>
-                    <p>${precipEmoji} <strong>Opady:</strong> ${currentPrecip} mm</p>
-                    <p>${cloudEmoji} <strong>Zachmurzenie:</strong> ${currentCloud}%</p>
-                    <p>${windEmoji} <strong>Prędkość wiatru:</strong> ${currentWind} km/h</p>
+                    <div class="weather-row">
+                        <div class="weather-label">
+                            ${tempIcon} <strong>Temperatura:</strong>
+                        </div>
+                        <div class="weather-value">${currentTemp}°C</div>
+                    </div>
+                    <div class="weather-row">
+                        <div class="weather-label">
+                            ${precipIcon} <strong>Opady:</strong>
+                        </div>
+                        <div class="weather-value">${currentPrecip} mm</div>
+                    </div>
+                    <div class="weather-row">
+                        <div class="weather-label">
+                            ${cloudIcon} <strong>Zachmurzenie:</strong>
+                        </div>
+                        <div class="weather-value">${currentCloud}%</div>
+                    </div>
+                    <div class="weather-row">
+                        <div class="weather-label">
+                            ${windIcon} <strong>Wiatr:</strong>
+                        </div>
+                        <div class="weather-value">${currentWind} km/h</div>
+                    </div>
                 `;
             } else {
-                weatherInfo.innerHTML = '<p><span class="weather-emoji">❌</span> Nie udało się pobrać danych pogodowych.</p>';
+                weatherInfo.innerHTML = `<p><i class="fas ${WEATHER_ICONS.error}"></i> Nie udało się pobrać danych pogodowych.</p>`;
             }
 
             // Wyłącz narzędzie po użyciu

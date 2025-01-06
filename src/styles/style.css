@@ -751,13 +751,59 @@ button i{
     padding: var(--spacing-md);
 }
 
+.weather-row {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
+    justify-content: space-between;
+}
+
+.weather-row .weather-label {
+    display: flex;
+    align-items: center;
+}
+
+.weather-row .weather-value {
+    text-align: right;
+}
+
+.weather-row:last-child {
+    border-bottom: none;
+}
+
+#weather-info i.fas {
+    font-size: 1.2em;
+    width: 2em;
+    text-align: center;
+    color: var(--accent-color);
+}
+
+#weather-info strong {
+    margin-right: var(--spacing-sm);
+    min-width: 120px;
+    display: inline-block;
+}
+
+#weather-info .weather-row > * {
+    margin: 0;
+}
+
 #weather-info p {
-    margin-bottom: var(--spacing-sm);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .weather-emoji {
     font-size: 1.5em;
+}
+
+/* Weather icons styling */
+#weather-info i.fas {
+    font-size: 1.2em;
+    width: 1.5em;
+    text-align: center;
+    color: var(--accent-color);
 }
