@@ -10,6 +10,11 @@ export function closeWrapperAbout() {
 }
 
 // Funkcje obsługi okna szlaków
+export function displayWrapperTrails() {
+    const modal = document.getElementById('wrapper-trails');
+    modal.style.display = 'block';
+}
+
 export function closeWrapperTrails() {
     const modal = document.getElementById('wrapper-trails');
     modal.style.display = 'none';

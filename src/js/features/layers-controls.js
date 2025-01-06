@@ -1,6 +1,7 @@
-import { trailLayers, markerLayer, TRAILS_STATE } from './layers.js';
-import { closeWrapperTrails } from '../ui/modal.js';
+import { trailLayers, markerLayer } from './layers.js';
+import { displayWrapperTrails, closeWrapperTrails } from '../ui/modal.js';
 import { setMeasurementsVisible } from './measurements.js';
+import { APP_STATE } from '../core/app-state.js';
 
 // Przełącza widoczność pojedynczej warstwy
 export function toggleLayer(layer, checkboxId) {
@@ -18,9 +19,9 @@ export function toggleTrail(color) {
         layer.setVisible(!isVisible);
         
         if (!isVisible) {
-            TRAILS_STATE.activeTrails.add(color);
+            APP_STATE.layers.activeTrails.add(color);
         } else {
-            TRAILS_STATE.activeTrails.delete(color);
+            APP_STATE.layers.activeTrails.delete(color);
         }
     }
 }
@@ -49,24 +50,34 @@ export function toggleVectorLayers(map) {
 
 // Przełącza widoczność wszystkich szlaków
 export function toggleAllTrails() {
+    // Pobierz checkbox szlaków
+    const checkbox = document.getElementById('szlaki');
+    if (!checkbox) return;
+
+    const isVisible = checkbox.checked;
+    
+    // Otwórz/zamknij okno szlaków
+    if (isVisible) {
+        displayWrapperTrails();
+        // Po otwarciu okna ustaw stan wszystkich checkboxów w modalu
+        const modalCheckboxes = document.querySelectorAll('#wrapper-trails input[type="checkbox"]');
+        modalCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    } else {
+        closeWrapperTrails();
+    }
+    
     // Zmień stan widoczności wszystkich szlaków
-    TRAILS_STATE.allTrailsVisible = !TRAILS_STATE.allTrailsVisible;
-    
-    // Pobierz wszystkie checkboxy szlaków
-    const trailCheckboxes = document.querySelectorAll('.trail-checkbox');
-    
-    // Ustaw stan wszystkich checkboxów
-    trailCheckboxes.forEach(checkbox => {
-        checkbox.checked = TRAILS_STATE.allTrailsVisible;
-    });
+    APP_STATE.layers.allTrailsVisible = isVisible;
     
     // Zaktualizuj widoczność warstw
     Object.entries(trailLayers).forEach(([color, layer]) => {
-        layer.setVisible(TRAILS_STATE.allTrailsVisible);
-        if (TRAILS_STATE.allTrailsVisible) {
-            TRAILS_STATE.activeTrails.add(color);
+        layer.setVisible(isVisible);
+        if (isVisible) {
+            APP_STATE.layers.activeTrails.add(color);
         } else {
-            TRAILS_STATE.activeTrails.delete(color);
+            APP_STATE.layers.activeTrails.delete(color);
         }
     });
 }
