@@ -83,14 +83,60 @@ export async function displayMarkerInfo(feature) {
 export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
-    // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.tools.marker.active) {
-        deactivateMarkerTool(map, mapCanvas);
-        return;
-    }
+    // Aktywuj narzędzie znaczników
+    StateActions.tools.activate('marker');
+    
+    // Upewnij się, że warstwa wektorowa jest widoczna
+    markerLayer.setVisible(true);
+    StateActions.layers.setVectorVisibility(true);
+    
+    // Zmień kursor na krzyżyk
+    mapCanvas.style.cursor = 'crosshair';
+    
+    // Dodaj obsługę kliknięcia w mapę
+    APP_STATE.tools.marker.clickListener = function(evt) {
+        const coordinates = evt.coordinate;
+        const coordinates4326 = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+        
+        try {
+            const elevation = getElevation(coordinates4326[1], coordinates4326[0]);
+            const formattedText = formatMarkerCoordinates(coordinates4326[0], coordinates4326[1], elevation);
+            
+            const feature = addMarkerAtCoordinates(coordinates);
+            displayMarkerInfo(feature);
+            
+            // Przywróć domyślny kursor i dezaktywuj narzędzie
+            mapCanvas.style.cursor = '';
+            deactivateMarkerTool(map);
+        } catch (error) {
+            alert('Nie udało się pobrać wysokości dla tego punktu');
+            
+            // Przywróć domyślny kursor w przypadku błędu
+            mapCanvas.style.cursor = '';
+        }
+    };
+    
+    map.on('click', APP_STATE.tools.marker.clickListener);
+}
 
-    // Aktywuj narzędzie
-    activateMarkerTool(map, mapCanvas);
+/**
+ * Dezaktywuje narzędzie dodawania znaczników
+ * @param {ol.Map} map - Instancja mapy OpenLayers
+ */
+export function deactivateMarkerTool(map) {
+    if (APP_STATE.tools.marker.clickListener) {
+        map.un('click', APP_STATE.tools.marker.clickListener);
+        APP_STATE.tools.marker.clickListener = null;
+    }
+    
+    // Przywróć domyślny kursor
+    const mapCanvas = map.getTargetElement().querySelector('canvas');
+    if (mapCanvas) {
+        mapCanvas.style.cursor = '';
+    }
+    
+    // Dezaktywuj narzędzie
+    StateActions.tools.deactivateAll();
 }
 
 // Dodaje znacznik w określonych współrzędnych
@@ -161,49 +207,4 @@ export function initMarkerHandlers(map) {
             map.getTargetElement().style.cursor = '';
         }
     });
-}
-
-// Funkcje pomocnicze
-
-function activateMarkerTool(map, mapCanvas) {
-    // Aktywuj narzędzie
-    StateActions.tools.activate('marker');
-    mapCanvas.style.cursor = 'crosshair';
-
-    // Dodaj listener kliknięcia
-    APP_STATE.tools.marker.clickListener = async function(evt) {
-        // Jeśli aktywny jest pomiar, nie dodawaj znacznika
-        if (APP_STATE.tools.measurement.active) {
-            return;
-        }
-
-        const coords = evt.coordinate;
-        const coords4326 = ol.proj.transform(coords, 'EPSG:3857', 'EPSG:4326');
-        
-        try {
-            const elevation = await getElevation(coords4326[1], coords4326[0]);
-            const formattedText = await formatMarkerCoordinates(coords4326[0], coords4326[1], elevation);
-            
-            const feature = addMarkerAtCoordinates(coords);
-            displayMarkerInfo(feature);
-            
-            // Dezaktywuj narzędzie po dodaniu znacznika
-            deactivateMarkerTool(map, mapCanvas);
-        } catch (error) {
-            console.error('Błąd podczas pobierania wysokości:', error);
-            alert('Nie udało się pobrać wysokości dla tego punktu');
-        }
-    };
-    
-    map.on('click', APP_STATE.tools.marker.clickListener);
-}
-
-export function deactivateMarkerTool(map, mapCanvas) {
-    StateActions.tools.deactivateAll();
-    mapCanvas.style.cursor = 'default';
-    
-    if (APP_STATE.tools.marker.clickListener) {
-        map.un('click', APP_STATE.tools.marker.clickListener);
-        APP_STATE.tools.marker.clickListener = null;
-    }
 }

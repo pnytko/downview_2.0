@@ -20,8 +20,7 @@ export const ortoLayer = new ol.layer.Tile({
             REQUEST: "GetMap",
             LAYERS: "Raster"
         },
-        transition: 0,
-        projection: "EPSG:4326"
+        transition: 0
     }),
     visible: APP_STATE.layers.orto.visible,
     title: "OrthoHD",
@@ -92,16 +91,16 @@ export const createTrailLayer = (layerId) => {
         source: new ol.source.TileWMS({
             url: "https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer",
             params: {
+                LAYERS: layerId,
                 FORMAT: "image/png",
                 TRANSPARENT: true,
                 VERSION: "1.1.1",
-                LAYERS: layerId,
             },
             transition: 0
         }),
         visible: false,
         opacity: 0.8,
-        zIndex: LAYER_ZINDEX.TRAILS,
+        zIndex: LAYER_ZINDEX.TRAILS
     });
 };
 

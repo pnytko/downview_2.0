@@ -44,8 +44,6 @@ function formatArea(polygon) {
 
 // Dodawanie interakcji pomiarowej
 function addInteraction(type, map) {
-    console.log('Dodawanie interakcji pomiarowej:', type);
-    
     // Aktywuj narzędzie pomiarów
     StateActions.tools.activate('measurement');
     
@@ -85,8 +83,6 @@ function addInteraction(type, map) {
     createMeasureTooltip(map);
 
     drawing.draw.on('drawstart', function(evt) {
-        console.log('Rozpoczęto rysowanie pomiaru');
-        
         // Ustaw flagę, że pomiar jest aktywny
         state.active = true;
         
@@ -113,8 +109,6 @@ function addInteraction(type, map) {
     });
 
     drawing.draw.on('drawend', function() {
-        console.log('Zakończono rysowanie pomiaru');
-        
         // Pobierz ostatnie współrzędne i wartość pomiaru
         const geom = drawing.sketch.getGeometry();
         let output, tooltipCoord;
@@ -171,14 +165,11 @@ function addInteraction(type, map) {
         // Usuń interakcję rysowania
         map.removeInteraction(drawing.draw);
         drawing.draw = null;
-        
-        console.log('Pomiar został dodany do warstwy:', markerLayer.getSource().getFeatures().length);
     });
 }
 
 // Publiczne API
 export function measureLength(map) {
-    console.log('Rozpoczynanie pomiaru długości');
     if (!APP_STATE.tools.measurement.active) {
         const state = APP_STATE.tools.measurement;
         const drawing = state.drawing;
@@ -191,7 +182,6 @@ export function measureLength(map) {
 }
 
 export function measureArea(map) {
-    console.log('Rozpoczynanie pomiaru powierzchni');
     if (!APP_STATE.tools.measurement.active) {
         const state = APP_STATE.tools.measurement;
         const drawing = state.drawing;
@@ -205,8 +195,6 @@ export function measureArea(map) {
 
 // Czyści pomiary
 export function clearMeasurements(map) {
-    console.log('Czyszczenie pomiarów');
-    
     const state = APP_STATE.tools.measurement;
     const drawing = state.drawing;
     
@@ -231,7 +219,6 @@ export function clearMeasurements(map) {
     
     // Usuń pomiary z warstwy
     const features = markerLayer.getSource().getFeatures();
-    console.log('Liczba features przed czyszczeniem:', features.length);
     
     features.forEach(feature => {
         // Usuń tylko features pomiarów, nie usuwaj markerów
@@ -239,8 +226,6 @@ export function clearMeasurements(map) {
             markerLayer.getSource().removeFeature(feature);
         }
     });
-    
-    console.log('Liczba features po czyszczeniu:', markerLayer.getSource().getFeatures().length);
     
     // Dezaktywuj narzędzie
     StateActions.tools.deactivateAll();
@@ -270,7 +255,6 @@ export function deactivateMeasurementTool(map) {
 
 // Ustawia widoczność pomiarów
 export function setMeasurementsVisible(visible) {
-    console.log('Ustawianie widoczności pomiarów:', visible);
     if (markerLayer) {
         markerLayer.setVisible(visible);
     }

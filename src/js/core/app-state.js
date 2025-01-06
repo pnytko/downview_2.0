@@ -1,22 +1,44 @@
-// Konfiguracja warstw
+// Z-index dla warstw
 export const LAYER_ZINDEX = {
     OSM: 0,
     ORTO: 1,
     DEM: 2,
-    PARCELS: 3,
-    TRAILS: 4,
-    MARKERS: 5,
-    MEASUREMENTS: 6,
-    KAYAK: 7,
-    CAMP: 8,
-    BIKE: 9
+    PARCEL: 3,
+    VECTOR: 4,
+    TRAILS: 5,
+    KAYAK: 6,
+    CAMP: 7,
+    BIKE: 8
 };
 
 // Stan aplikacji
 export const APP_STATE = {
-    // Aktywne narzędzie
-    activeTool: null,
-
+    // Stan narzędzi
+    tools: {
+        marker: {
+            active: false,
+            currentFeature: null,
+            clickListener: null,
+            counter: 0  // Inicjalizujemy licznik od 0
+        },
+        measurement: {
+            active: false,
+            drawing: {
+                source: null,
+                draw: null,
+                sketch: null,
+                listener: null,
+                tooltipElement: null,
+                tooltip: null
+            },
+            overlays: []
+        },
+        weather: {
+            active: false,
+            clickListener: null
+        }
+    },
+    
     // Stan warstw
     layers: {
         // Warstwy bazowe
@@ -27,62 +49,24 @@ export const APP_STATE = {
         kayak: { visible: false },
         camp: { visible: false },
         bike: { visible: false },
-
-        // Warstwy wektorowe
-        vector: {
-            visible: false
-        },
-
-        // Stan szlaków
-        allTrailsVisible: false,
-        activeTrails: new Set(),
-        trails: {
-            red: { visible: false },
-            blue: { visible: false },
-            green: { visible: false },
-            yellow: { visible: false },
-            black: { visible: false }
-        }
-    },
-    
-    // Stan narzędzi
-    tools: {
-        // Stan narzędzia znaczników
-        marker: {
-            active: false,
-            counter: 1,
-            clickListener: null,
-            currentFeature: null  // Aktualnie wybrany marker
-        },
         
-        // Stan narzędzia pomiarów
-        measurement: {
-            active: false,
-            drawing: {
-                source: null,
-                vector: null,
-                draw: null,
-                sketch: null,
-                listener: null,
-                tooltipElement: null,
-                tooltip: null
-            },
-            overlays: []  // Lista overlayów do usunięcia
-        },
-
-        // Stan narzędzia pogody
-        weather: {
-            active: false,
-            clickListener: null
+        // Warstwy wektorowe
+        vector: { visible: false },
+        
+        // Stan szlaków
+        trails: {
+            visible: false,
+            active: []
         }
     },
     
-    // Stan interfejsu
+    // Stan UI
     ui: {
         modals: {
-            trails: { visible: false },
-            marker: { visible: false },
-            weather: { visible: false }
+            about: false,
+            marker: false,
+            trails: false,
+            weather: false
         },
         tooltips: {
             visible: true
@@ -90,63 +74,52 @@ export const APP_STATE = {
     }
 };
 
-// Akcje do zarządzania stanem aplikacji
+// Akcje do modyfikacji stanu aplikacji
 export const StateActions = {
-    // Akcje dla narzędzi
     tools: {
-        activate: (toolName) => {
+        activate: (tool) => {
             // Dezaktywuj wszystkie narzędzia
             StateActions.tools.deactivateAll();
             
             // Aktywuj wybrane narzędzie
-            if (APP_STATE.tools[toolName]) {
-                APP_STATE.tools[toolName].active = true;
+            if (APP_STATE.tools[tool]) {
+                APP_STATE.tools[tool].active = true;
             }
         },
-        
         deactivateAll: () => {
-            // Dezaktywuj wszystkie narzędzia
-            Object.keys(APP_STATE.tools).forEach(toolName => {
-                if (APP_STATE.tools[toolName]) {
-                    APP_STATE.tools[toolName].active = false;
+            Object.keys(APP_STATE.tools).forEach(tool => {
+                if (APP_STATE.tools[tool]) {
+                    APP_STATE.tools[tool].active = false;
                 }
             });
         }
     },
-
-    // Akcje dla warstw
+    ui: {
+        toggleModal: (modal, visible) => {
+            APP_STATE.ui.modals[modal] = visible;
+        }
+    },
     layers: {
-        toggleLayer: (layerName, visible) => {
-            if (APP_STATE.layers[layerName]) {
-                APP_STATE.layers[layerName].visible = visible;
+        setLayerVisibility: (layer, visible) => {
+            if (APP_STATE.layers[layer]) {
+                APP_STATE.layers[layer].visible = visible;
             }
         },
-
-        toggleTrail: (trailColor, visible) => {
-            if (APP_STATE.layers.trails[trailColor]) {
-                APP_STATE.layers.trails[trailColor].visible = visible;
-                if (visible) {
-                    APP_STATE.layers.activeTrails.add(trailColor);
-                } else {
-                    APP_STATE.layers.activeTrails.delete(trailColor);
-                }
-            }
-        },
-
         setVectorVisibility: (visible) => {
             APP_STATE.layers.vector.visible = visible;
         },
-
-        setAllTrailsVisibility: (visible) => {
-            APP_STATE.layers.allTrailsVisible = visible;
-        }
-    },
-
-    // Akcje dla UI
-    ui: {
-        toggleModal: (modalName, visible) => {
-            if (APP_STATE.ui.modals[modalName]) {
-                APP_STATE.ui.modals[modalName].visible = visible;
+        setTrailsVisibility: (visible) => {
+            APP_STATE.layers.trails.visible = visible;
+        },
+        addTrail: (trailId) => {
+            if (!APP_STATE.layers.trails.active.includes(trailId)) {
+                APP_STATE.layers.trails.active.push(trailId);
+            }
+        },
+        removeTrail: (trailId) => {
+            const index = APP_STATE.layers.trails.active.indexOf(trailId);
+            if (index > -1) {
+                APP_STATE.layers.trails.active.splice(index, 1);
             }
         }
     }
