@@ -1,35 +1,35 @@
 // Import modułu pomiarów - funkcje do mierzenia odległości i powierzchni na mapie
-import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js'; // Import modułu pomiarów - funkcje do mierzenia odległości i powierzchni na mapie
+import { initMeasurements, measureLength, measureArea, clearMeasurements } from './modules/measurements.js';
 
 // Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
-import { initControls, rotateMap, resetRotation } from './modules/control.js'; // Import modułu kontrolek - inicjalizacja i obsługa kontrolek mapy
+import { initControls, rotateMap, resetRotation } from './modules/control.js';
 
 // Import konfiguracji - stałe i ustawienia dla mapy i pogody
-import { MAP_CONFIG, APP_STATE } from './modules/config.js'; // Import konfiguracji - stałe i ustawienia dla mapy i pogody
+import { MAP_CONFIG, APP_STATE } from './modules/config.js';
 
 // Import warstw mapy - definicje wszystkich warstw
-import { osmLayer, ortoLayer, demLayer, parcelLayer, trailLayers, markerLayer, markerSource, createMarkerStyle, kayakLayer, campLayer, bikeLayer } from './modules/layers.js'; // Import warstw mapy - definicje wszystkich warstw
+import { osmLayer, ortoLayer, demLayer, parcelLayer, trailLayers, markerLayer, markerSource, createMarkerStyle, kayakLayer, campLayer, bikeLayer } from './modules/layers.js';
 
 // Import obsługi okien modalnych - funkcje do wyświetlania/ukrywania i zarządzania oknami
-import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, CloseWrapperWeather, initModals } from './modules/modal.js'; // Import obsługi okien modalnych - funkcje do wyświetlania/ukrywania i zarządzania oknami
+import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, CloseWrapperWeather, initModals } from './modules/modal.js';
 
 // Import modułu znaczników - funkcje do dodawania i usuwania znaczników
-import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js'; // Import modułu znaczników - funkcje do dodawania i usuwania znaczników
+import { addMarker, deleteMarker, initMarkerHandlers } from './modules/markers.js';
 
 // Import modułu pogody
-import { toggleWeather } from './modules/weather.js'; // Import modułu pogody
+import { toggleWeather } from './modules/weather.js';
 
 // Import modułu geolokalizacji
-import { getUserLocation } from './modules/geolocation.js'; // Import modułu geolokalizacji
+import { getUserLocation } from './modules/geolocation.js';
 
 // Import modułu pełnego ekranu
-import { toggleFullScreen } from './modules/fullscreen.js'; // Import modułu pełnego ekranu
+import { toggleFullScreen } from './modules/fullscreen.js';
 
 // Import kontroli warstw
-import { toggleLayer, toggleTrail, toggleVectorLayers, toggleAllTrails, initTrailControls } from './modules/layers-controls.js'; // Import kontroli warstw
+import { toggleLayer, toggleTrail, toggleVectorLayers, toggleAllTrails, initTrailControls } from './modules/layers-controls.js';
 
 // Zmienna mapy
-let map; // Zmienna mapy
+let map;
 
 // Eksport funkcji do window dla dostępu z HTML
 Object.assign(window, {
