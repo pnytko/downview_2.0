@@ -1,4 +1,3 @@
-import { APP_STATE } from './config.js';
 import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, CloseWrapperWeather } from '../ui/modal.js';
 import { addMarker, deleteMarker } from '../features/markers.js';
 import { toggleWeather } from '../features/weather.js';
@@ -8,14 +7,15 @@ import { getUserLocation } from '../utils/geolocation.js';
 import { rotateMap } from '../features/directions.js';
 import { measureLength, measureArea, clearMeasurements } from '../features/measurements.js';
 import { osmLayer, ortoLayer, demLayer, parcelLayer, kayakLayer, campLayer, bikeLayer } from '../features/layers.js';
+import { APP_STATE } from './app-state.js';
 
 /**
- * Eksportuje wszystkie potrzebne funkcje do obiektu window
+ * Eksportuje funkcje do obiektu window dla użycia w HTML
  * @param {ol.Map} map - Instancja mapy OpenLayers
  */
 export function initializeWindowExports(map) {
     Object.assign(window, {
-        // Funkcje okien modalnych
+        // Okna modalne
         DisplayWrapperAbout: displayWrapperAbout,
         CloseWrapperAbout: closeWrapperAbout,
         CloseWrapperTrails: closeWrapperTrails,
@@ -23,11 +23,11 @@ export function initializeWindowExports(map) {
         CloseWrapperMarker: closeWrapperMarker,
         CloseWrapperWeather: CloseWrapperWeather,
 
-        // Funkcje znaczników
+        // Znaczniki
         AddMarker: () => addMarker(map),
         DeleteMarker: deleteMarker,
 
-        // Funkcje warstw
+        // Warstwy
         ToggleLayersWMS_Weather: () => toggleWeather(map),
         ToggleLayersWMS_Osm: () => toggleLayer(osmLayer, 'osm'),
         ToggleLayersWMS_Wektory: () => toggleVectorLayers(map),
@@ -40,14 +40,14 @@ export function initializeWindowExports(map) {
         ToggleLayersWMS_Szlaki: toggleAllTrails,
         toggleTrail: toggleTrail,
 
-        // Funkcje kierunków
+        // Kierunki
         rotateMap: (direction) => rotateMap(map, direction),
 
-        // Inne funkcje
+        // Narzędzia
         FullScreen: toggleFullScreen,
         GetUserLocation: () => getUserLocation(map),
 
-        // Funkcje pomiarów
+        // Pomiary
         MeasureLength: () => {
             APP_STATE.measurementActive = true;
             measureLength(map);

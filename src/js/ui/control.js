@@ -29,46 +29,39 @@ export function zoomOut(map) {
     });
 }
 
-/**
- * Przełącza widoczność menu mobilnego
- */
+// Przełącza widoczność menu mobilnego
 export function toggleMenu() {
     const sidebar = document.getElementById('sidebar');
-    const menuButton = document.getElementById('menuToggle');
-    if (sidebar && menuButton) {
+    if (sidebar) {
         sidebar.classList.toggle('active');
-        menuButton.classList.toggle('hidden');
     }
 }
 
-/**
- * Zamyka menu mobilne
- */
+// Zamyka menu mobilne
 export function closeMenu() {
     const sidebar = document.getElementById('sidebar');
-    const menuButton = document.getElementById('menuToggle');
-    if (sidebar && menuButton) {
+    if (sidebar) {
         sidebar.classList.remove('active');
-        menuButton.classList.remove('hidden');
     }
 }
 
-/**
- * Inicjalizuje kontrolki mapy i podpina je do window
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Inicjalizuje kontrolki mapy i podpina je do window
+// @param {ol.Map} map - Instancja mapy OpenLayers
 export function initControls(map) {
-    // Podpięcie funkcji do window dla dostępu z HTML
-    Object.assign(window, {
-        zoomIn: () => zoomIn(map),
-        zoomOut: () => zoomOut(map),
-        toggleMenu: toggleMenu,
-        closeMenu: closeMenu
-    });
+    // Obsługa przycisków zoom
+    const zoomInButton = document.getElementById('zoom-in');
+    const zoomOutButton = document.getElementById('zoom-out');
 
-    // Zamykanie menu po kliknięciu mapy
-    const mapElement = map.getTargetElement();
-    if (mapElement) {
-        mapElement.addEventListener('click', closeMenu);
+    if (zoomInButton) {
+        zoomInButton.addEventListener('click', () => zoomIn(map));
+    }
+    if (zoomOutButton) {
+        zoomOutButton.addEventListener('click', () => zoomOut(map));
+    }
+
+    // Obsługa menu mobilnego
+    const menuButton = document.getElementById('menuToggle');
+    if (menuButton) {
+        menuButton.addEventListener('click', toggleMenu);
     }
 }

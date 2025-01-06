@@ -1,4 +1,10 @@
-import { LAYER_ZINDEX } from '../core/config.js';
+import { APP_STATE, LAYER_ZINDEX } from '../core/app-state.js';
+
+// Stan warstw szlaków
+export const TRAILS_STATE = {
+    activeTrails: new Set(),
+    allTrailsVisible: true
+};
 
 // ========== PODSTAWOWE WARSTWY ==========
 
@@ -187,7 +193,7 @@ export const kayakLayer = new ol.layer.Tile({
     opacity: 0.8,
     visible: false,
     title: 'Trasy kajakowe',
-    zIndex: LAYER_ZINDEX.VECTOR
+    zIndex: LAYER_ZINDEX.KAYAK
 });
 
 // Warstwa miejsc biwakowych
@@ -206,7 +212,7 @@ export const campLayer = new ol.layer.Tile({
     opacity: 0.5,
     visible: false,
     title: 'Miejsca biwakowe',
-    zIndex: LAYER_ZINDEX.VECTOR
+    zIndex: LAYER_ZINDEX.CAMP
 });
 
 // Warstwa tras rowerowych
@@ -225,5 +231,5 @@ export const bikeLayer = new ol.layer.Tile({
     opacity: 0.8,
     visible: false,
     title: 'Trasy rowerowe',
-    zIndex: LAYER_ZINDEX.VECTOR
+    zIndex: LAYER_ZINDEX.BIKE
 });

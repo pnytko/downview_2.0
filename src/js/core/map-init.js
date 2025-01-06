@@ -1,23 +1,38 @@
-import { MAP_CONFIG } from './config.js';
+// Konfiguracja mapy
+export const MAP_CONFIG = {
+    // Ograniczenia zoomu
+    minZoom: 3,
+    maxZoom: 25,
+    startZoom: 18,
+    
+    // Współrzędne startowe
+    startCoords: [20.9884, 50.01225]
+};
+
 import { osmLayer, ortoLayer, demLayer, parcelLayer, trailLayers, markerLayer, kayakLayer, campLayer, bikeLayer } from '../features/layers.js';
 
-/**
- * Inicjalizuje mapę OpenLayers
- * @returns {ol.Map} Instancja mapy OpenLayers
- */
 export function initializeMap() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+        throw new Error('Element mapy nie został znaleziony');
+    }
+
+    // Pobierz wszystkie warstwy szlaków (żółty, zielony, niebieski, czerwony, czarny)
+    const allTrailLayers = Object.values(trailLayers);
+
     return new ol.Map({
         target: 'map',
+        // Warstwy ułożone zgodnie z LAYER_ZINDEX
         layers: [
-            osmLayer,
-            ortoLayer,
-            demLayer,
-            parcelLayer,
-            ...Object.values(trailLayers),
-            markerLayer,
-            kayakLayer,
-            campLayer,
-            bikeLayer
+            osmLayer,          // OSM: 0
+            ortoLayer,         // ORTO: 1
+            demLayer,          // DEM: 2
+            parcelLayer,       // PARCELS: 3
+            ...allTrailLayers, // TRAILS: 4 (wszystkie szlaki)
+            markerLayer,       // MARKERS: 5
+            kayakLayer,        // KAYAK: 6
+            campLayer,         // CAMP: 7
+            bikeLayer          // BIKE: 8
         ],
         view: new ol.View({
             center: ol.proj.fromLonLat(MAP_CONFIG.startCoords),
@@ -25,7 +40,9 @@ export function initializeMap() {
             minZoom: MAP_CONFIG.minZoom,
             maxZoom: MAP_CONFIG.maxZoom
         }),
-        controls: [],
-        interactions: ol.interaction.defaults({doubleClickZoom: false})
+        controls: [],  // Kontrolki dodane osobno
+        interactions: ol.interaction.defaults({
+            doubleClickZoom: false  // Wyłączone ze względu na inne narzędzia
+        })
     });
 }

@@ -1,3 +1,5 @@
+import { APP_STATE, ToolActions, LAYER_ZINDEX } from '../core/app-state.js';
+
 // Stan pomiarów w domknięciu
 let measureTooltipElement;
 let measureTooltip;
@@ -30,7 +32,7 @@ export function initMeasurements(map) {
                 })
             })
         }),
-        zIndex: 8,
+        zIndex: LAYER_ZINDEX.MEASUREMENTS,
         name: 'measure'
     });
     map.addLayer(measureVector);
@@ -57,30 +59,36 @@ function createMeasureTooltip(map) {
 // Formatowanie długości
 function formatLength(line) {
     const length = ol.sphere.getLength(line);
+    let output;
     if (length > 100) {
-        return (Math.round(length / 1000 * 100) / 100) + ' km';
+        output = Math.round((length / 1000) * 100) / 100 + ' km';
+    } else {
+        output = Math.round(length * 100) / 100 + ' m';
     }
-    return (Math.round(length * 100) / 100) + ' m';
+    return output;
 }
 
 // Formatowanie powierzchni
 function formatArea(polygon) {
     const area = ol.sphere.getArea(polygon);
-    if (area >= 1000000) {
-        return (Math.round(area / 1000000 * 100) / 100) + ' km²';
-    } else if (area >= 10000) {
-        return (Math.round(area / 10000 * 100) / 100) + ' ha';
+    let output;
+    if (area > 10000) {
+        output = Math.round((area / 1000000) * 100) / 100 + ' km\xB2';
+    } else {
+        output = Math.round(area * 100) / 100 + ' m\xB2';
     }
-    return (Math.round(area * 100) / 100) + ' m²';
+    return output;
 }
 
 // Dodawanie interakcji pomiarowej
 function addInteraction(type, map) {
-    createMeasureTooltip(map);
+    // Aktywuj narzędzie pomiarów
+    ToolActions.activateTool('measurement');
     
+    const drawType = type === 'LineString' ? 'LineString' : 'Polygon';
     draw = new ol.interaction.Draw({
         source: measureSource,
-        type: type,
+        type: drawType,
         style: new ol.style.Style({
             fill: new ol.style.Fill({
                 color: 'rgba(255, 0, 0, 0.2)'
@@ -101,15 +109,15 @@ function addInteraction(type, map) {
             })
         })
     });
-
     map.addInteraction(draw);
+    createMeasureTooltip(map);
 
     let listener;
-    draw.on('drawstart', (evt) => {
+    draw.on('drawstart', function(evt) {
         sketch = evt.feature;
         let tooltipCoord = evt.coordinate;
 
-        listener = sketch.getGeometry().on('change', (evt) => {
+        listener = sketch.getGeometry().on('change', function(evt) {
             const geom = evt.target;
             let output;
             if (geom instanceof ol.geom.Polygon) {
@@ -124,13 +132,16 @@ function addInteraction(type, map) {
         });
     });
 
-    draw.on('drawend', () => {
+    draw.on('drawend', function() {
         measureTooltipElement.className = 'ol-tooltip ol-tooltip-static';
         measureTooltip.setOffset([0, -7]);
         sketch = null;
         measureTooltipElement = null;
         createMeasureTooltip(map);
         ol.Observable.unByKey(listener);
+        
+        // Dezaktywuj narzędzie po zakończeniu pomiaru
+        ToolActions.deactivateAllTools();
         map.removeInteraction(draw);
         draw = null;
     });
@@ -138,19 +149,23 @@ function addInteraction(type, map) {
 
 // Publiczne API
 export function measureLength(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
+    if (!APP_STATE.measurement.active) {
+        if (draw) {
+            map.removeInteraction(draw);
+            draw = null;
+        }
+        addInteraction('LineString', map);
     }
-    addInteraction('LineString', map);
 }
 
 export function measureArea(map) {
-    if (draw) {
-        map.removeInteraction(draw);
-        draw = null;
+    if (!APP_STATE.measurement.active) {
+        if (draw) {
+            map.removeInteraction(draw);
+            draw = null;
+        }
+        addInteraction('Polygon', map);
     }
-    addInteraction('Polygon', map);
 }
 
 export function clearMeasurements(map) {
@@ -165,24 +180,24 @@ export function clearMeasurements(map) {
         elements[0].parentNode.removeChild(elements[0]);
     }
     
-    // Resetuj zmienne tooltipów
-    measureTooltipElement = null;
-    measureTooltip = null;
-    
-    // Wyczyść źródło wektora
+    // Wyczyść źródło
     if (measureSource) {
         measureSource.clear();
     }
+    
+    // Dezaktywuj narzędzie
+    ToolActions.deactivateAllTools();
 }
 
+// Ustawia widoczność pomiarów
 export function setMeasurementsVisible(visible) {
     if (measureVector) {
         measureVector.setVisible(visible);
-        
-        // Obsługa tooltipów
-        const tooltips = document.getElementsByClassName('ol-tooltip');
-        for (let tooltip of tooltips) {
-            tooltip.style.display = visible ? 'block' : 'none';
-        }
+    }
+    
+    // Pokaż/ukryj tooltips
+    const tooltips = document.getElementsByClassName('ol-tooltip');
+    for (let tooltip of tooltips) {
+        tooltip.style.display = visible ? 'block' : 'none';
     }
 }

@@ -1,42 +1,19 @@
-import { APP_STATE } from '../core/config.js';
 import { displayWrapperWeather, CloseWrapperWeather } from '../ui/modal.js';
+import { APP_STATE, ToolActions } from '../core/app-state.js';
 
 // Konfiguracja API pogodowego
 const WEATHER_CONFIG = {
     apiUrl: 'https://api.open-meteo.com/v1/forecast',
     params: {
         hourly: 'temperature_2m,precipitation,cloudcover,windspeed_10m',
-        timezone: 'Europe/Warsaw'
+        timezone: 'auto'
     }
 };
 
-// Konfiguracja ikon dla różnych warunków pogodowych
-const WEATHER_ICONS = {
-    // Ikony temperatury
-    temperature: {
-        cold: 'fa-thermometer-empty',
-        normal: 'fa-thermometer-half',
-        hot: 'fa-thermometer-full'
-    },
-    // Ikony opadów
-    precipitation: {
-        none: 'fa-umbrella',
-        rain: 'fa-cloud-rain'
-    },
-    // Ikony zachmurzenia
-    cloudcover: {
-        clear: 'fa-sun',
-        fewClouds: 'fa-cloud-sun',
-        partlyCloudy: 'fa-cloud-sun',
-        mostlyCloudy: 'fa-cloud'
-    },
-    // Ikona wiatru
-    wind: 'fa-wind',
-    // Ikona błędu
-    error: 'fa-exclamation-circle'
-};
-
-// Przełącza narzędzie pogodowe
+/**
+ * Przełącza narzędzie pogodowe
+ * @param {ol.Map} map - Instancja mapy OpenLayers
+ */
 export function toggleWeather(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
@@ -47,16 +24,18 @@ export function toggleWeather(map) {
     }
 
     // Aktywuj narzędzie
+    ToolActions.activateTool('weather');
     activateWeatherTool(map, mapCanvas);
 }
 
-// Aktywuje narzędzie pogodowe
+/**
+ * Aktywuje narzędzie pogodowe
+ */
 function activateWeatherTool(map, mapCanvas) {
-    APP_STATE.weather.active = true;
     mapCanvas.style.cursor = 'crosshair';
     
     // Funkcja obsługująca kliknięcie w mapę
-    APP_STATE.weatherClickListener = async function(evt) {
+    APP_STATE.weather.clickListener = async function(evt) {
         const coords = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
         const weatherData = await getWeatherData(coords);
         if (weatherData) {
@@ -65,16 +44,19 @@ function activateWeatherTool(map, mapCanvas) {
         deactivateWeatherTool(map, mapCanvas);
     };
     
-    map.on('click', APP_STATE.weatherClickListener);
+    map.on('click', APP_STATE.weather.clickListener);
 }
 
-// Dezaktywuje narzędzie pogodowe
+/**
+ * Dezaktywuje narzędzie pogodowe
+ */
 function deactivateWeatherTool(map, mapCanvas) {
-    APP_STATE.weather.active = false;
+    ToolActions.deactivateAllTools();
     mapCanvas.style.cursor = 'default';
-    if (APP_STATE.weatherClickListener) {
-        map.un('click', APP_STATE.weatherClickListener);
-        APP_STATE.weatherClickListener = null;
+    
+    if (APP_STATE.weather.clickListener) {
+        map.un('click', APP_STATE.weather.clickListener);
+        APP_STATE.weather.clickListener = null;
     }
 }
 
@@ -108,6 +90,7 @@ async function getWeatherData(coords) {
     } catch (error) {
         console.error('Szczegóły błędu:', error);
         alert('Nie udało się pobrać danych pogodowych');
+        return null;
     }
 }
 
@@ -118,10 +101,10 @@ function displayWeatherInfo(data, coords) {
         const currentHour = new Date().getHours();
         
         // Pobierz dane dla aktualnej godziny
-        const temperature = data.hourly.temperature_2m[currentHour];
-        const precipitation = data.hourly.precipitation[currentHour];
-        const cloudcover = data.hourly.cloudcover[currentHour];
-        const windspeed = data.hourly.windspeed_10m[currentHour];
+        const temperature = Math.round(data.hourly.temperature_2m[currentHour]);
+        const precipitation = Math.round(data.hourly.precipitation[currentHour] * 10) / 10;
+        const cloudcover = Math.round(data.hourly.cloudcover[currentHour]);
+        const windspeed = Math.round(data.hourly.windspeed_10m[currentHour]);
         
         // Przygotuj HTML z danymi
         const content = `
@@ -142,7 +125,7 @@ function displayWeatherInfo(data, coords) {
                     <span class="weather-value">${cloudcover}%</span>
                 </div>
                 <div class="weather-row">
-                    <i class="fas ${WEATHER_ICONS.wind}"></i>
+                    <i class="fas fa-wind"></i>
                     <span class="weather-label">Wiatr:</span>
                     <span class="weather-value">${windspeed} km/h</span>
                 </div>
@@ -159,20 +142,25 @@ function displayWeatherInfo(data, coords) {
 
 // Zwraca ikonę dla temperatury
 function getTemperatureIcon(temp) {
-    if (temp < 10) return WEATHER_ICONS.temperature.cold;
-    if (temp > 25) return WEATHER_ICONS.temperature.hot;
-    return WEATHER_ICONS.temperature.normal;
+    if (temp < 10) return 'fa-thermometer-empty';
+    if (temp > 25) return 'fa-thermometer-full';
+    return 'fa-thermometer-half';
 }
 
 // Zwraca ikonę dla opadów
 function getPrecipitationIcon(precip) {
-    return precip > 0 ? WEATHER_ICONS.precipitation.rain : WEATHER_ICONS.precipitation.none;
+    return precip > 0 ? 'fa-cloud-rain' : 'fa-umbrella';
 }
 
 // Zwraca ikonę dla zachmurzenia
 function getCloudIcon(cover) {
-    if (cover < 25) return WEATHER_ICONS.cloudcover.clear;
-    if (cover < 50) return WEATHER_ICONS.cloudcover.fewClouds;
-    if (cover < 75) return WEATHER_ICONS.cloudcover.partlyCloudy;
-    return WEATHER_ICONS.cloudcover.mostlyCloudy;
+    if (cover < 25) return 'fa-sun';
+    if (cover < 50) return 'fa-cloud-sun';
+    if (cover < 75) return 'fa-cloud-sun';
+    return 'fa-cloud';
+}
+
+// Zwraca ikonę dla wiatru
+function getWindIcon(wind) {
+    return 'fa-wind';
 }

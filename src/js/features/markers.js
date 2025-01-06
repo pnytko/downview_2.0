@@ -1,6 +1,13 @@
-import { APP_STATE } from '../core/config.js';
 import { markerSource, createMarkerStyle } from './layers.js';
 import { displayWrapperMarker } from '../ui/modal.js';
+import { APP_STATE, ToolActions } from '../core/app-state.js';
+
+// Stan narzędzia znaczników
+export const MARKER_STATE = {
+    active: false,
+    counter: 1,
+    clickListener: null
+};
 
 // Funkcje pobierania wysokości
 async function fetchWithTimeout(url, timeout = 5000) {
@@ -80,7 +87,7 @@ export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     
     // Jeśli narzędzie jest już aktywne, wyłącz je
-    if (APP_STATE.marker.active) {
+    if (MARKER_STATE.active) {
         deactivateMarkerTool(map, mapCanvas);
         return;
     }
@@ -165,26 +172,26 @@ export function initMarkerHandlers(map) {
 // Funkcje pomocnicze
 
 function deactivateMarkerTool(map, mapCanvas) {
-    APP_STATE.marker.active = false;
+    MARKER_STATE.active = false;
     mapCanvas.style.cursor = 'default';
-    if (APP_STATE.markerClickListener) {
-        map.un('click', APP_STATE.markerClickListener);
-        APP_STATE.markerClickListener = null;
+    if (MARKER_STATE.clickListener) {
+        map.un('click', MARKER_STATE.clickListener);
+        MARKER_STATE.clickListener = null;
     }
 }
 
 function activateMarkerTool(map, mapCanvas) {
-    APP_STATE.marker.active = true;
+    MARKER_STATE.active = true;
     mapCanvas.style.cursor = 'crosshair';
     
     // Funkcja obsługująca kliknięcie w mapę
-    APP_STATE.markerClickListener = function(evt) {
+    MARKER_STATE.clickListener = function(evt) {
         const coordinates = evt.coordinate;
         const feature = new ol.Feature({
             geometry: new ol.geom.Point(coordinates)
         });
         
-        feature.setStyle(createMarkerStyle(APP_STATE.markerCounter++));
+        feature.setStyle(createMarkerStyle(MARKER_STATE.counter++));
         markerSource.addFeature(feature);
         
         // Wyświetl modal z informacjami o znaczniku
@@ -195,5 +202,5 @@ function activateMarkerTool(map, mapCanvas) {
         deactivateMarkerTool(map, mapCanvas);
     };
     
-    map.on('click', APP_STATE.markerClickListener);
+    map.on('click', MARKER_STATE.clickListener);
 }

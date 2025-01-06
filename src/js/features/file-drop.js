@@ -1,145 +1,157 @@
-import { LAYER_ZINDEX } from '../core/config.js';
+import { LAYER_ZINDEX } from '../core/app-state.js';
 
+// Konfiguracja
+const CONFIG = {
+    SUPPORTED_FORMATS: ['gpx', 'kml', 'kmz'],
+    VECTOR_LAYER_NAME: 'measure',
+    MAX_ZOOM: 18,
+    PADDING: [50, 50, 50, 50]
+};
+
+// Style dla importowanych tras
+const TRACK_STYLE = new ol.style.Style({
+    stroke: new ol.style.Stroke({
+        color: '#ff0000',
+        width: 4
+    })
+});
+
+/**
+ * Inicjalizuje obsługę przeciągania plików na mapę
+ */
 export function initFileDropHandler(map) {
-    const dropZone = document.body;
-
-    // Get existing vector layer from map
-    let vectorLayer;
-    map.getLayers().forEach(layer => {
-        if (layer.get('name') === 'measure') {
-            vectorLayer = layer;
-        }
-    });
-
+    const vectorLayer = findVectorLayer(map);
     if (!vectorLayer) {
-        console.error('Vector layer not found');
+        console.error('Nie znaleziono warstwy wektorowej');
         return;
     }
 
-    // Create style for imported tracks
-    const trackStyle = new ol.style.Style({
-        stroke: new ol.style.Stroke({
-            color: '#ff0000',
-            width: 4
-        })
-    });
+    setupDropZone(document.body, files => handleFiles(files, map, vectorLayer));
+}
 
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    // Handle dropped files
-    dropZone.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-
-        handleFiles(files);
-    }
-
-    function handleFiles(files) {
-        [...files].forEach(file => {
-            const extension = file.name.toLowerCase().split('.').pop();
-            
-            if (['gpx', 'kml', 'kmz'].includes(extension)) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    const content = e.target.result;
-                    
-                    switch(extension) {
-                        case 'gpx':
-                            handleGPX(content);
-                            break;
-                        case 'kml':
-                            handleKML(content);
-                            break;
-                        case 'kmz':
-                            handleKMZFile(file);
-                            break;
-                    }
-                };
-
-                if (extension !== 'kmz') {
-                    reader.readAsText(file);
-                } else {
-                    handleKMZFile(file);
-                }
-            }
-        });
-    }
-
-    function handleGPX(content) {
-        const gpxFormat = new ol.format.GPX();
-        const features = gpxFormat.readFeatures(content, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map.getView().getProjection()
-        });
-
-        // Apply style to features
-        features.forEach(feature => {
-            feature.setStyle(trackStyle);
-        });
-
-        // Add features to existing vector source
-        vectorLayer.getSource().addFeatures(features);
-        
-        // Fit view to the features extent
-        const extent = vectorLayer.getSource().getExtent();
-        map.getView().fit(extent, {
-            padding: [50, 50, 50, 50],
-            maxZoom: 18
-        });
-    }
-
-    function handleKML(content) {
-        const kmlFormat = new ol.format.KML();
-        const features = kmlFormat.readFeatures(content, {
-            dataProjection: 'EPSG:4326',
-            featureProjection: map.getView().getProjection()
-        });
-
-        // Apply style to features
-        features.forEach(feature => {
-            feature.setStyle(trackStyle);
-        });
-
-        // Add features to existing vector source
-        vectorLayer.getSource().addFeatures(features);
-        
-        // Fit view to the features extent
-        const extent = vectorLayer.getSource().getExtent();
-        map.getView().fit(extent, {
-            padding: [50, 50, 50, 50],
-            maxZoom: 18
-        });
-    }
-
-    async function handleKMZFile(file) {
-        try {
-            const arrayBuffer = await file.arrayBuffer();
-            const zip = await JSZip.loadAsync(arrayBuffer);
-            
-            // Find the KML file in the KMZ (which is actually a ZIP)
-            const kmlFile = Object.values(zip.files).find(file => 
-                file.name.toLowerCase().endsWith('.kml')
-            );
-
-            if (!kmlFile) {
-                throw new Error('No KML file found in KMZ');
-            }
-
-            const kmlContent = await kmlFile.async('text');
-            handleKML(kmlContent);
-        } catch (error) {
-            console.error('Error processing KMZ file:', error);
+/**
+ * Znajduje warstwę wektorową na mapie
+ */
+function findVectorLayer(map) {
+    let vectorLayer;
+    map.getLayers().forEach(layer => {
+        if (layer.get('name') === CONFIG.VECTOR_LAYER_NAME) {
+            vectorLayer = layer;
         }
+    });
+    return vectorLayer;
+}
+
+/**
+ * Konfiguruje strefę upuszczania plików
+ */
+function setupDropZone(dropZone, onDrop) {
+    // Zapobiegaj domyślnym zachowaniom
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    // Obsługa upuszczonych plików
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        onDrop(files);
+    });
+}
+
+/**
+ * Przetwarza upuszczone pliki
+ */
+function handleFiles(files, map, vectorLayer) {
+    [...files].forEach(file => {
+        const extension = file.name.toLowerCase().split('.').pop();
+        
+        if (CONFIG.SUPPORTED_FORMATS.includes(extension)) {
+            processFile(file, extension, map, vectorLayer);
+        } else {
+            console.warn(`Nieobsługiwany format pliku: ${extension}`);
+        }
+    });
+}
+
+/**
+ * Przetwarza pojedynczy plik
+ */
+async function processFile(file, extension, map, vectorLayer) {
+    try {
+        let content;
+        
+        if (extension === 'kmz') {
+            content = await extractKMLFromKMZ(file);
+        } else {
+            content = await readFileContent(file);
+        }
+
+        const features = parseFileContent(content, extension, map);
+        addFeaturesToMap(features, vectorLayer, map);
+        
+    } catch (error) {
+        console.error(`Błąd podczas przetwarzania pliku ${file.name}:`, error);
     }
+}
+
+/**
+ * Czyta zawartość pliku
+ */
+function readFileContent(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Wyodrębnia KML z pliku KMZ
+ */
+async function extractKMLFromKMZ(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+    
+    const kmlFile = Object.values(zip.files).find(file => 
+        file.name.toLowerCase().endsWith('.kml')
+    );
+
+    if (!kmlFile) {
+        throw new Error('Nie znaleziono pliku KML w archiwum KMZ');
+    }
+
+    return await kmlFile.async('text');
+}
+
+/**
+ * Parsuje zawartość pliku na features
+ */
+function parseFileContent(content, format, map) {
+    const parser = format === 'gpx' ? new ol.format.GPX() : new ol.format.KML();
+    return parser.readFeatures(content, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: map.getView().getProjection()
+    });
+}
+
+/**
+ * Dodaje features do mapy
+ */
+function addFeaturesToMap(features, vectorLayer, map) {
+    // Zastosuj styl do features
+    features.forEach(feature => feature.setStyle(TRACK_STYLE));
+
+    // Dodaj features do warstwy
+    vectorLayer.getSource().addFeatures(features);
+    
+    // Dopasuj widok do zasięgu features
+    const extent = vectorLayer.getSource().getExtent();
+    map.getView().fit(extent, {
+        padding: CONFIG.PADDING,
+        maxZoom: CONFIG.MAX_ZOOM
+    });
 }

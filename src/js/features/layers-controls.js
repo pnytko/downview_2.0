@@ -1,6 +1,6 @@
-import { APP_STATE } from '../core/config.js';
-import { trailLayers, markerLayer } from './layers.js';
+import { trailLayers, markerLayer, TRAILS_STATE } from './layers.js';
 import { closeWrapperTrails } from '../ui/modal.js';
+import { setMeasurementsVisible } from './measurements.js';
 
 // Przełącza widoczność pojedynczej warstwy
 export function toggleLayer(layer, checkboxId) {
@@ -12,54 +12,69 @@ export function toggleLayer(layer, checkboxId) {
 
 // Przełącza widoczność pojedynczego szlaku
 export function toggleTrail(color) {
-    const checkbox = document.getElementById(`trail-${color}`);
-    if (trailLayers[color]) {
-        trailLayers[color].setVisible(checkbox.checked);
+    const layer = trailLayers[color];
+    if (layer) {
+        const isVisible = layer.getVisible();
+        layer.setVisible(!isVisible);
+        
+        if (!isVisible) {
+            TRAILS_STATE.activeTrails.add(color);
+        } else {
+            TRAILS_STATE.activeTrails.delete(color);
+        }
     }
 }
 
 // Przełącza widoczność wszystkich warstw wektorowych
 export function toggleVectorLayers(map) {
-    const checkbox = document.getElementById('vector');
-    const isChecked = checkbox.checked;
+    const checkbox = document.getElementById('wektory');
+    if (!checkbox) return;
+
+    const isVisible = checkbox.checked;
     
-    // Przełącz widoczność warstw wektorowych
-    markerLayer.setVisible(isChecked);
-    const measureLayer = map.getLayers().getArray().find(layer => layer.get('name') === 'measure');
-    if (measureLayer) {
-        measureLayer.setVisible(isChecked);
-    }
+    // Przełącz widoczność warstwy znaczników
+    markerLayer.setVisible(isVisible);
     
-    // Obsługa tooltipów
-    const tooltips = document.getElementsByClassName('ol-tooltip');
-    for (let tooltip of tooltips) {
-        tooltip.style.display = isChecked ? 'block' : 'none';
-    }
+    // Przełącz widoczność warstw szlaków
+    Object.values(trailLayers).forEach(layer => {
+        layer.setVisible(isVisible);
+    });
+
+    // Przełącz widoczność pomiarów
+    setMeasurementsVisible(isVisible);
+
+    // Zamknij okno szlaków
+    closeWrapperTrails();
 }
 
 // Przełącza widoczność wszystkich szlaków
 export function toggleAllTrails() {
-    const checkbox = document.getElementById('szlaki');
-    const isChecked = checkbox.checked;
+    // Zmień stan widoczności wszystkich szlaków
+    TRAILS_STATE.allTrailsVisible = !TRAILS_STATE.allTrailsVisible;
     
-    if (isChecked) {
-        document.getElementById('wrapper-trails').style.display = 'block';
-    } else {
-        closeWrapperTrails();
-    }
-
-    // Przełącz wszystkie szlaki zgodnie ze stanem głównego checkboxa
-    ['red', 'blue', 'green', 'yellow', 'black'].forEach(color => {
-        if (trailLayers[color]) {
-            trailLayers[color].setVisible(isChecked);
-            document.getElementById(`trail-${color}`).checked = isChecked;
+    // Pobierz wszystkie checkboxy szlaków
+    const trailCheckboxes = document.querySelectorAll('.trail-checkbox');
+    
+    // Ustaw stan wszystkich checkboxów
+    trailCheckboxes.forEach(checkbox => {
+        checkbox.checked = TRAILS_STATE.allTrailsVisible;
+    });
+    
+    // Zaktualizuj widoczność warstw
+    Object.entries(trailLayers).forEach(([color, layer]) => {
+        layer.setVisible(TRAILS_STATE.allTrailsVisible);
+        if (TRAILS_STATE.allTrailsVisible) {
+            TRAILS_STATE.activeTrails.add(color);
+        } else {
+            TRAILS_STATE.activeTrails.delete(color);
         }
     });
 }
 
 // Inicjalizuje obsługę przełączania pojedynczych szlaków
 export function initTrailControls() {
-    ['Yellow', 'Green', 'Blue', 'Red', 'Black'].forEach(color => {
-        window[`ToggleLayersWMS_Szlaki_${color}`] = () => toggleTrail(color.toLowerCase());
+    // Dodaj obsługę zdarzeń do checkboxów szlaków
+    document.querySelectorAll('.trail-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => toggleTrail(checkbox.value));
     });
 }
