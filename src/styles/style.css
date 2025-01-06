@@ -204,23 +204,23 @@ button i{
   font-size:1.2em;
 }
 
-.menu-toggle{
-    align-items:center;
-    background-color:var(--secondary-bg);
-    border:none;
-    border-radius:var(--radius-md);
-    box-shadow:var(--shadow-md);
-    color:var(--text-primary);
-    cursor:pointer;
-    display:none;
-    height:45px;
-    justify-content:center;
-    left:15px;
-    padding:12px;
-    position:fixed;
-    top:15px;
-    width:45px;
-    z-index:2000;
+.menu-toggle {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px;
+    left: 10px;
+    padding: 10px;
+    position: absolute;
+    top: 10px;
+    transition: all 0.3s ease;
+    z-index: 1001;
+}
+
+.menu-toggle.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .menu-toggle i{
@@ -667,7 +667,7 @@ button i{
     }
 }
 
-@media screen and (width <= 768px) {
+@media screen and (max-width: 768px) {
     .direction-controls {
         display: none;
     }
@@ -704,6 +704,12 @@ button i{
 .nav-button:hover {
     background: var(--accent-color);
     transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .nav-controls {
+        display: none;
+    }
 }
 
 .wrapper {

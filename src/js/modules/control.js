@@ -89,6 +89,30 @@ export function resetRotation(map) {
 }
 
 /**
+ * Przełącza widoczność menu mobilnego
+ */
+export function toggleMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('menuToggle');
+    if (sidebar && menuButton) {
+        sidebar.classList.toggle('active');
+        menuButton.classList.toggle('hidden');
+    }
+}
+
+/**
+ * Zamyka menu mobilne
+ */
+export function closeMenu() {
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('menuToggle');
+    if (sidebar && menuButton) {
+        sidebar.classList.remove('active');
+        menuButton.classList.remove('hidden');
+    }
+}
+
+/**
  * Inicjalizuje kontrolki mapy i podpina je do window
  * @param {ol.Map} map - Instancja mapy OpenLayers
  */
@@ -96,10 +120,16 @@ export function initControls(map) {
     // Podpięcie funkcji do window dla dostępu z HTML
     Object.assign(window, {
         rotateMap: (direction) => rotateMap(map, direction),
-        rotateLeft: () => rotateMap(map, 'left'),
-        rotateRight: () => rotateMap(map, 'right'),
         resetRotation: () => resetRotation(map),
         zoomIn: () => zoomIn(map),
-        zoomOut: () => zoomOut(map)
+        zoomOut: () => zoomOut(map),
+        toggleMenu: toggleMenu,
+        closeMenu: closeMenu
     });
+
+    // Zamykanie menu po kliknięciu mapy
+    const mapElement = map.getTargetElement();
+    if (mapElement) {
+        mapElement.addEventListener('click', closeMenu);
+    }
 }
