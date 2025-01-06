@@ -8,6 +8,7 @@ import { initDirections } from './features/directions.js';
 import { initModals } from './ui/modal.js';
 import { initMarkerHandlers } from './features/markers.js';
 import { initTrailControls } from './features/layers-controls.js';
+import { initFileDropHandler } from './features/file-drop.js';
 
 // Import eksportu funkcji do window
 import { initializeWindowExports } from './core/window-exports.js';
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         initModals();
         initMarkerHandlers(map);
         initTrailControls();
+        initFileDropHandler(map);
 
         // Eksport funkcji do window
         initializeWindowExports(map);
