@@ -16,9 +16,7 @@ const TRACK_STYLE = new ol.style.Style({
     })
 });
 
-/**
- * Znajduje lub tworzy warstwę wektorową na mapie
- */
+// Znajduje lub tworzy warstwę wektorową na mapie
 export function findVectorLayer(map) {
     let vectorLayer;
     map.getLayers().forEach(layer => {
@@ -28,7 +26,6 @@ export function findVectorLayer(map) {
     });
 
     if (!vectorLayer) {
-        // Jeśli warstwa nie istnieje, stwórz ją
         vectorLayer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
@@ -59,9 +56,7 @@ export function findVectorLayer(map) {
     return vectorLayer;
 }
 
-/**
- * Inicjalizuje obsługę przeciągania plików na mapę
- */
+//Inicjalizuje obsługę przeciągania plików na mapę
 export function initFileDropHandler(map) {
     const vectorLayer = findVectorLayer(map);
     if (!vectorLayer) {
@@ -72,11 +67,8 @@ export function initFileDropHandler(map) {
     setupDropZone(document.body, files => handleFiles(files, map, vectorLayer));
 }
 
-/**
- * Konfiguruje strefę upuszczania plików
- */
+//Konfiguruje strefę upuszczania plików
 function setupDropZone(dropZone, onDrop) {
-    // Zapobiegaj domyślnym zachowaniom
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, e => {
             e.preventDefault();
@@ -84,16 +76,13 @@ function setupDropZone(dropZone, onDrop) {
         });
     });
 
-    // Obsługa upuszczonych plików
     dropZone.addEventListener('drop', e => {
         const files = e.dataTransfer.files;
         onDrop(files);
     });
 }
 
-/**
- * Przetwarza upuszczone pliki
- */
+// Przetwarza upuszczone pliki
 function handleFiles(files, map, vectorLayer) {
     [...files].forEach(file => {
         const extension = file.name.toLowerCase().split('.').pop();
@@ -106,9 +95,7 @@ function handleFiles(files, map, vectorLayer) {
     });
 }
 
-/**
- * Przetwarza pojedynczy plik
- */
+// Przetwarza pojedynczy plik
 async function processFile(file, extension, map, vectorLayer) {
     try {
         let content;
@@ -127,9 +114,7 @@ async function processFile(file, extension, map, vectorLayer) {
     }
 }
 
-/**
- * Czyta zawartość pliku
- */
+// Czyta zawartość pliku
 function readFileContent(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -139,9 +124,7 @@ function readFileContent(file) {
     });
 }
 
-/**
- * Wyodrębnia KML z pliku KMZ
- */
+// Wyodrębnia KML z pliku KMZ
 async function extractKMLFromKMZ(file) {
     const arrayBuffer = await file.arrayBuffer();
     const zip = await JSZip.loadAsync(arrayBuffer);
@@ -157,9 +140,7 @@ async function extractKMLFromKMZ(file) {
     return await kmlFile.async('text');
 }
 
-/**
- * Parsuje zawartość pliku na features
- */
+// Parsuje zawartość pliku na features
 function parseFileContent(content, format, map) {
     const parser = format === 'gpx' ? new ol.format.GPX() : new ol.format.KML();
     return parser.readFeatures(content, {
@@ -168,17 +149,10 @@ function parseFileContent(content, format, map) {
     });
 }
 
-/**
- * Dodaje features do mapy
- */
+// Dodaje features do mapy
 function addFeaturesToMap(features, vectorLayer, map) {
-    // Zastosuj styl do features
     features.forEach(feature => feature.setStyle(TRACK_STYLE));
-
-    // Dodaj features do warstwy
     vectorLayer.getSource().addFeatures(features);
-    
-    // Dopasuj widok do zasięgu features
     const extent = vectorLayer.getSource().getExtent();
     map.getView().fit(extent, {
         padding: CONFIG.PADDING,

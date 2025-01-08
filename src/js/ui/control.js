@@ -3,10 +3,7 @@ const ZOOM_CONFIG = {
     animationMs: 300   // Czas animacji przybliżania/oddalania w milisekundach
 };
 
-/**
- * Przybliża widok mapy
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Przybliża widok mapy
 export function zoomIn(map) {
     const view = map.getView();
     const zoom = view.getZoom();
@@ -16,10 +13,7 @@ export function zoomIn(map) {
     });
 }
 
-/**
- * Oddala widok mapy
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+//Instancja mapy OpenLayers
 export function zoomOut(map) {
     const view = map.getView();
     const zoom = view.getZoom();
@@ -46,7 +40,6 @@ export function closeMenu() {
 }
 
 // Inicjalizuje kontrolki mapy i podpina je do window
-// @param {ol.Map} map - Instancja mapy OpenLayers
 export function initControls(map) {
     // Obsługa przycisków zoom
     const zoomInButton = document.getElementById('zoom-in');

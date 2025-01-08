@@ -1,8 +1,6 @@
 import { APP_STATE, LAYER_ZINDEX } from '../core/app-state.js';
 
-// ========== PODSTAWOWE WARSTWY ==========
-
-// WARSTWA OSM
+// Warstwa OSM
 export const osmLayer = new ol.layer.Tile({
     source: new ol.source.OSM(),
     title: "OSM",
@@ -10,7 +8,7 @@ export const osmLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.OSM,
 });
 
-// WARSTWA ORTO
+// Warstwa ORTO
 export const ortoLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution",
@@ -27,7 +25,7 @@ export const ortoLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.ORTO
 });
 
-// WARSTWA DEM
+// Warstwa DEM
 export const demLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: "https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WMS/ShadedRelief",
@@ -54,7 +52,7 @@ export const demLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.DEM,
 });
 
-// WARSTWA DZIAŁEK
+// Warstwa działek
 export const parcelLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: "https://integracja.gugik.gov.pl/cgi-bin/KrajowaIntegracjaEwidencjiGruntow/WMS",
@@ -83,9 +81,7 @@ export const parcelLayer = new ol.layer.Tile({
     zIndex: LAYER_ZINDEX.PARCELS,
 });
 
-// ========== WARSTWY SZLAKÓW ==========
-
-// Funkcja do tworzenia warstwy szlaków
+// WARSTWA GŁÓWNA SZLAKU
 export const createTrailLayer = (layerId) => {
     return new ol.layer.Tile({
         source: new ol.source.TileWMS({
@@ -104,7 +100,7 @@ export const createTrailLayer = (layerId) => {
     });
 };
 
-// Warstwy WMS dla szlaków
+// DLA POSZCZEGÓLNCYH SZLAKÓW
 export const trailLayers = {
     yellow: createTrailLayer("11"),   // szlak pieszy żółty
     green: createTrailLayer("12"),    // szlak pieszy zielony
@@ -113,7 +109,6 @@ export const trailLayers = {
     black: createTrailLayer("15"),    // szlak pieszy czarny
 };
 
-// ========== WARSTWA MARKERÓW ==========
 
 // Funkcja do tworzenia stylu znacznika z numerem
 export const createMarkerStyle = (number) => {
@@ -125,8 +120,8 @@ export const createMarkerStyle = (number) => {
         text: new ol.style.Text({
             font: 'bold 12px Inter',
             text: `PUNKT ${number}`,
-            offsetY: 25,  // Przesunięcie w dół
-            offsetX: 0,   // Wycentrowanie w osi X
+            offsetY: 25,
+            offsetX: 0,
             textAlign: 'center',
             fill: new ol.style.Fill({
                 color: '#000000'
@@ -148,14 +143,12 @@ export const markerLayer = new ol.layer.Vector({
     zIndex: LAYER_ZINDEX.MARKERS
 });
 
-// ========== WARSTWY DODATKOWE ==========
-
 // Warstwa tras kajakowych
 export const kayakLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
         params: {
-            'LAYERS': '4',  // Trasy kajakowe
+            'LAYERS': '4',
             'FORMAT': 'image/png',
             'TRANSPARENT': true,
             'VERSION': '1.1.1',
@@ -174,7 +167,7 @@ export const campLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
         params: {
-            'LAYERS': '0',  // Miejsca biwakowe
+            'LAYERS': '0',
             'FORMAT': 'image/png',
             'TRANSPARENT': true,
             'VERSION': '1.1.1',
@@ -193,7 +186,7 @@ export const bikeLayer = new ol.layer.Tile({
     source: new ol.source.TileWMS({
         url: 'https://mapserver.bdl.lasy.gov.pl/ArcGIS/services/WMS_BDL_Mapa_turystyczna/MapServer/WMSServer',
         params: {
-            'LAYERS': '8',  // Trasy rowerowe
+            'LAYERS': '8',
             'FORMAT': 'image/png',
             'TRANSPARENT': true,
             'VERSION': '1.1.1',

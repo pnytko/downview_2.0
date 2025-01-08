@@ -9,10 +9,8 @@ import { measureLength, measureArea, clearMeasurements, deactivateMeasurementToo
 import { osmLayer, ortoLayer, demLayer, parcelLayer, kayakLayer, campLayer, bikeLayer } from '../features/layers.js';
 import { APP_STATE } from './app-state.js';
 
-/**
- * Eksportuje funkcje do obiektu window dla użycia w HTML
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+//Eksportuje funkcje do obiektu window dla użycia w HTML
+
 export function initializeWindowExports(map) {
     Object.assign(window, {
         // Okna modalne

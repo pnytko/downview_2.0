@@ -33,37 +33,24 @@ async function getElevation(lat, lon, retries = 3) {
             const data = await response.json();
             return data.results[0].elevation;
         } catch (error) {
-            if (i === retries - 1) throw error; // Rzuć błąd tylko przy ostatniej próbie
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Zwiększający się czas oczekiwania
+            if (i === retries - 1) throw error;
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
         }
     }
 }
 
-/**
- * Formatuje współrzędne markera z wysokością
- * @param {number} lon - Długość geograficzna
- * @param {number} lat - Szerokość geograficzna
- * @param {number|string} elevation - Wysokość lub informacja o błędzie
- * @returns {string} Sformatowany tekst z współrzędnymi
- */
+// Formatuje współrzędne markera z wysokością
 function formatMarkerCoordinates(lon, lat, elevation) {
     return `Długość: ${lon.toFixed(6)}°\nSzerokość: ${lat.toFixed(6)}°\nWysokość: ${
         typeof elevation === 'number' ? `${elevation.toFixed(1)} m n.p.m.` : elevation
     }`;
 }
 
-/**
- * Wyświetla informacje o markerze wraz z wysokością
- * @param {ol.Feature} feature - Feature markera
- */
+// Wyświetla informacje o markerze wraz z wysokością
 export async function displayMarkerInfo(feature) {
     const coordinates = feature.getGeometry().getCoordinates();
     const lonLat = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-    
-    // Zapisz aktualny feature
     APP_STATE.tools.marker.currentFeature = feature;
-    
-    // Pokaż modal z początkowymi danymi
     StateActions.ui.toggleModal('marker', true);
     displayWrapperMarker(formatMarkerCoordinates(lonLat[0], lonLat[1], 'pobieranie...'));
     
@@ -76,42 +63,25 @@ export async function displayMarkerInfo(feature) {
     }
 }
 
-/**
- * Dodaje nowy znacznik na mapę
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Dodaje nowy znacznik na mapę
 export function addMarker(map) {
     const mapCanvas = map.getTargetElement().querySelector('canvas');
-    
-    // Aktywuj narzędzie znaczników
     StateActions.tools.activate('marker');
-    
-    // Upewnij się, że warstwa wektorowa jest widoczna
     markerLayer.setVisible(true);
     StateActions.layers.setVectorVisibility(true);
-    
-    // Zmień kursor na krzyżyk
     mapCanvas.style.cursor = 'crosshair';
-    
-    // Dodaj obsługę kliknięcia w mapę
     APP_STATE.tools.marker.clickListener = function(evt) {
         const coordinates = evt.coordinate;
         const coordinates4326 = ol.proj.transform(coordinates, 'EPSG:3857', 'EPSG:4326');
-        
         try {
             const elevation = getElevation(coordinates4326[1], coordinates4326[0]);
             const formattedText = formatMarkerCoordinates(coordinates4326[0], coordinates4326[1], elevation);
-            
             const feature = addMarkerAtCoordinates(coordinates);
             displayMarkerInfo(feature);
-            
-            // Przywróć domyślny kursor i dezaktywuj narzędzie
             mapCanvas.style.cursor = '';
             deactivateMarkerTool(map);
         } catch (error) {
             alert('Nie udało się pobrać wysokości dla tego punktu');
-            
-            // Przywróć domyślny kursor w przypadku błędu
             mapCanvas.style.cursor = '';
         }
     };
@@ -119,23 +89,16 @@ export function addMarker(map) {
     map.on('click', APP_STATE.tools.marker.clickListener);
 }
 
-/**
- * Dezaktywuje narzędzie dodawania znaczników
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Dezaktywuje narzędzie dodawania znaczników
 export function deactivateMarkerTool(map) {
     if (APP_STATE.tools.marker.clickListener) {
         map.un('click', APP_STATE.tools.marker.clickListener);
         APP_STATE.tools.marker.clickListener = null;
     }
-    
-    // Przywróć domyślny kursor
     const mapCanvas = map.getTargetElement().querySelector('canvas');
     if (mapCanvas) {
         mapCanvas.style.cursor = '';
     }
-    
-    // Dezaktywuj narzędzie
     StateActions.tools.deactivateAll();
 }
 
@@ -153,10 +116,7 @@ export function addMarkerAtCoordinates(coordinates) {
     return feature;
 }
 
-/**
- * Usuwa znacznik z mapy na podstawie współrzędnych
- * @param {ol.Coordinate} coordinates - Współrzędne punktu
- */
+// Usuwa znacznik z mapy na podstawie współrzędnych
 export function deleteMarker(coordinates) {
     const source = markerLayer.getSource();
     const features = source.getFeatures();
@@ -169,21 +129,13 @@ export function deleteMarker(coordinates) {
             break;
         }
     }
-    
-    // Zamknij modal
     StateActions.ui.toggleModal('marker', false);
 }
 
-/**
- * Inicjalizuje obsługę znaczników na mapie
- * @param {ol.Map} map - Instancja mapy OpenLayers
- */
+// Inicjalizuje obsługę znaczników na mapie
 export function initMarkerHandlers(map) {
-    // Obsługa kliknięcia na znacznik
     map.on('click', function(evt) {
-        // Jeśli aktywny jest pomiar, nie wyświetlaj informacji o markerze
         if (APP_STATE.tools.measurement.active) return;
-        
         const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
             return feature;
         });
@@ -193,7 +145,6 @@ export function initMarkerHandlers(map) {
         }
     });
 
-    // Zmiana kursora po najechaniu na marker
     map.on('pointermove', function(evt) {
         const pixel = map.getEventPixel(evt.originalEvent);
         const hit = map.hasFeatureAtPixel(pixel);

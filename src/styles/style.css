@@ -883,9 +883,3 @@ button i{
     text-align: center;
     color: var(--accent-color);
 }
-
-.weather-error {
-    color: var(--danger-color);
-    text-align: center;
-    padding: var(--spacing-md);
-}
