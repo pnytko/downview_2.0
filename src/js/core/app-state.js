@@ -19,7 +19,7 @@ export const APP_STATE = {
             active: false,
             currentFeature: null,
             clickListener: null,
-            counter: 0  // Inicjalizujemy licznik od 0
+            counter: 0
         },
         measurement: {
             active: false,
@@ -49,14 +49,12 @@ export const APP_STATE = {
         kayak: { visible: false },
         camp: { visible: false },
         bike: { visible: false },
+        vector: { visible: true }, // Warstwa wektorowa (znaczniki)
         
-        // Warstwy wektorowe
-        vector: { visible: false },
-        
-        // Stan szlaków
+        // Szlaki
         trails: {
             visible: false,
-            active: []
+            activeTrails: new Set()
         }
     },
     
@@ -80,46 +78,37 @@ export const StateActions = {
         activate: (tool) => {
             // Dezaktywuj wszystkie narzędzia
             StateActions.tools.deactivateAll();
-            
             // Aktywuj wybrane narzędzie
-            if (APP_STATE.tools[tool]) {
-                APP_STATE.tools[tool].active = true;
-            }
+            APP_STATE.tools[tool].active = true;
         },
         deactivateAll: () => {
             Object.keys(APP_STATE.tools).forEach(tool => {
-                if (APP_STATE.tools[tool]) {
-                    APP_STATE.tools[tool].active = false;
-                }
+                APP_STATE.tools[tool].active = false;
             });
         }
     },
     ui: {
         toggleModal: (modal, visible) => {
-            APP_STATE.ui.modals[modal] = visible;
+            modal.style.display = visible ? 'block' : 'none';
         }
     },
     layers: {
         setLayerVisibility: (layer, visible) => {
-            if (APP_STATE.layers[layer]) {
-                APP_STATE.layers[layer].visible = visible;
-            }
+            APP_STATE.layers[layer].visible = visible;
         },
         setVectorVisibility: (visible) => {
-            APP_STATE.layers.vector.visible = visible;
+            APP_STATE.layers.vector = { visible };
         },
         setTrailsVisibility: (visible) => {
             APP_STATE.layers.trails.visible = visible;
         },
         addTrail: (trailId) => {
-            if (!APP_STATE.layers.trails.active.includes(trailId)) {
-                APP_STATE.layers.trails.active.push(trailId);
-            }
+            APP_STATE.layers.trails.activeTrails.add(trailId);
         },
         removeTrail: (trailId) => {
-            const index = APP_STATE.layers.trails.active.indexOf(trailId);
-            if (index > -1) {
-                APP_STATE.layers.trails.active.splice(index, 1);
+            APP_STATE.layers.trails.activeTrails.delete(trailId);
+            if (APP_STATE.layers.trails.activeTrails.size === 0) {
+                StateActions.layers.setTrailsVisibility(false);
             }
         }
     }

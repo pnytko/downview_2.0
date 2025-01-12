@@ -1,11 +1,25 @@
-import { APP_STATE, LAYER_ZINDEX } from '../core/app-state.js';
+import { APP_STATE } from '../core/app-state.js';
+
+// Kolejność warstw (z-index)
+const LAYER_ORDER = {
+    OSM: 0,
+    ORTO: 1,
+    DEM: 2,
+    VECTOR: 3,
+    PARCEL: 4,
+    TRAILS: 5,
+    KAYAK: 6,
+    CAMP: 7,
+    BIKE: 8,
+    MARKERS: 9
+};
 
 // Warstwa OSM
 export const osmLayer = new ol.layer.Tile({
     source: new ol.source.OSM(),
     title: "OSM",
     visible: APP_STATE.layers.osm.visible,
-    zIndex: LAYER_ZINDEX.OSM,
+    zIndex: LAYER_ORDER.OSM,
 });
 
 // Warstwa ORTO
@@ -22,7 +36,7 @@ export const ortoLayer = new ol.layer.Tile({
     }),
     visible: APP_STATE.layers.orto.visible,
     title: "OrthoHD",
-    zIndex: LAYER_ZINDEX.ORTO
+    zIndex: LAYER_ORDER.ORTO
 });
 
 // Warstwa DEM
@@ -49,7 +63,7 @@ export const demLayer = new ol.layer.Tile({
     }),
     visible: APP_STATE.layers.dem.visible,
     title: "DEM",
-    zIndex: LAYER_ZINDEX.DEM,
+    zIndex: LAYER_ORDER.DEM,
 });
 
 // Warstwa działek
@@ -78,7 +92,7 @@ export const parcelLayer = new ol.layer.Tile({
     }),
     visible: APP_STATE.layers.parcel.visible,
     title: "Działki",
-    zIndex: LAYER_ZINDEX.PARCEL,
+    zIndex: LAYER_ORDER.PARCEL,
     opacity: 1,
 });
 
@@ -97,7 +111,7 @@ export const createTrailLayer = (layerId) => {
         }),
         visible: false,
         opacity: 0.8,
-        zIndex: LAYER_ZINDEX.TRAILS
+        zIndex: LAYER_ORDER.TRAILS
     });
 };
 
@@ -109,7 +123,6 @@ export const trailLayers = {
     red: createTrailLayer("14"),      // szlak pieszy czerwony
     black: createTrailLayer("15"),    // szlak pieszy czarny
 };
-
 
 // Funkcja do tworzenia stylu znacznika z numerem
 export const createMarkerStyle = (number) => {
@@ -141,7 +154,7 @@ export const markerLayer = new ol.layer.Vector({
     style: createMarkerStyle(1),  // Domyślny styl dla pierwszego znacznika
     visible: APP_STATE.layers.vector.visible,
     title: 'Znaczniki',
-    zIndex: LAYER_ZINDEX.MARKERS
+    zIndex: LAYER_ORDER.MARKERS
 });
 
 // Warstwa tras kajakowych
@@ -160,7 +173,7 @@ export const kayakLayer = new ol.layer.Tile({
     opacity: 0.8,
     visible: APP_STATE.layers.kayak.visible,
     title: 'Trasy kajakowe',
-    zIndex: LAYER_ZINDEX.KAYAK
+    zIndex: LAYER_ORDER.KAYAK
 });
 
 // Warstwa miejsc biwakowych
@@ -179,7 +192,7 @@ export const campLayer = new ol.layer.Tile({
     opacity: 0.5,
     visible: APP_STATE.layers.camp.visible,
     title: 'Miejsca biwakowe',
-    zIndex: LAYER_ZINDEX.CAMP
+    zIndex: LAYER_ORDER.CAMP
 });
 
 // Warstwa tras rowerowych
@@ -198,5 +211,5 @@ export const bikeLayer = new ol.layer.Tile({
     opacity: 0.8,
     visible: APP_STATE.layers.bike.visible,
     title: 'Trasy rowerowe',
-    zIndex: LAYER_ZINDEX.BIKE
+    zIndex: LAYER_ORDER.BIKE
 });
