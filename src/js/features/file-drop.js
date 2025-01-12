@@ -60,7 +60,7 @@ export function findVectorLayer(map) {
 export function initFileDropHandler(map) {
     const vectorLayer = findVectorLayer(map);
     if (!vectorLayer) {
-        console.error('Nie znaleziono warstwy wektorowej');
+        alert('Nie znaleziono warstwy wektorowej');
         return;
     }
 
@@ -90,7 +90,7 @@ function handleFiles(files, map, vectorLayer) {
         if (CONFIG.SUPPORTED_FORMATS.includes(extension)) {
             processFile(file, extension, map, vectorLayer);
         } else {
-            console.warn(`Nieobsługiwany format pliku: ${extension}`);
+            alert(`Nieobsługiwany format pliku: ${extension}. Obsługiwane formaty: ${CONFIG.SUPPORTED_FORMATS.join(', ')}`);
         }
     });
 }
@@ -110,7 +110,7 @@ async function processFile(file, extension, map, vectorLayer) {
         addFeaturesToMap(features, vectorLayer, map);
         
     } catch (error) {
-        console.error(`Błąd podczas przetwarzania pliku ${file.name}:`, error);
+        alert(`Błąd podczas przetwarzania pliku ${file.name}. Sprawdź czy plik jest poprawny.`);
     }
 }
 

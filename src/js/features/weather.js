@@ -1,4 +1,4 @@
-import { displayWrapperWeather, CloseWrapperWeather } from '../ui/modal.js';
+import { displayWrapperWeather, closeWrapperWeather } from '../ui/modal.js';
 import { APP_STATE, StateActions } from '../core/app-state.js';
 
 // Konfiguracja API pogodowego
@@ -67,28 +67,21 @@ async function getWeatherData(coords) {
         const params = new URLSearchParams(WEATHER_CONFIG.params);
         const url = `${WEATHER_CONFIG.apiUrl}?latitude=${lat}&longitude=${lon}&${params}`;
         
-        console.log('Pobieranie pogody z URL:', url);
-        
         const response = await fetch(url);
-        console.log('Status odpowiedzi:', response.status);
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Odpowiedź API:', errorText);
             throw new Error(`Błąd podczas pobierania danych pogodowych: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Otrzymane dane:', data);
         
         if (!data.hourly || !data.hourly.temperature_2m) {
-            console.error('Nieprawidłowa struktura danych:', data);
             throw new Error('Nieprawidłowa struktura danych pogodowych');
         }
 
         return data;
     } catch (error) {
-        console.error('Szczegóły błędu:', error);
         alert('Nie udało się pobrać danych pogodowych');
         return null;
     }
@@ -97,7 +90,6 @@ async function getWeatherData(coords) {
 // Wyświetla informacje o pogodzie
 function displayWeatherInfo(data, coords) {
     try {
-        console.log('Wyświetlanie pogody dla godziny:', new Date().getHours());
         const currentHour = new Date().getHours();
         
         // Pobierz dane dla aktualnej godziny
@@ -132,10 +124,8 @@ function displayWeatherInfo(data, coords) {
             </div>
         `;
 
-        console.log('Przygotowany content:', content);
         displayWrapperWeather(content, coords);
     } catch (error) {
-        console.error('Błąd podczas wyświetlania pogody:', error);
         displayWrapperWeather('<div class="weather-error">Błąd podczas wyświetlania danych pogodowych</div>', coords);
     }
 }

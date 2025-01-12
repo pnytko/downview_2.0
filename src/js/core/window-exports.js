@@ -1,4 +1,4 @@
-import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, CloseWrapperWeather } from '../ui/modal.js';
+import { displayWrapperAbout, closeWrapperAbout, closeWrapperTrails, displayWrapperMarker, closeWrapperMarker, closeWrapperWeather } from '../ui/modal.js';
 import { addMarker, deleteMarker } from '../features/markers.js';
 import { toggleWeather } from '../features/weather.js';
 import { toggleLayer, toggleVectorLayers, toggleAllTrails, toggleTrail } from '../features/layers-controls.js';
@@ -14,44 +14,44 @@ import { APP_STATE } from './app-state.js';
 export function initializeWindowExports(map) {
     Object.assign(window, {
         // Okna modalne
-        DisplayWrapperAbout: displayWrapperAbout,
-        CloseWrapperAbout: closeWrapperAbout,
-        CloseWrapperTrails: closeWrapperTrails,
-        DisplayWrapperMarker: displayWrapperMarker,
-        CloseWrapperMarker: closeWrapperMarker,
-        CloseWrapperWeather: CloseWrapperWeather,
+        displayWrapperAbout,
+        closeWrapperAbout,
+        closeWrapperTrails,
+        displayWrapperMarker,
+        closeWrapperMarker,
+        closeWrapperWeather,
 
         // Znaczniki
-        AddMarker: () => addMarker(map),
-        DeleteMarker: () => {
+        addMarker: () => addMarker(map),
+        deleteMarker: () => {
             const feature = APP_STATE.tools.marker.currentFeature;
             const coordinates = feature.getGeometry().getCoordinates();
             deleteMarker(coordinates);
         },
 
         // Warstwy
-        ToggleLayersWMS_Weather: () => toggleWeather(map),
-        ToggleLayersWMS_Osm: () => toggleLayer(osmLayer, 'osm'),
-        ToggleLayersWMS_Wektory: () => toggleVectorLayers(map),
-        ToggleLayersWMS_Dzialki: () => toggleLayer(parcelLayer, 'dzialki'),
-        ToggleLayersWMS_OrtoHD: () => toggleLayer(ortoLayer, 'ortoHD'),
-        ToggleLayersWMS_DEM: () => toggleLayer(demLayer, 'dem'),
-        ToggleLayersWMS_Camp: () => toggleLayer(campLayer, 'camp'),
-        ToggleLayersWMS_Kayak: () => toggleLayer(kayakLayer, 'kayak'),
-        ToggleLayersWMS_Bike: () => toggleLayer(bikeLayer, 'bike'),
-        ToggleLayersWMS_Szlaki: toggleAllTrails,
-        toggleTrail: toggleTrail,
+        toggleWeather: () => toggleWeather(map),
+        toggleOsm: () => toggleLayer(osmLayer, 'osm'),
+        toggleVectors: () => toggleVectorLayers(map),
+        toggleParcels: () => toggleLayer(parcelLayer, 'dzialki'),
+        toggleOrtho: () => toggleLayer(ortoLayer, 'ortoHD'),
+        toggleDem: () => toggleLayer(demLayer, 'dem'),
+        toggleCamp: () => toggleLayer(campLayer, 'camp'),
+        toggleKayak: () => toggleLayer(kayakLayer, 'kayak'),
+        toggleBike: () => toggleLayer(bikeLayer, 'bike'),
+        toggleTrails: toggleAllTrails,
+        toggleTrail,
 
         // Kierunki
         rotateMap: (direction) => rotateMap(map, direction),
 
         // Narzędzia
-        FullScreen: toggleFullScreen,
-        GetUserLocation: () => getUserLocation(map),
+        toggleFullScreen: toggleFullScreen,
+        getUserLocation: () => getUserLocation(map),
 
         // Pomiary
-        MeasureLength: () => measureLength(map),
-        MeasureArea: () => measureArea(map),
-        ClearMeasurements: () => clearMeasurements(map)
+        measureLength: () => measureLength(map),
+        measureArea: () => measureArea(map),
+        clearMeasurements: () => clearMeasurements(map)
     });
 }

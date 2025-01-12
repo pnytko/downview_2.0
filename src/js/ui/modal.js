@@ -74,7 +74,7 @@ export function displayWrapperWeather(content, coordinates) {
     wrapper.innerHTML = `
         <div class="modal-header">
             <h2>Warunki pogodowe</h2>
-            <button class="btn-close" onclick="CloseWrapperWeather()">
+            <button class="btn-close" onclick="closeWrapperWeather()">
                 <i class="fas fa-power-off"></i>
             </button>
         </div>
@@ -86,7 +86,7 @@ export function displayWrapperWeather(content, coordinates) {
     makeDraggable(wrapper);
 }
 
-export function CloseWrapperWeather() {
+export function closeWrapperWeather() {
     const modal = document.getElementById('wrapper-weather');
     modal.style.display = 'none';
 }

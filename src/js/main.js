@@ -32,6 +32,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Eksport funkcji do window
         initializeWindowExports(map);
     } catch (error) {
-        console.error('Błąd podczas inicjalizacji mapy:', error);
+        alert('Błąd podczas inicjalizacji mapy. Odśwież stronę lub skontaktuj się z administratorem.');
     }
 });
