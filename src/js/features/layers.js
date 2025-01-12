@@ -78,7 +78,8 @@ export const parcelLayer = new ol.layer.Tile({
     }),
     visible: APP_STATE.layers.parcel.visible,
     title: "Działki",
-    zIndex: LAYER_ZINDEX.PARCELS,
+    zIndex: LAYER_ZINDEX.PARCEL,
+    opacity: 1,
 });
 
 // WARSTWA GŁÓWNA SZLAKU

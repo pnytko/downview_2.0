@@ -26,9 +26,9 @@ export function initializeMap() {
         layers: [
             osmLayer,          // OSM: 0
             ortoLayer,         // ORTO: 1
-            demLayer,          // DEM: 2
-            parcelLayer,       // PARCELS: 3
-            ...allTrailLayers, // TRAILS: 4 (wszystkie szlaki)
+            parcelLayer,       // PARCELS: 2
+            demLayer,          // DEM: 3
+            ...allTrailLayers, // TRAILS: 4
             markerLayer,       // MARKERS: 5
             kayakLayer,        // KAYAK: 6
             campLayer,         // CAMP: 7
