@@ -11,7 +11,7 @@ import { APP_STATE } from './app-state.js';
 
 //Eksportuje funkcje do obiektu window dla użycia w HTML
 
-export function initializeWindowExports(map) {
+export const initializeWindowExports = (map) => {
     Object.assign(window, {
         // Okna modalne
         displayWrapperAbout,
@@ -39,14 +39,14 @@ export function initializeWindowExports(map) {
         toggleCamp: () => toggleLayer(campLayer, 'camp'),
         toggleKayak: () => toggleLayer(kayakLayer, 'kayak'),
         toggleBike: () => toggleLayer(bikeLayer, 'bike'),
-        toggleTrails: toggleAllTrails,
-        toggleTrail,
+        toggleTrails: () => toggleAllTrails(),
+        toggleTrail: (id) => toggleTrail(id),
 
         // Kierunki
         rotateMap: (direction) => rotateMap(map, direction),
 
         // Narzędzia
-        toggleFullScreen: toggleFullScreen,
+        toggleFullScreen: () => toggleFullScreen(),
         getUserLocation: () => getUserLocation(map),
 
         // Pomiary
@@ -54,4 +54,4 @@ export function initializeWindowExports(map) {
         measureArea: () => measureArea(map),
         clearMeasurements: () => clearMeasurements(map)
     });
-}
+};
