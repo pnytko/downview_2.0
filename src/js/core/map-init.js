@@ -20,20 +20,25 @@ export function initializeMap() {
     // Pobierz wszystkie warstwy szlaków (żółty, zielony, niebieski, czerwony, czarny)
     const allTrailLayers = Object.values(trailLayers);
 
+    // Wszystkie warstwy w jednej tablicy
+    const allLayers = [
+        osmLayer,
+        ortoLayer,
+        demLayer,
+        parcelLayer,
+        ...allTrailLayers,
+        markerLayer,
+        kayakLayer,
+        campLayer,
+        bikeLayer
+    ];
+
+    // Sortowanie warstw według zIndex
+    allLayers.sort((a, b) => a.getZIndex() - b.getZIndex());
+
     return new ol.Map({
         target: 'map',
-        // Warstwy ułożone zgodnie z LAYER_ZINDEX
-        layers: [
-            osmLayer,          // OSM: 0
-            ortoLayer,         // ORTO: 1
-            parcelLayer,       // PARCELS: 2
-            demLayer,          // DEM: 3
-            ...allTrailLayers, // TRAILS: 4
-            markerLayer,       // MARKERS: 5
-            kayakLayer,        // KAYAK: 6
-            campLayer,         // CAMP: 7
-            bikeLayer          // BIKE: 8
-        ],
+        layers: allLayers,  // Użycie posortowanych warstw
         view: new ol.View({
             center: ol.proj.fromLonLat(MAP_CONFIG.startCoords),
             zoom: MAP_CONFIG.startZoom,
