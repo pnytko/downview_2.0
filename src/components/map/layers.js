@@ -136,6 +136,9 @@ export function createParcelLayer() {
  */
 export function createTrailLayer(layerId) {
     const config = LAYERS_CONFIG.wms.trails;
+    console.log(`Creating trail layer for ID: ${layerId}`);
+    console.log('Trail WMS config:', config);
+    
     return new ol.layer.Tile({
         source: new ol.source.TileWMS({
             url: config.url,
@@ -158,13 +161,24 @@ export function createTrailLayer(layerId) {
  * @returns {Object} Obiekt zawierający warstwy szlaków
  */
 export function createTrailLayers() {
-    return {
+    console.log('Creating trail layers');
+    const layers = {
         yellow: createTrailLayer("11"),   // szlak pieszy żółty
         green: createTrailLayer("12"),    // szlak pieszy zielony
         blue: createTrailLayer("13"),     // szlak pieszy niebieski
         red: createTrailLayer("14"),      // szlak pieszy czerwony
         black: createTrailLayer("15"),    // szlak pieszy czarny
     };
+    
+    // Set titles for each layer to make them identifiable
+    layers.yellow.set('title', 'Szlak yellow');
+    layers.green.set('title', 'Szlak green');
+    layers.blue.set('title', 'Szlak blue');
+    layers.red.set('title', 'Szlak red');
+    layers.black.set('title', 'Szlak black');
+    
+    console.log('Created trail layers:', Object.keys(layers));
+    return layers;
 }
 
 /**

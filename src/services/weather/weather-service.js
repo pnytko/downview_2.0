@@ -17,18 +17,26 @@ export async function fetchWeatherData(coords) {
         const params = new URLSearchParams(WEATHER_CONFIG.params);
         const url = `${WEATHER_CONFIG.apiUrl}?latitude=${lat}&longitude=${lon}&${params}`;
         
-        const response = await fetch(url, { 
+        console.log('Weather API URL:', url);
+        console.log('Weather config:', WEATHER_CONFIG);
+        
+        const response = await fetch(url, {
             signal: AbortSignal.timeout(WEATHER_CONFIG.timeout)
         });
         
+        console.log('Weather API response status:', response.status);
+        
         if (!response.ok) {
             const errorText = await response.text();
+            console.error('Weather API error response:', errorText);
             throw new Error(`Błąd podczas pobierania danych pogodowych: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('Weather API response data structure:', Object.keys(data));
         
         if (!data.hourly || !data.hourly.temperature_2m) {
+            console.error('Invalid weather data structure:', data);
             throw new Error('Nieprawidłowa struktura danych pogodowych');
         }
 

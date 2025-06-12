@@ -60,7 +60,10 @@ export function toggleVectorLayers(map) {
  */
 export function toggleAllTrails() {
     const checkbox = document.getElementById('szlaki');
-    if (!checkbox) return;
+    if (!checkbox) {
+        console.error('Trails checkbox not found!');
+        return;
+    }
     
     const isVisible = checkbox.checked;
     console.log(`Toggling all trails to ${isVisible}`);
@@ -69,6 +72,10 @@ export function toggleAllTrails() {
         displayWrapperTrails();
         const modalCheckboxes = document.querySelectorAll('#wrapper-trails input[type="checkbox"]');
         console.log(`Found ${modalCheckboxes.length} trail checkboxes`);
+        
+        if (modalCheckboxes.length === 0) {
+            console.error('No trail checkboxes found in the modal!');
+        }
         
         modalCheckboxes.forEach(checkbox => {
             checkbox.checked = true;
@@ -91,6 +98,7 @@ export function toggleAllTrails() {
     
     // Aktualizuj stan aplikacji
     StateActions.layers.setTrailsVisibility(isVisible);
+    console.log('Updated trails visibility in APP_STATE:', APP_STATE.layers.trails);
 }
 
 /**
@@ -103,15 +111,31 @@ export function toggleTrail(color) {
     
     if (checkbox) {
         const isVisible = checkbox.checked;
+        console.log(`Toggling trail ${color} to ${isVisible}`);
         
         // Znajdź warstwę szlaku w mapie
         const map = window.map; // Zakładamy, że mapa jest dostępna globalnie
         if (map) {
+            let found = false;
             map.getLayers().forEach(layer => {
+                console.log(`Checking layer:`, layer.get('title'));
                 if (layer.get('title') === `Szlak ${color}`) {
+                    console.log(`Found layer for trail ${color}, setting visible:`, isVisible);
                     layer.setVisible(isVisible);
+                    found = true;
                 }
             });
+            
+            if (!found) {
+                console.error(`No layer found with title "Szlak ${color}"`);
+                // Let's try to find the layer by other means
+                console.log('Available layers:');
+                map.getLayers().forEach((layer, index) => {
+                    console.log(`Layer ${index}:`, layer.get('title'));
+                });
+            }
+        } else {
+            console.error('Map not available in window.map!');
         }
         
         // Aktualizuj stan aplikacji

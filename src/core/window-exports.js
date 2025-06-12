@@ -29,6 +29,29 @@ import { APP_STATE } from './state/app-state.js';
  * @param {ol.Map} map - Instancja mapy OpenLayers
  */
 export function initializeWindowExports(map) {
+    console.log('Initializing window exports with map:', map);
+    
+    if (!map) {
+        console.error('Map is undefined or null in initializeWindowExports');
+        return;
+    }
+    
+    try {
+        // Sprawdź, czy mapa ma metodę getLayers
+        if (typeof map.getLayers !== 'function') {
+            console.error('map.getLayers is not a function. Map object:', map);
+            return;
+        }
+        
+        // Log all available layers
+        console.log('Available layers:');
+        map.getLayers().forEach((layer, index) => {
+            console.log(`Layer ${index}:`, layer.get('title'));
+        });
+    } catch (error) {
+        console.error('Error logging layers:', error);
+    }
+    
     // Zapisz referencje do warstw
     const osmLayer = map.getLayers().getArray().find(layer => layer.get('title') === 'OSM');
     const ortoLayer = map.getLayers().getArray().find(layer => layer.get('title') === 'OrthoHD');
@@ -37,6 +60,16 @@ export function initializeWindowExports(map) {
     const kayakLayer = map.getLayers().getArray().find(layer => layer.get('title') === 'Trasy kajakowe');
     const campLayer = map.getLayers().getArray().find(layer => layer.get('title') === 'Miejsca biwakowe');
     const bikeLayer = map.getLayers().getArray().find(layer => layer.get('title') === 'Trasy rowerowe');
+    
+    console.log('Found layers:', {
+        osmLayer,
+        ortoLayer,
+        demLayer,
+        parcelLayer,
+        kayakLayer,
+        campLayer,
+        bikeLayer
+    });
     
     // Eksportuj funkcje do globalnego obiektu window
     Object.assign(window, {
@@ -58,7 +91,22 @@ export function initializeWindowExports(map) {
                 deleteMarker(coordinates, map);
             }
         },
-        toggleWeather: () => toggleWeather(map),
+        toggleWeatherTool: () => {
+            console.log('toggleWeatherTool called from window function');
+            
+            // Użyj mapy zapisanej w zmiennej globalnej
+            const weatherMap = window.weatherMap || map;
+            console.log('Using map:', weatherMap);
+            
+            // Wywołaj funkcję toggleWeather
+            try {
+                console.log('Calling toggleWeather with map');
+                toggleWeather(weatherMap);
+            } catch (error) {
+                console.error('Error calling toggleWeather from window function:', error);
+                console.error('Error details:', error.message, error.stack);
+            }
+        },
         measureLength: () => measureLength(map),
         measureArea: () => measureArea(map),
         clearMeasurements: () => clearMeasurements(map),
@@ -73,8 +121,14 @@ export function initializeWindowExports(map) {
         toggleCamp: () => toggleLayer(campLayer, 'camp'),
         toggleKayak: () => toggleLayer(kayakLayer, 'kayak'),
         toggleBike: () => toggleLayer(bikeLayer, 'bike'),
-        toggleTrails: () => toggleAllTrails(),
-        toggleTrail: (id) => toggleTrail(id),
+        toggleTrails: () => {
+            console.log('toggleTrails called from window function');
+            toggleAllTrails();
+        },
+        toggleTrail: (id) => {
+            console.log(`toggleTrail called from window function with id: ${id}`);
+            toggleTrail(id);
+        },
         
         // Kierunki
         rotateMap: (direction) => rotateMap(map, direction),
